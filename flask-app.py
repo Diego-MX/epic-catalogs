@@ -6,9 +6,14 @@ from src import engine
 from src import tools
 
 SITE = Path(__file__).parent if '__file__' in globals() else Path(os.getcwd())
-
-
 app  = Flask(__name__)
+
+
+@app.route("/", methods=["GET"])
+def show_base_request():
+    simple_dict = {"App Running Version":  "1.0.2"}
+    return simple_dict
+
 
 @app.route("/v1/catalogs/get-zipcode-neighborhoods", methods=["POST", "GET"])
 def get_from_zipcode():
@@ -23,7 +28,6 @@ def get_from_zipcode():
     b_messages = engine.process_request(an_input["neighborhoodsRequest"])
     return b_messages
       
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0")

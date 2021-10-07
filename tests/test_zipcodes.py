@@ -3,11 +3,11 @@ from datetime import datetime as dt
 import requests
 
 
-URL = "http://localhost:5000/v1/catalogs/get-zipcode-neighborhoods"
-# URL = "https://wap-cx-collections-dev.azurewebsites.net/v1/catalogs/get-zipcode-neighborhoods"
+# URL = "http://localhost:5000/v1/catalogs/get-zipcode-neighborhoods"
+URL = "https://wap-prod-catalogs-dev.azurewebsites.net/v1/catalogs/get-zipcode-neighborhoods"
 
 
-class TestLoanMessages(TestCase): 
+class TestZipcodes(TestCase): 
     def set_example(self):
         example_request = { 
             "input"     : {
@@ -43,15 +43,15 @@ if __name__ == "__main__":
     unit_main()
 
 else: 
-    from tests import test_app 
+    from tests import test_zipcodes
     
     from importlib import reload
-    reload(test_app)
+    reload(test_zipcodes)
 
-    some_test = test_app.TestFilters()
-    simple = some_test.simple_example()
-    an_input = simple["input"]
-    a_request = an_input["collectionsMessagesRequest"]
+    some_test = test_zipcodes.TestZipcodes()
+    setup_json = some_test.set_example()
+    an_input = setup_json["input"]
+    a_request = an_input["neighborhoodsRequest"]
     
     a_response = requests.post(URL, json=an_input)
 
