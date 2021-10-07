@@ -1,0 +1,7 @@
+.Rproj.user
+
+.env
+.vscode
+.venv
+
+__pycache__*

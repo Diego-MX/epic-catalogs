@@ -1,0 +1,143 @@
+{
+  "swagger": "2.0",
+  "info"   : {
+    "description": "Esta API se encarga de manejar las colonias (y asentamientos) asociados a un código postal.",
+    "version"    : "0.0.1",
+    "title"      : "Get neighborhoods for zipcode."
+  },
+  "host"    : "data-catalogs.azurewebsites.net",
+  "basePath": "/api",
+  "schemes" : ["https"],
+  "paths"   : {
+    "/v1/catalogs/get-zipcode-neighborhoods/" : {
+      "post" : {
+        "tags"       : ["zipcode", "neighborhoods"],
+        "operationId": "get-zipcode-neighborhoods",
+        "summary"    : "Obtener las colonias (asentamientos) para un código psotal.",
+        "description": "Obtiene un listado de colonias asociadas a un código postal.",
+        "consumes"   : ["application/json"],
+        "parameters" : [ {
+            "type"       : "string",
+            "in"         : "header",
+            "name"       : "Authorization",
+            "description": "Bearer token generado en el proceso de autenticación",
+            "required"   : true },
+          {
+            "type"       : "string",
+            "in"         : "header",
+            "name"       : "subscription-key",
+            "description": "Llave API del cliente consumidor",
+            "required"   : true },
+          {
+            "type"       : "string",
+            "in"         : "header",
+            "name"       : "uuid",
+            "description": "Identificador único de la petición",
+            "required"   : true },
+          {
+            "in"      : "body",
+            "name"    : "neighborhoodsRequest",
+            "required": true,
+            "schema"  : { "$ref": "#/definitions/NeighborhoodsRequest" }
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "description": "Success",
+            "schema"     : { "$ref": "#/definitions/NeighborhoodsResponse" }
+          },
+          "400" : {
+            "description": "Invalid Input",
+            "schema"     : { "$ref": "#/definitions/ErrorResponse" }
+          },
+          "500" : {
+            "description": "Internal Engine Error",
+            "schema"     : {
+              "$ref": "#/definitions/ErrorResponse"
+
+  } } } } } },
+  "definitions" : {
+    "NeighborhoodsRequest" : {
+      "type"      : "object",
+      "properties": { 
+        "zipcode": {
+          "type"   : "string",
+          "pattern": "^\\d{5}$"
+    } } }, 
+
+    "NeighborhoodsResponse" : {
+      "type"      : "object",
+      "properties": {
+        "zipcode" : {
+          "type"      : "object",
+          "properties": { 
+            "code"        : {"type": "string"},
+            "state"       : {"type": "string"},
+            "municipality": {"type": "string"}
+        } }, 
+        "neighborhoods" : {
+          "type" : "object",
+          "properties" : {
+            "numberOfNeighborhoods": {"type": "integer"},
+            "neighborhoodAttributes": {"type": "array"},
+            "neighborhoodsSet"      : {
+              "type"       : "array",
+              "description": "Listado de colonias (o asentamientos), y sus atributos correspondientes.",
+              "items"      : {"$ref": "#/definitions/Neighborhood"}
+            }, 
+            "neighborhoodsPagination" : {
+              "type"       : "object",
+              "description": "Whether or not there are more neighborhoods in the list to call for.",
+              "properties" : {
+                "hasPagination": {"type" : "boolean"},
+                "paginationURL": {"type" : "string",
+                  "description" : "URL address to call for next pagination set."}, 
+                "pageExpiration": {"type" :"string", "format": "timestamp"}
+    } } } } } }, 
+
+    "Neighborhood": {
+      "type"      : "object",
+      "properties": {
+        "zipcode": {"type":"string"},
+        "name"   : {"type": "string"},
+        "type"   : {"type": "string"},
+        "zone"   : {"type": "string"},
+        "city"   : {"type": "string"}
+    } },
+    
+    "ErrorResponse" : {
+      "type"      : "object",
+      "properties": {
+        "code" : {
+          "type"       : "string",
+          "description": "Código de error",
+          "example"    : "0056"
+        },
+        "type" : {
+          "type"       : "string",
+          "description": "Tipo de error que se recibe",
+          "example"    : "security/access-denied"
+        },
+        "status" : {
+          "type"       : "string",
+          "description": "Status http que responde el servicio",
+          "example"    : "500"
+        },
+        "detail" : {
+          "type"       : "string",
+          "description": "Información detallada del error",
+          "example"    : "Se detecto un ingreso no autorizado"
+        },
+        "timestamp" : {
+          "type"       : "string",
+          "format"     : "date-time",
+          "description": "Fecha y hora de la respuesta de error",
+          "example"    : "2017-07-21T17:32:28Z"
+        },
+        "instance" : {
+          "type"       : "string",
+          "description": "Permite identificar el lugar especifico donde se originó el error",
+          "example"    : "login/oauth-server"
+} } } } }
+
+

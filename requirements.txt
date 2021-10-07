@@ -1,0 +1,10 @@
+python-dotenv
+
+openpyxl
+pandas 
+pyarrow
+
+requests 
+Flask
+jsonschema
+
