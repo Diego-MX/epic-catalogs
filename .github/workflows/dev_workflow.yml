@@ -5,6 +5,7 @@ on:
       - dev
 
 env:
+  GH_REPO      : Bineo2/data-prod-catalogs
   ACR_HOST     : prodcatalogsregistry.azurecr.io
   AZURE_WEB    : wap-prod-catalogs-dev
   DOCKER_IMAGE : prod-catalogs-webapp
@@ -20,7 +21,7 @@ jobs:
     - name: Checkout GitHub Actions 
       uses: actions/checkout@v2
       with: 
-        repository: Bineo/data-debt-collections
+        repository: ${{ env.GH_REPO }}
         ref       : dev
 
     # https://github.com/mr-smithers-excellent/docker-build-push
