@@ -1,0 +1,12 @@
+{
+  "type"      : "object",
+  "properties": {
+    "neighborhoodsRequest": {
+      "type"    : "object",
+      "required": ["zipcode"], 
+      "properties": {
+        "zipcode": {
+          "type" : "string"}
+} } } } 
+
+
