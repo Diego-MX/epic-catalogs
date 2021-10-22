@@ -1,1 +1,2 @@
 *.csv
+!estados_claves.csv
