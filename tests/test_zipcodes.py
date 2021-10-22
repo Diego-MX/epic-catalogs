@@ -3,55 +3,69 @@ from datetime import datetime as dt
 import requests
 
 
-# URL = "http://localhost:5000/v1/catalogs/get-zipcode-neighborhoods"
-URL = "https://wap-prod-catalogs-dev.azurewebsites.net/v1/catalogs/get-zipcode-neighborhoods"
-
-
 class TestZipcodes(TestCase): 
-    def set_example(self):
+    def yes_example(self):
         example_request = { 
-            "input"     : {
-                "neighborhoodsRequest": {
-                    "zipcode": "92773"}, 
-            "output"    : {
-                "neighborhoodsResponse": {
-                    "zipcode": {
-                        "code": "92773", 
-                        "state": "Veracruz", 
-                        "municipality": "Tuxpan"},
-                    "neighborhoods": {
-                        "numberOfNeighborhoods": "17", 
-                        "neighborhoodsPagination": False
+                "input"     : {
+                    "neighborhoodsRequest": {
+                        "zipcode": "92773" }, 
+                "output"    : {
+                    "neighborhoodsResponse": {
+                        "zipcode": {
+                            "code": "92773", 
+                            "state": "Veracruz", 
+                            "municipality": "Tuxpan"},
+                        "neighborhoods": {
+                            "numberOfNeighborhoods": "17", 
+                            "neighborhoodsPagination": False
         } } } } }
+        return example_request
+
+    def no_example(self):
+        example_request = { 
+                "input"     : {
+                    "neighborhoodsRequest": {
+                        "zipcode": "01025" }, 
+                "output"    : {
+        } } }
         return example_request
 
 
     def test_simple_request_is_successful(self):
-        sample   = self.set_example()
+        sample   = self.yes_example()
         response = requests.post(URL, json=sample["input"])
         self.assertEqual(response.status_code, 200)
 
 
-    def test_app_matches_filter_to_catalog(self):
-        pass 
+    def test_no_zipcodes_returns_404(self): 
+        sample   = self.no_example()
+        response = requests.post(URL, json=sample["input"])
+        self.assertEqual(response.status_code, 404)
 
-    def test_app_breaks_about_unmatched_filter_in_catalog(self): 
-        pass 
 
 
 if __name__ == "__main__": 
+    import sys
+    import config
+    ENV = config.DEFAULT_ENV if len(sys.argv) == 1 else sys.argv.pop()
+    URL = config.ENV_URLS.get(ENV)
+
     unit_main()
 
-else: 
-    from tests import test_zipcodes
-    
+if False:
     from importlib import reload
-    reload(test_zipcodes)
+    from tests import test_zipcodes
+    import config
 
-    some_test = test_zipcodes.TestZipcodes()
-    setup_json = some_test.set_example()
-    an_input = setup_json["input"]
-    a_request = an_input["neighborhoodsRequest"]
+    ENV = "local" # "staging"
+    URL = config.ENV_URLS.get(ENV)
+    
+    reload(test_zipcodes)
+    
+    some_test  = test_zipcodes.TestZipcodes() 
+    setup_json = some_test.yes_example()
+    an_input   = setup_json["input"]
+    a_request  = an_input["neighborhoodsRequest"]
     
     a_response = requests.post(URL, json=an_input)
 

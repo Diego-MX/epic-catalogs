@@ -73,7 +73,8 @@
           "properties": { 
             "code"        : {"type": "string"},
             "state"       : {"type": "string"},
-            "municipality": {"type": "string"}
+            "municipality": {"type": "string"}, 
+            "mun_id"      : {"type": "string"}
         } }, 
         "neighborhoods" : {
           "type" : "object",
