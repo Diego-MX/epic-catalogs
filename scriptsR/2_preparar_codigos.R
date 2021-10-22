@@ -10,19 +10,25 @@ codigos_0 <- read_delim("codigos_postales_tabla.txt" %>% file.path(data_dir, .),
 codigos_1 <- checks_codigos(codigos_0)
 
 
-
 # 2457 municipios.  
 municipios <- codigos_1 %>% 
   group_by(c_estado, c_mnpio, d_mnpio) %>% 
   summarize(.groups = "drop", 
       min_cp = min(d_codigo), max_cp = max(d_codigo)) 
 
-# muns_check <-  municipios %>% 
-#   arrange(min_cp) %>% 
-#   mutate_at(c("min_cp", "max_cp"), as.numeric) %>% 
-#   mutate(rank = row_number(),
-#       ordered = lead(min_cp) - max_cp) %>% 
-#   filter(ordered <= 0 | lead(ordered) <= 0 | lag(ordered) <= 0)
+
+muns_check <-  municipios %>% 
+  mutate_at(c("min_cp", "max_cp"), as.numeric) %>% 
+  arrange(min_cp) %>% 
+  mutate(rank = row_number(), 
+      pos_min = lead(min_cp), 
+      pre_max = cummax(dplyr::lag(max_cp, default = 0)), 
+      separated = (pre_max < min_cp) & (max_cp < pos_min), 
+      max_cp  = if_else(separated, lead(min_cp) - 1, max_cp)) %>% 
+  mutate_at(c("min_cp", "max_cp"), 
+    .f = ~as.character(.) %>% str_pad(5, "left", "0")) %>% 
+  select(-c(rank, pos_min, pre_max))
+
 
 write_feather(municipios, "../refs/catalogs/codigos_drive_municipios.feather")
 write_csv(municipios, "../refs/catalogs/codigos_drive_municipios.csv")

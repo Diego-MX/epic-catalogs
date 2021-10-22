@@ -1,14 +1,17 @@
 from unittest import TestCase, main as unit_main
-from datetime import datetime as dt 
 import requests
+import re
 
+from requests import status_codes
 
 class TestZipcodes(TestCase): 
-    def yes_example(self):
-        example_request = { 
+    def set_example(self, has_nbhd=True):
+        if has_nbhd:
+            example_request = { 
                 "input"     : {
                     "neighborhoodsRequest": {
-                        "zipcode": "92773" }, 
+                        "zipcode": "92773"
+                }}, 
                 "output"    : {
                     "neighborhoodsResponse": {
                         "zipcode": {
@@ -18,27 +21,30 @@ class TestZipcodes(TestCase):
                         "neighborhoods": {
                             "numberOfNeighborhoods": "17", 
                             "neighborhoodsPagination": False
-        } } } } }
-        return example_request
-
-    def no_example(self):
-        example_request = { 
+            } } } }
+        else:
+            example_request = { 
                 "input"     : {
                     "neighborhoodsRequest": {
                         "zipcode": "01025" }, 
                 "output"    : {
-        } } }
+            } } }
         return example_request
+
+    def test_base_request_with_tag(self): 
+        base_url = re.search(r'^https?://.*?/', URL).group()
+        response = requests.get(base_url)
+        self.assertEqual(response.status_codes, 200)
 
 
     def test_simple_request_is_successful(self):
-        sample   = self.yes_example()
+        sample   = self.set_example(has_nbhd=True)
         response = requests.post(URL, json=sample["input"])
         self.assertEqual(response.status_code, 200)
 
 
     def test_no_zipcodes_returns_404(self): 
-        sample   = self.no_example()
+        sample   = self.set_example(has_nbhd=False)
         response = requests.post(URL, json=sample["input"])
         self.assertEqual(response.status_code, 404)
 
@@ -58,7 +64,7 @@ if False:
     import config
 
     ENV = "staging" # "local" #
-    URL = config.ENV_URLS["ENV"]
+    URL = config.ENV_URLS[ENV]
     
     reload(test_zipcodes)
     
