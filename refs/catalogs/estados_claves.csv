@@ -1,0 +1,33 @@
+clave,nombre,ABR,Abr_1,ABR_2,renapo,Iso_3166,drive,gobmx,marco_geo,min_cp,max_cp
+9,Ciudad de México,CDMX,C.D.Mx.,CXB​,DF,CMXC​,CdMx,CdMx,ciudaddemexico,1000,19999
+1,Aguascalientes,AGS,Ags.,AG,AS,AGU,Ags,Ags,aguascalientes,20000,20999
+2,Baja California,BC,B.C.,BC,BC,BCN,BC,bc,bajacalifornia,21000,22999
+3,Baja California Sur,BCS,B.C.S.,BS,BS,BCS,BCS,bcs,bajacaliforniasur,23000,23999
+4,Campeche,CAMP,Camp.,CM,CC,CAM,Camp,camp,campeche,24000,24999
+5,Chihuahua,CHIH,Chih.,CH,CH,CHH,Chih,chih,coahuiladezaragoza,25000,27999
+6,Chiapas,CHIS,Chis.,CS,CS,CHP,Chs,chis,colima,28000,28999
+7,Coahuila,COAH,Coah.,CO,CL,COA,Coah,coah,chiapas,29000,30999
+8,Colima,COL,Col.,CL,CM,COL,Col,col,chihuahua,31000,33999
+10,Durango,DGO,Dgo.,DG,DG,DUR,Dur,dgo,durango,34000,35999
+11,Guerrero,GRO,Gro.,GR,GR,GRO,Gro,gro,guerrero,36000,38999
+12,Guanajuato,GTO,Gto.,GT,GT,GUA,Gto,gto,guanajuato,39000,41999
+13,Hidalgo,HGO,Hgo.,HG,HG,HID,Hgo,hgo,hidalgo,42000,43999
+14,Jalisco,JAL,Jal.,JC,JC,JAL,Jal,jal,jalisco,44000,49999
+15,Estado de México,MEX,Edo. Méx.D​,EM,MC,MEX,EdoMex,mex,mexico,50000,57999
+16,Michoacán,MICH,Mich.,MI,MN,MIC,Mich,mich,michoacandeocampo,58000,61999
+17,Morelos,MOR,Mor.,MO,MS,MOR,Mor,mor,morelos,62000,62999
+18,Nuevo León,NL,N.L.,NL,NL,NLE,NL,nl,nayarit,63000,63999
+19,Nayarit,NAY,Nay.,NA,NT,NAY,Nay,nay,nuevoleon,64000,67999
+20,Oaxaca,OAX,Oax.,OA,OC,OAX,Oax,oax,oaxaca,68000,71999
+21,Puebla,PUE,Pue.,PU,PL,PUE,Pue,pue,puebla,72000,75999
+22,Querétaro,QRO,Qro.,QT,QO,QUE,Qro,qro,queretaro,76000,76999
+23,Quintana Roo,QROO,Q. Roo.F​,QR,QR,ROO,QRoo,qroo,quintanaroo,77000,77999
+24,Sinaloa,SIN,Sin.,SI,SL,SIN,Sin,sin,sanluispotosi,78000,79999
+25,San Luis Potosí,SLP,S.L.P.,SL,SP,SLP,SLP,slp,sinaloa,80000,82999
+26,Sonora,SON,Son.,SO,SR,SON,Son,son,sonora,83000,85999
+27,Tabasco,TAB,Tab.,TB,TC,TAB,Tab,tab,tabasco,86000,86999
+28,Tamaulipas,TAMPS,Tamps.,TM,TS,TAM,Tamps,tamps,tamaulipas,87000,89999
+29,Tlaxcala,TLAX,Tlax.,TL,TL,TLA,Tlax,tlax,tlaxcala,90000,90999
+30,Veracruz,VER,Ver.,VE,VZ,VER,Ver,ver,veracruzignaciodelallave,91000,96999
+31,Yucatán,YUC,Yuc.,YU,YN,YUC,Yuc,yuc,yucatan,97000,97999
+32,Zacatecas,ZAC,Zac.,ZA,ZS,ZAC,Zac,zac,zacatecas,98000,99999
