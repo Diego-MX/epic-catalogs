@@ -57,8 +57,8 @@ if False:
     from tests import test_zipcodes
     import config
 
-    ENV = "local" # "staging"
-    URL = config.ENV_URLS.get(ENV)
+    ENV = "local" # "local" #
+    URL = config.ENV_URLS["ENV"]
     
     reload(test_zipcodes)
     

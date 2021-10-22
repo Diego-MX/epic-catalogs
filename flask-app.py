@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from flask import Flask, request
+from flask import Flask, request, jsonify
 
 from src import engine 
 from src import tools
@@ -21,12 +21,16 @@ def get_from_zipcode():
 
     input_file   = SITE/"refs"/"openapi"/"1-input-zipcode-nbhd.json"
     a_validation = tools.response_validate(an_input, input_file)
+
+    try:
+        if a_validation["error"]:
+            return a_validation["output"]
+        
+        b_messages = engine.process_request(an_input["neighborhoodsRequest"])
+        return b_messages
     
-    if a_validation["error"]:
-        return a_validation["output"]
-    
-    b_messages = engine.process_request(an_input["neighborhoodsRequest"])
-    return b_messages
+    except Exception as e:
+        return (jsonify({"detail": str(e)}), 500)
       
 
 if __name__ == "__main__":
