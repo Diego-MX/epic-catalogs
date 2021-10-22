@@ -13,7 +13,16 @@ codigos_1 <- checks_codigos(codigos_0)
 
 # 2457 municipios.  
 municipios <- codigos_1 %>% 
-  select(c_estado, c_mnpio, d_mnpio) %>% unique()
+  group_by(c_estado, c_mnpio, d_mnpio) %>% 
+  summarize(.groups = "drop", 
+      min_cp = min(d_codigo), max_cp = max(d_codigo)) 
+
+# muns_check <-  municipios %>% 
+#   arrange(min_cp) %>% 
+#   mutate_at(c("min_cp", "max_cp"), as.numeric) %>% 
+#   mutate(rank = row_number(),
+#       ordered = lead(min_cp) - max_cp) %>% 
+#   filter(ordered <= 0 | lead(ordered) <= 0 | lag(ordered) <= 0)
 
 write_feather(municipios, "../refs/catalogs/codigos_drive_municipios.feather")
 write_csv(municipios, "../refs/catalogs/codigos_drive_municipios.csv")
@@ -54,8 +63,8 @@ checks_codigos <- function (codigos_df) {
   cols_original <- c("d_codigo", "d_asenta", "d_tipo_asenta", "D_mnpio", "d_estado", 
       "d_ciudad", "d_CP", "c_estado", "c_oficina", "c_CP", "c_tipo_asenta", 
       "c_mnpio", "id_asenta_cpcons", "d_zona", "c_cve_ciudad")
-  assert("Columns are the standard ones", 
-      cols_original == names(codigos_df))
+  # assert("Columns are the standard ones", 
+  #     cols_original == names(codigos_df))
 
   codigos_1 <- codigos_df %>% 
     select(-c_CP) %>% 

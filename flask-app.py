@@ -11,7 +11,7 @@ app  = Flask(__name__)
 
 @app.route("/", methods=["GET"])
 def show_base_request():
-    simple_dict = {"App Running Version":  "1.0.2"}
+    simple_dict = {"App Running Version":  "1.0.3"}
     return simple_dict
 
 
@@ -30,7 +30,7 @@ def get_from_zipcode():
       
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0")
+    app.run(host="0.0.0.0", debug=False)
 
 
 
