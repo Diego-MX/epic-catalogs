@@ -29,10 +29,10 @@ def query_catalogs(a_zipcode):
     tipo_asenta = pd.read_feather(ctlg_dir/"codigos_drive_tipo_asentamientos.feather")
     ciudades    = pd.read_feather(ctlg_dir/"codigos_drive_ciudades.feather")
     municipios  = pd.read_feather(ctlg_dir/"codigos_drive_municipios.feather")
-    estados     = (pd.read_csv(   ctlg_dir/"estados_claves.csv")
-        .assign(clave = lambda df: df.clave.map(str).str.pad(2, fillchar="0"))
-        .loc[:, ["clave", "nombre"]]
-        .rename(columns={ "clave": "c_estado", "nombre": "d_estado"}))
+    estados     =(pd.read_csv(    ctlg_dir/"estados_claves.csv")
+        .assign(c_estado = lambda df: df.clave.map(str).str.pad(2, fillchar="0"))
+        .loc[:, ["c_estado", "nombre"]]
+        .rename(columns={"nombre": "d_estado"}))
 
     las_colonias = (pd.read_feather(ctlg_dir/"codigos_drive.feather")
         .query(f"`d_codigo` == '{a_zipcode}'"))
