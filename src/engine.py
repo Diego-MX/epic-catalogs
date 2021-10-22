@@ -11,15 +11,19 @@ SITE = Path(__file__).parents[1] if "__file__" in globals() else Path(os.getcwd(
 
 def process_request(request): 
     response_dfs = query_catalogs(request.get("zipcode"))    
+    try: 
+        the_response = manage_response(response_dfs)
+        if (("warnings" in the_response) and 
+            ("zipcode"  in the_response["warnings"]) and 
+            (the_response["warnings"]["zipcode"][0] == 3)):
+            code = 404
+        else:
+            code = 200
     
-    the_response = manage_response(response_dfs)
-    if (("warnings" in the_response) and 
-        ("zipcode"  in the_response["warnings"]) and 
-        (the_response["warnings"]["zipcode"][0] == 3)):
-        processed = (jsonify(the_response), 404)
-    else:
-        processed = (jsonify(the_response), 200)
-    return processed
+    except Exception as exc:
+        the_response = {"exception": str(exc)}
+        code = 500
+    return (jsonify(the_response), code)
 
     
 
