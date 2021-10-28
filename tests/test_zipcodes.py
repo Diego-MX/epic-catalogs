@@ -1,3 +1,4 @@
+from pathlib import Path
 from unittest import TestCase, main as unit_main
 import requests
 import re
@@ -32,20 +33,19 @@ class TestZipcodes(TestCase):
         return example_request
 
     def test_base_request_with_tag(self): 
-        base_url = re.search(r'^https?://.*?/', URL).group()
-        response = requests.get(base_url)
-        self.assertEqual(response.status_codes, 200)
+        response = requests.get(URL)
+        self.assertEqual(response.status_code, 200)
 
 
     def test_simple_request_is_successful(self):
         sample   = self.set_example(has_nbhd=True)
-        response = requests.post(URL, json=sample["input"])
+        response = requests.post(f"{URL}/get-zipcode-neighborhoods", json=sample["input"])
         self.assertEqual(response.status_code, 200)
 
 
     def test_no_zipcodes_returns_404(self): 
         sample   = self.set_example(has_nbhd=False)
-        response = requests.post(URL, json=sample["input"])
+        response = requests.post(f"{URL}/get-zipcode-neighborhoods", json=sample["input"])
         self.assertEqual(response.status_code, 404)
 
 
@@ -53,6 +53,7 @@ class TestZipcodes(TestCase):
 if __name__ == "__main__": 
     import sys
     import config
+    
     ENV = config.DEFAULT_ENV if len(sys.argv) == 1 else sys.argv.pop()
     URL = config.ENV_URLS.get(ENV)
 

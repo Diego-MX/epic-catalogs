@@ -10,16 +10,16 @@ app  = Flask(__name__)
 
 
 @app.route("/", methods=["GET"])
-def show_base_request():
+def base_request():
     simple_dict = {"App Running Version":  "1.0.5"}
     return simple_dict
 
 
-@app.route("/v1/catalogs/get-zipcode-neighborhoods", methods=["POST", "GET"])
+@app.route("/zipcode-neighborhoods", methods=["POST", "GET"])
 def get_from_zipcode():
     an_input = request.json
 
-    input_file   = SITE/"refs"/"openapi"/"1-input-zipcode-nbhd.json"
+    input_file   = SITE/"refs/openapi/1-input-zipcode-nbhd.json"
     a_validation = tools.response_validate(an_input, input_file)
 
     if a_validation["error"]:
