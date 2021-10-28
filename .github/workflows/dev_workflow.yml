@@ -5,6 +5,7 @@ on:
       - dev
 
 env:
+
   GH_REPO      : Bineo2/data-prod-catalogs
   ACR_HOST     : prodcatalogsregistry.azurecr.io
   AZURE_WEB    : wap-prod-catalogs-dev
