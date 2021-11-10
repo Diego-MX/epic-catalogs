@@ -1,17 +1,16 @@
-import os
-from pathlib import Path
-from flask import Flask, request, jsonify
+from flask import Flask, request
 
-from src import engine 
-from src import tools
+from src import engine, tools
+import config 
 
-SITE = Path(__file__).parent if '__file__' in globals() else Path(os.getcwd())
+
+SITE = config.SITE
 app  = Flask(__name__)
 
 
 @app.route("/", methods=["GET"])
 def base_request():
-    simple_dict = {"App Running Version":  "1.0.6"}
+    simple_dict = {"App Running Version":  "1.0.7"}
     return simple_dict
 
 
@@ -27,7 +26,7 @@ def get_from_zipcode():
     
     b_messages = engine.process_request(an_input["neighborhoodsRequest"])
     return b_messages
-      
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=False)

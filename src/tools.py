@@ -91,7 +91,7 @@ def encode64(a_str):
     return encoded
 
 
-def dataframe_response(a_df, cols_df, resp_keys): 
+def dataframe_response(a_df, cols_df, resp_keys, drop_nas=True): 
     # COLS_DF tiene columnas:
     #  TYPE['datetime', 'date', ...]
     #  ATRIBUTO
@@ -104,11 +104,16 @@ def dataframe_response(a_df, cols_df, resp_keys):
     str_assign  = {col: str 
             for col in ts_cols if col in a_df.columns.values}
     
-    b_df = a_df.astype(str_assign).assign(**date_assign)
+    b_df  = a_df.astype(str_assign).assign(**date_assign)
+    if drop_nas:
+        b_records = [ row.dropna().to_dict() for _i, row in b_df.iterrows()]
+    else: 
+        b_records = b_df.fillna("").to_dict(orient="records")
+
     std_dict = {
         "numberOfRecords"   : b_df.shape[0],
         "attributes"        : b_df.columns.tolist(),
-        "recordSet"         : b_df.to_dict(orient="records"),
+        "recordSet"         : b_records,
         "pagination"        : False}
 
     df_response = { resp_keys.get(key, key): std_dict[key] for key in std_dict.keys()}
