@@ -4,14 +4,15 @@ from pathlib import Path
 import pandas as pd
 
 from flask import jsonify
-from src.tools import dataframe_response
+from src import tools
 
 SITE = Path(__file__).parents[1] if "__file__" in globals() else Path(os.getcwd())
 
 
 def process_request(request): 
-    response_dfs = query_catalogs(request.get("zipcode"))    
     try: 
+        the_zipcode  = request.get("zipcode")
+        response_dfs = query_catalogs(the_zipcode)
         the_response = manage_response(response_dfs)
         if (("warnings" in the_response) and 
             ("zipcode"  in the_response["warnings"]) and 
@@ -96,11 +97,11 @@ def manage_response(nbhd_elems):
             "dtipo"     : "character"})
 
     nbhd_keys = { "numberOfRecords" : "numberOfNeighborhoods",
-                "attributes"      : "neighborhoodAttributes",
-                "recordSet"       : "neighborhoodsSet",
-                "pagination"      : "neighborhoodsPagination"}
+                  "attributes"      : "neighborhoodAttributes",
+                  "recordSet"       : "neighborhoodsSet",
+                  "pagination"      : "neighborhoodsPagination"}
 
-    nbhd_dict = dataframe_response(nbhd_df, nbhd_cols, nbhd_keys)
+    nbhd_dict = tools.dataframe_response(nbhd_df, nbhd_cols, nbhd_keys)
     
     pre_response = {
         "zipcode"       : zipcode_props, 
