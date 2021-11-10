@@ -1,13 +1,10 @@
 from pathlib import Path
 from unittest import TestCase, main as unit_main
 import requests
-import re
 
-from requests import status_codes
 
-class TestZipcodes(TestCase): 
-    def set_example(self, has_nbhd=True):
-        if has_nbhd:
+def set_example(name=None):
+        if name is None:
             example_request = { 
                 "input"     : {
                     "neighborhoodsRequest": {
@@ -23,21 +20,34 @@ class TestZipcodes(TestCase):
                             "numberOfNeighborhoods": "17", 
                             "neighborhoodsPagination": False
             } } } }
-        else:
+        elif name == "no-nbhd":
             example_request = { 
                 "input"     : {
                     "neighborhoodsRequest": {
                         "zipcode": "01025" }, 
                 "output"    : {
             } } }
+        elif name == "no-city": 
+            example_request = { 
+                "input"     : {
+                    "neighborhoodsRequest": {
+                        "zipcode": "54200" }, 
+                "output"    : {
+            } } }
         return example_request
 
+
+class TestZipcodes(TestCase): 
+    
     def test_base_request_with_tag(self): 
         response = requests.get(URL)
         self.assertEqual(response.status_code, 200)
 
 
-    def test_simple_request_is_successful(self):
+    def test_no_city_returns_empty_str(self): 
+
+
+    def test_example_is_successful(self):
         sample   = self.set_example(has_nbhd=True)
         response = requests.post(f"{URL}/get-zipcode-neighborhoods", json=sample["input"])
         self.assertEqual(response.status_code, 200)
@@ -64,20 +74,23 @@ if False:
     from tests import test_zipcodes
     import config
 
-    ENV = "staging" # "local" #
+    ENV = "staging" # "local" # "qa" #
     URL = config.ENV_URLS[ENV]
     
+    reload(config)
     reload(test_zipcodes)
     
     some_test  = test_zipcodes.TestZipcodes() 
-    setup_json = some_test.yes_example()
+    setup_json = some_test.set_example(True)
     an_input   = setup_json["input"]
     a_request  = an_input["neighborhoodsRequest"]
     
-    a_response = requests.post(URL, json=an_input)
-
+    a_response = requests.post(f"{URL}/zipcode-neighborhoods", json=an_input)
     a_response.status_code
     print(a_response.text)
     
+
+
+    b_response = requests.get(URL)
 
     
