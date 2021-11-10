@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-SITE = Path(__file__) if "__file__" in globals() else Path(os.getcwd())
+SITE = Path(__file__).parent if "__file__" in globals() else Path(os.getcwd())
 
 DEFAULT_ENV = "staging"
 
