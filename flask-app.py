@@ -10,7 +10,7 @@ app  = Flask(__name__)
 
 @app.route("/", methods=["GET"])
 def base_request():
-    simple_dict = {"App Running Version":  "1.0.7"}
+    simple_dict = {"App Running Version":  "1.0.8"}
     return simple_dict
 
 
