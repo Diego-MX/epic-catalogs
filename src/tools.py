@@ -102,10 +102,10 @@ def dataframe_response(a_df, cols_df=None, resp_keys=None, drop_nas=True):
         the_types = {"bool": "logical", "object": "character"}
         cols_df = (a_df.dtypes.replace(the_types)
             .to_frame("dtipo").reset_index()
-            .rename(columns={"index": "atributo"}))
+            .rename(columns={"index": "nombre"}))
     
-    ts_cols     = cols_df.query("dtipo == 'datetime'")["atributo"]
-    date_cols_0 = cols_df.query("dtipo == 'date'")["atributo"]
+    ts_cols     = cols_df.query("dtipo == 'datetime'")["nombre"]
+    date_cols_0 = cols_df.query("dtipo == 'date'")["nombre"]
 
     date_assign = {col: a_df[col].apply(lambda dt: dt.strftime("%Y-%m-%d")) 
             for col in date_cols_0 if col in a_df.columns.values}
