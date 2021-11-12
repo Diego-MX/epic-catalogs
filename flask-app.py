@@ -9,7 +9,7 @@ app  = Flask(__name__)
 
 @app.route("/", methods=["GET"])
 def base_request():
-    simple_dict = {"App Running Version":  "1.0.8"}
+    simple_dict = {"App Running Version":  "1.0.9"}
     return simple_dict
 
 
@@ -28,7 +28,7 @@ def post_get_zipcode_neighborhoods():
 
 
 @app.route("/national-banks", methods=["GET"])
-def get_banks():    
+def get_banks(): 
     banks_response = engine.banks_request()
     return banks_response
 

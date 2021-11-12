@@ -10,9 +10,9 @@ ctlg_dir  = SITE/"refs/catalogs"
     
     
 
-def zipcode_request(request): 
+def zipcode_request(a_request): 
     try: 
-        the_zipcode  = request.get("zipcode")
+        the_zipcode  = a_request.get("zipcode")
         response_dfs = zipcode_query(the_zipcode)
         the_response = zipcode_response(response_dfs)
         if (("warnings" in the_response) and 
@@ -28,16 +28,22 @@ def zipcode_request(request):
     return (jsonify(the_response), code)
 
     
-def bank_request(request): 
-    banks_df = pd.read_feather(ctlg_dir/"bancos.feather")
+def banks_request(): 
+    try:
+        banks_df = pd.read_feather(ctlg_dir/"bancos.feather")
 
-    bank_keys = { 
-        "numberOfRecords" : "numberOfBanks",
-        "attributes"      : "bankAttributes",
-        "recordSet"       : "banksSet"}
+        banks_keys = { 
+            "numberOfRecords" : "numberOfBanks",
+            "attributes"      : "bankAttributes",
+            "recordSet"       : "banksSet"}
 
-    bank_resp = tools.dataframe_response(banks_df, None, bank_keys)
-    return (bank_resp, 200)
+        banks_resp = tools.dataframe_response(banks_df, None, banks_keys)
+        code       = 200
+    except Exception as exc:
+        banks_resp = {"an_exception": str(exc)}
+        code      = 500
+
+    return (jsonify(banks_resp), code)
 
 
 
@@ -107,8 +113,8 @@ def zipcode_response(nbhd_elems):
         zipcode_props = zpcd_df.to_dict(orient="records")
 
     nbhd_cols = pd.DataFrame(data={
-            "database"  : ["zipcode", "name", "zone", "type", "city", "city_id"], 
-            "dtipo"     : "character"})
+            "nombre" : ["zipcode", "name", "zone", "type", "city", "city_id"], 
+            "dtipo"  : "character"})
 
     nbhd_keys = { "numberOfRecords" : "numberOfNeighborhoods",
                   "attributes"      : "neighborhoodAttributes",

@@ -78,11 +78,12 @@ if __name__ == "__main__":
     unit_main()
 
 if False:
+    import requests
     from importlib import reload
     from tests import test_zipcodes
     import config
 
-    ENV = "staging" # "qa" # "local" # "qa" # "staging" # 
+    ENV = "local" # "staging" # "qa" # "local" # "qa" # "staging" # 
     URL = config.ENV_URLS[ENV]
     
     reload(config)
