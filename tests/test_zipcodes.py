@@ -31,14 +31,18 @@ def set_example(name=None):
         example_request = { 
             "input"     : {
                 "neighborhoodsRequest": {
-                    "zipcode": "54200" }, 
+                    "zipcode": "54200" 
+        } },  
             "output"    : {
-        } } }
+        } }
     return example_request
 
 
 class TestZipcodes(TestCase): 
     
+    def pre_auth(self):
+        pass
+
     def test_base_request_with_tag(self): 
         response = requests.get(URL)
         self.assertEqual(response.status_code, 200)
@@ -78,13 +82,13 @@ if False:
     from tests import test_zipcodes
     import config
 
-    ENV = "local" # "qa" #"staging" # 
+    ENV = "staging" # "qa" # "local" # "qa" # "staging" # 
     URL = config.ENV_URLS[ENV]
     
     reload(config)
     reload(test_zipcodes)
     
-    setup_json = set_example()
+    setup_json = set_example("no-city")
     an_input   = setup_json["input"]
     a_request  = an_input["neighborhoodsRequest"]
     

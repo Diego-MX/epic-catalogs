@@ -3,7 +3,6 @@ from flask import Flask, request
 from src import engine, tools
 import config 
 
-
 SITE = config.SITE
 app  = Flask(__name__)
 
@@ -15,7 +14,7 @@ def base_request():
 
 
 @app.route("/zipcode-neighborhoods", methods=["POST", "GET"])
-def get_from_zipcode():
+def post_get_zipcode_neighborhoods():
     an_input = request.json
 
     input_file   = SITE/"refs/openapi/1-input-zipcode-nbhd.json"
@@ -24,8 +23,14 @@ def get_from_zipcode():
     if a_validation["error"]:
         return a_validation["output"]
     
-    b_messages = engine.process_request(an_input["neighborhoodsRequest"])
+    b_messages = engine.zipcode_request(an_input["neighborhoodsRequest"])
     return b_messages
+
+
+@app.route("/national-banks", methods=["GET"])
+def get_banks():    
+    banks_response = engine.banks_request()
+    return banks_response
 
 
 if __name__ == "__main__":

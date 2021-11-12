@@ -1,19 +1,20 @@
-import os
-from pathlib import Path
 
 import pandas as pd
 
 from flask import jsonify
 from src import tools
+import config
 
-SITE = Path(__file__).parents[1] if "__file__" in globals() else Path(os.getcwd())
+SITE = config.SITE
+ctlg_dir  = SITE/"refs/catalogs"
+    
+    
 
-
-def process_request(request): 
+def zipcode_request(request): 
     try: 
         the_zipcode  = request.get("zipcode")
-        response_dfs = query_catalogs(the_zipcode)
-        the_response = manage_response(response_dfs)
+        response_dfs = zipcode_query(the_zipcode)
+        the_response = zipcode_response(response_dfs)
         if (("warnings" in the_response) and 
             ("zipcode"  in the_response["warnings"]) and 
             (the_response["warnings"]["zipcode"][0] == 3)):
@@ -27,10 +28,23 @@ def process_request(request):
     return (jsonify(the_response), code)
 
     
+def bank_request(request): 
+    banks_df = pd.read_feather(ctlg_dir/"bancos.feather")
 
-def query_catalogs(a_zipcode): 
-    ctlg_dir  = SITE/"refs/catalogs"
-    
+    bank_keys = { 
+        "numberOfRecords" : "numberOfBanks",
+        "attributes"      : "bankAttributes",
+        "recordSet"       : "banksSet"}
+
+    bank_resp = tools.dataframe_response(banks_df, None, bank_keys)
+    return (bank_resp, 200)
+
+
+
+#%% Further Down the Rabbit Hole. 
+
+
+def zipcode_query(a_zipcode): 
     tipo_asenta = pd.read_feather(ctlg_dir/"codigos_drive_tipo_asentamientos.feather")
     ciudades    = pd.read_feather(ctlg_dir/"codigos_drive_ciudades.feather")
     municipios  = pd.read_feather(ctlg_dir/"codigos_drive_municipios.feather")
@@ -48,7 +62,7 @@ def query_catalogs(a_zipcode):
             .merge(municipios, on=["c_estado", "c_mnpio"], how="left")
             .merge(estados, on="c_estado", how="left")
             .assign(cve_mnpio=lambda df: df.c_estado.str.cat(df.c_mnpio))
-            .loc[:, ["d_codigo", "d_mnpio", "d_estado", "cve_mnpio"]])
+            .loc[:, ["d_codigo", "d_mnpio", "d_estado", "c_estado", "cve_mnpio"]])
     else:
         mun_estado = (municipios
             .assign(cve_mnpio=lambda df: df.c_estado.str.cat(df.c_mnpio))
@@ -70,7 +84,7 @@ def query_catalogs(a_zipcode):
     return resp_elements
 
 
-def manage_response(nbhd_elems):
+def zipcode_response(nbhd_elems):
     translator = {
         "d_codigo"      : "zipcode",    "d_asenta"      : "name", 
         "d_tipo_asenta" : "type",       "d_zona"        : "zone",
@@ -107,11 +121,11 @@ def manage_response(nbhd_elems):
         "zipcode"       : zipcode_props, 
         "neighborhoods" : nbhd_dict }
 
-    the_response = set_zipcode_warnings(pre_response, warnables)
+    the_response = zipcode_warnings(pre_response, warnables)
     return the_response
 
 
-def set_zipcode_warnings(a_response, warnables):
+def zipcode_warnings(a_response, warnables):
     warnings = {}
     if   warnables[0]:
         warnings["borough"] = (1, "No se encontró municipio para CP")
