@@ -1,8 +1,8 @@
 
 
 El archivo `bancos.xlsx.lnk` es un _link_ del archivo cuyo original se encuentra en 
-en el _site_ de Sharepoint `Data Arch - Documents`;  su dirección es:   
-`[Sitio]/Catalogos/Inhouse/Catálogo de Bancos.xlsx` 
+en el _site_ de Sharepoint `Data Arch - Documents`.  
+Su dirección es: `.../Catalogos/Inhouse/Catálogo de Bancos.xlsx` 
 
 El vínculo se crea manualmente como cualquier vínculo. 
 
