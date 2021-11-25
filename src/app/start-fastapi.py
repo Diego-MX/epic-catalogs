@@ -8,12 +8,12 @@ from src import engine
 
 
 app = FastAPI(title="Catálogos centralizados de uso de las Apps.",
-    version="1.0.11")
+    version="1.0.12")
 
 
 @app.get("/")
 async def base_request():
-    simple_dict = {"App Running Version": "1.0.11"}
+    simple_dict = {"App Running Version": "1.0.12"}
     return simple_dict
 
 
@@ -42,6 +42,7 @@ async def get_zipcode_neighborhoods_str(zipcode: str):
 def get_banks(): 
     banks_response = engine.banks_request(server="fastapi")
     return banks_response
+
 
 
 if __name__ == "__main__":
