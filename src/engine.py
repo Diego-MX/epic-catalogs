@@ -76,7 +76,7 @@ def zipcode_query(a_zipcode):
     municipios  = pd.read_feather(ctlg_dir/"codigos_drive_municipios.feather")
     estados     =(pd.read_csv(    ctlg_dir/"estados_claves.csv")
         .assign(c_estado = lambda df: df.clave.map(str).str.pad(2, fillchar="0"))
-        .rename(columns={"nombre": "d_estado", "Iso_3166": "c_estado_iso"})
+        .rename(columns={"nombre": "d_estado", "ISO_3166": "c_estado_iso"})
         .loc[:, ["c_estado", "d_estado", "c_estado_iso"]])
 
     las_colonias = (pd.read_feather(ctlg_dir/"codigos_drive.feather")
