@@ -5,6 +5,8 @@ from fastapi.responses import JSONResponse
 from typing import List, Any, Optional, Tuple
 from orjson import dumps
 
+from src.engine import zipcode_query
+
 # Fix bugs. 
 class ORJSONResponse(JSONResponse): 
     media_type = "application/json"
@@ -22,6 +24,7 @@ class MetaRequestNbhd(BaseModel):
 
 # Response
 class Zipcode(BaseModel): 
+    zipcode    : str
     state      : str
     state_id   : str
     state_iso  : str

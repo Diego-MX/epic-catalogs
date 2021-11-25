@@ -73,7 +73,8 @@ def banks_request(server="flask"):
 def zipcode_query(a_zipcode): 
     tipo_asenta = pd.read_feather(ctlg_dir/"codigos_drive_tipo_asentamientos.feather")
     ciudades    = pd.read_feather(ctlg_dir/"codigos_drive_ciudades.feather")
-    municipios  = pd.read_feather(ctlg_dir/"codigos_drive_municipios.feather")
+    municipios  =(pd.read_feather(ctlg_dir/"codigos_drive_municipios.feather")
+        .assign(cve_mnpio=lambda df: df.c_estado.str.cat(df.c_mnpio)))
     estados     =(pd.read_csv(    ctlg_dir/"estados_claves.csv")
         .assign(c_estado = lambda df: df.clave.map(str).str.pad(2, fillchar="0"))
         .rename(columns={"nombre": "d_estado", "ISO_3166": "c_estado_iso"})
@@ -84,19 +85,19 @@ def zipcode_query(a_zipcode):
     hay_colonias = las_colonias.shape[0] > 1
 
     if hay_colonias:
-        mun_estado = (las_colonias[["d_codigo", "c_estado", "c_mnpio"]].drop_duplicates()
+        mun_estado = (las_colonias[["d_codigo", "c_estado", "c_mnpio"]]
+            .drop_duplicates()
             .merge(municipios, on=["c_estado", "c_mnpio"], how="left")
             .merge(estados, on="c_estado", how="left")
-            .assign(cve_mnpio=lambda df: df.c_estado.str.cat(df.c_mnpio))
-            .loc[:, ["d_codigo", "d_mnpio", "d_estado", "c_estado", "c_estado_iso", "cve_mnpio"]])
+            .loc[:, ["d_codigo", "d_mnpio", "d_estado", 
+                "c_estado", "c_estado_iso", "cve_mnpio"]])
     else:
         mun_estado = (municipios
-            .assign(cve_mnpio=lambda df: df.c_estado.str.cat(df.c_mnpio))
-            .loc[(municipios.min_cp <= a_zipcode) & (a_zipcode <= municipios.max_cp), 
-                ["c_estado", "cve_mnpio", "d_mnpio"]]
+            .loc[(municipios.min_cp <= a_zipcode) & (a_zipcode <= municipios.max_cp), :] 
+            .assign(d_codigo=a_zipcode)
             .merge(estados, on="c_estado", how="left")
-            .loc[:, ["d_mnpio", "d_estado", "c_estado", "c_estado_iso", "cve_mnpio"]])
-            # Cuando HAY_COLONIAS == False, en columnas no incluye D_CODIGO. 
+            .loc[:, ["d_codigo", "d_mnpio", "d_estado", 
+                "c_estado", "c_estado_iso", "cve_mnpio"]])
         
     sub_colonias = (las_colonias
         .merge(tipo_asenta, on="c_tipo_asenta", how="left")
