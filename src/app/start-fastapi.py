@@ -8,12 +8,12 @@ from src import engine
 
 
 app = FastAPI(title="Catálogos centralizados de uso de las Apps.",
-    version="1.0.10")
+    version="1.0.11")
 
 
 @app.get("/")
 async def base_request():
-    simple_dict = {"App Running Version": "1.0.10"}
+    simple_dict = {"App Running Version": "1.0.11"}
     return simple_dict
 
 

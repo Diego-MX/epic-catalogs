@@ -82,13 +82,13 @@ if False:
     from tests import test_zipcodes
     from config import URLS
 
-    ENV = "local-fastapi" # "staging" # "qa" # "local" # "qa" # "staging" # 
+    ENV = "staging" # "local-fastapi" # "qa" # "local" # "qa" # 
     URL = URLS[ENV]
     
     reload(config)
     reload(test_zipcodes)
     
-    setup_json = set_example("no-city")  # no-nbhd, no-city
+    setup_json = set_example("yussel")  # no-nbhd, no-city
     an_input   = setup_json["input"]
     a_request  = an_input["neighborhoodsRequest"]
     
