@@ -88,7 +88,7 @@ if False:
     reload(config)
     reload(test_zipcodes)
     
-    setup_json = set_example("yussel")  # no-nbhd, no-city
+    setup_json = set_example("no-nbhd")  # no-nbhd, no-city, yussel
     an_input   = setup_json["input"]
     a_request  = an_input["neighborhoodsRequest"]
     
