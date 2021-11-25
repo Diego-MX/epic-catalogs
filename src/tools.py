@@ -92,6 +92,7 @@ def encode64(a_str):
 
 
 def dataframe_response(a_df, cols_df=None, resp_keys=None, drop_nas=True): 
+    # Convierte A_DF en {numberOfRecords, attributes, recordSet, pagination}
     # COLS_DF tiene columnas:
     #  DTIPO['datetime', 'date', ...]
     #  ATRIBUTO
@@ -122,7 +123,7 @@ def dataframe_response(a_df, cols_df=None, resp_keys=None, drop_nas=True):
         "numberOfRecords"   : b_df.shape[0],
         "attributes"        : b_df.columns.tolist(),
         "recordSet"         : b_records,
-        "pagination"        : False}
+        "pagination"        : {"hasPagination": False}}
 
     df_response = { resp_keys.get(key, key): std_dict[key] for key in std_dict.keys()}
     return df_response

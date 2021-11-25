@@ -2,33 +2,45 @@
 import pandas as pd
 
 from flask import jsonify
+from fastapi.exceptions import HTTPException
+
 from src import tools
 import config
 
 SITE = config.SITE
-ctlg_dir  = SITE/"refs/catalogs"
+ctlg_dir = SITE/"refs/catalogs"
     
     
-
-def zipcode_request(a_request): 
+def zipcode_request(a_request, server="flask"): 
     try: 
-        the_zipcode  = a_request.get("zipcode")
+        the_zipcode  = a_request["zipcode"]
         response_dfs = zipcode_query(the_zipcode)
         the_response = zipcode_response(response_dfs)
         if (("warnings" in the_response) and 
             ("zipcode"  in the_response["warnings"]) and 
             (the_response["warnings"]["zipcode"][0] == 3)):
-            code = 404
+            detail = the_response["warnings"]["zipcode"][1]
+            code   = 404
         else:
             code = 200
     
     except Exception as exc:
-        the_response = {"exception": str(exc)}
+        detail = str(exc)
+        the_response = {"exception": detail}
         code = 500
-    return (jsonify(the_response), code)
+
+    if server == "flask": 
+        return (jsonify(the_response), code)
+    elif (server == "fastapi") and (code == 200): 
+        return the_response
+    elif (server == "fastapi") and (code != 200): 
+        an_exception = HTTPException(status_code=code, detail=detail)
+        raise an_exception
 
     
-def banks_request(): 
+
+    
+def banks_request(server="flask"): 
     try:
         banks_df = pd.read_feather(ctlg_dir/"bancos.feather")
 
@@ -40,14 +52,22 @@ def banks_request():
         banks_resp = tools.dataframe_response(banks_df, None, banks_keys)
         code       = 200
     except Exception as exc:
-        banks_resp = {"an_exception": str(exc)}
-        code      = 500
+        detail     = str(exc)
+        banks_resp = {"an_exception": detail}
+        code       = 500
 
-    return (jsonify(banks_resp), code)
+    if server == "flask": 
+        return (jsonify(banks_resp), code)
+    elif (server == "fastapi") and (code == 200): 
+        return banks_resp
+    elif (server == "fastapi") and (code != 200): 
+        an_exception = HTTPException(status_code=code, detail=detail)
+        raise an_exception
 
 
 
-#%% Further Down the Rabbit Hole. 
+
+#%% Farther Down the Rabbit Hole. 
 
 
 def zipcode_query(a_zipcode): 
@@ -56,25 +76,27 @@ def zipcode_query(a_zipcode):
     municipios  = pd.read_feather(ctlg_dir/"codigos_drive_municipios.feather")
     estados     =(pd.read_csv(    ctlg_dir/"estados_claves.csv")
         .assign(c_estado = lambda df: df.clave.map(str).str.pad(2, fillchar="0"))
-        .loc[:, ["c_estado", "nombre"]]
-        .rename(columns={"nombre": "d_estado"}))
+        .rename(columns={"nombre": "d_estado", "Iso_3166": "c_estado_iso"})
+        .loc[:, ["c_estado", "d_estado", "c_estado_iso"]])
 
     las_colonias = (pd.read_feather(ctlg_dir/"codigos_drive.feather")
         .query(f"`d_codigo` == '{a_zipcode}'"))
-    hay_colonias = (las_colonias.shape[0] > 1)
+    hay_colonias = las_colonias.shape[0] > 1
 
     if hay_colonias:
         mun_estado = (las_colonias[["d_codigo", "c_estado", "c_mnpio"]].drop_duplicates()
             .merge(municipios, on=["c_estado", "c_mnpio"], how="left")
             .merge(estados, on="c_estado", how="left")
             .assign(cve_mnpio=lambda df: df.c_estado.str.cat(df.c_mnpio))
-            .loc[:, ["d_codigo", "d_mnpio", "d_estado", "c_estado", "cve_mnpio"]])
+            .loc[:, ["d_codigo", "d_mnpio", "d_estado", "c_estado", "c_estado_iso", "cve_mnpio"]])
     else:
         mun_estado = (municipios
             .assign(cve_mnpio=lambda df: df.c_estado.str.cat(df.c_mnpio))
             .loc[(municipios.min_cp <= a_zipcode) & (a_zipcode <= municipios.max_cp), 
-                  ["c_estado", "cve_mnpio", "d_mnpio"]]
-            .merge(estados, on="c_estado", how="left"))
+                ["c_estado", "cve_mnpio", "d_mnpio"]]
+            .merge(estados, on="c_estado", how="left")
+            .loc[:, ["d_mnpio", "d_estado", "c_estado", "c_estado_iso", "cve_mnpio"]])
+            # Cuando HAY_COLONIAS == False, en columnas no incluye D_CODIGO. 
         
     sub_colonias = (las_colonias
         .merge(tipo_asenta, on="c_tipo_asenta", how="left")
@@ -96,6 +118,7 @@ def zipcode_response(nbhd_elems):
         "d_tipo_asenta" : "type",       "d_zona"        : "zone",
         "d_ciudad"      : "city",       "cve_ciudad"    : "city_id", 
         "d_estado"      : "state",      "c_estado"      : "state_id", 
+                                        "c_estado_iso"  : "state_iso",
         "d_mnpio"       : "borough",    "cve_mnpio"     : "borough_id"}
 
     zpcd_df = nbhd_elems.get("zipcode_df").rename(columns=translator)
@@ -121,7 +144,7 @@ def zipcode_response(nbhd_elems):
                   "recordSet"       : "neighborhoodsSet",
                   "pagination"      : "neighborhoodsPagination"}
 
-    nbhd_dict = tools.dataframe_response(nbhd_df, nbhd_cols, nbhd_keys)
+    nbhd_dict = tools.dataframe_response(nbhd_df, nbhd_cols, nbhd_keys, drop_nas=False)
     
     pre_response = {
         "zipcode"       : zipcode_props, 

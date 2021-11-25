@@ -6,5 +6,10 @@ pyarrow
 
 requests 
 Flask
+fastapi
 jsonschema
+uvicorn
 
+clabe
+
+orjson
