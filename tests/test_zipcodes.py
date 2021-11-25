@@ -6,10 +6,7 @@ import requests
 def set_example(name=None):
     if name is None:
         example_request = { 
-            "input"     : {
-                "neighborhoodsRequest": {
-                    "zipcode": "92773"
-            }}, 
+            "input"     : { "neighborhoodsRequest": { "zipcode": "92773" } }, 
             "output"    : {
                 "neighborhoodsResponse": {
                     "zipcode": {
@@ -20,21 +17,19 @@ def set_example(name=None):
                         "numberOfNeighborhoods": "17", 
                         "neighborhoodsPagination": False
         } } } }
+        
     elif name == "no-nbhd":
         example_request = { 
-            "input"     : {
-                "neighborhoodsRequest": {
-                    "zipcode": "01025" }, 
-            "output"    : {
-        } } }
+            "input"  : { "neighborhoodsRequest": { "zipcode": "01025" } }, 
+            "output" : { } } 
     elif name == "no-city": 
         example_request = { 
-            "input"     : {
-                "neighborhoodsRequest": {
-                    "zipcode": "54200" 
-        } },  
-            "output"    : {
-        } }
+            "input"  : { "neighborhoodsRequest": { "zipcode": "54200" } },  
+            "output" : { } }
+    elif name == "yussel": 
+        example_request = {
+            "input"  : { "neighborhoodsRequest": { "zipcode" : "55280" } }, 
+            "output" : { } }
     return example_request
 
 
@@ -52,8 +47,12 @@ class TestZipcodes(TestCase):
         sample    = set_example(name="no-city")
         response  = requests.post(f"{URL}/zipcode-neighborhoods", json=sample["input"])
         nbhd_dict = response.json().get("neighborhoods").get("neighborhoodsSet")[0]
-        self.assertNotIn("city", nbhd_dict)
-        
+        self.assertEqual(nbhd_dict["city"], "")
+    
+    def test_specific_zipcode_returns_ok(self): 
+        sample   = set_example("yussel")
+        response = requests.post(f"{URL}/zipcode-neighborhoods", json=sample["input"])
+        self.assertEqual(response.status_code, 200)
 
     def test_example_is_successful(self):
         sample   = set_example()
@@ -73,7 +72,7 @@ if __name__ == "__main__":
     import config
     
     ENV = config.DEFAULT_ENV if len(sys.argv) == 1 else sys.argv.pop()
-    URL = config.ENV_URLS.get(ENV)
+    URL = config.URLS.get(ENV)
 
     unit_main()
 
@@ -81,15 +80,15 @@ if False:
     import requests
     from importlib import reload
     from tests import test_zipcodes
-    import config
+    from config import URLS
 
-    ENV = "local" # "staging" # "qa" # "local" # "qa" # "staging" # 
-    URL = config.ENV_URLS[ENV]
+    ENV = "local-fastapi" # "staging" # "qa" # "local" # "qa" # "staging" # 
+    URL = URLS[ENV]
     
     reload(config)
     reload(test_zipcodes)
     
-    setup_json = set_example("no-city")
+    setup_json = set_example("no-city")  # no-nbhd, no-city
     an_input   = setup_json["input"]
     a_request  = an_input["neighborhoodsRequest"]
     

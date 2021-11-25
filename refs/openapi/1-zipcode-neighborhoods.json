@@ -62,8 +62,9 @@
       "properties": { 
         "zipcode": {
           "type"   : "string",
-          "pattern": "^\\d{5}$"
-    } } }, 
+          "pattern": "^\\d{5}$"}, 
+        "zipcodeAttr": {"type": "string"}
+        } }, 
 
     "NeighborhoodsResponse" : {
       "type"      : "object",
@@ -71,10 +72,11 @@
         "zipcode" : {
           "type"      : "object",
           "properties": { 
-            "code"        : {"type": "string"},
             "state"       : {"type": "string"},
-            "municipality": {"type": "string"}, 
-            "mun_id"      : {"type": "string"}
+            "state_id"    : {"type": "string"},
+            "state_iso"   : {"type": "string"},
+            "borough"     : {"type": "string"}, 
+            "borough_id"  : {"type": "string"}
         } }, 
         "neighborhoods" : {
           "type" : "object",
@@ -99,11 +101,12 @@
     "Neighborhood": {
       "type"      : "object",
       "properties": {
-        "zipcode": {"type":"string"},
+        "zipcode": {"type": "string"},
         "name"   : {"type": "string"},
-        "type"   : {"type": "string"},
         "zone"   : {"type": "string"},
-        "city"   : {"type": "string"}
+        "type"   : {"type": "string"},
+        "city"   : {"type": "string"}, 
+        "city_id": {"type": "string"}
     } },
     
     "ErrorResponse" : {

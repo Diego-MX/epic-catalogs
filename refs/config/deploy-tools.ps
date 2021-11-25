@@ -1,0 +1,17 @@
+
+# Iniciar la app: con Flask, o con FastAPI.
+python -m src.app.start-fastapi
+python ./src/app/start-fastapi.py
+
+
+uvicorn start-fastapi:app --port 80 --host 0.0.0.0
+
+# Para el Docker
+docker build -f .\dockerfile.ci -t prod-catalogs-webapp:latest .
+docker run -p 80:80 --rm prod-catalogs-webapp
+docker ps -a 
+docker stop {la_instancia}
+
+
+# Para el Testing 
+python -m tests.test_rfc
