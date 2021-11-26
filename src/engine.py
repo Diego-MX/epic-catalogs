@@ -4,13 +4,15 @@ import pandas as pd
 from flask import jsonify
 from fastapi.exceptions import HTTPException
 
-from src import tools
-import config
+import clabe
 
-SITE = config.SITE
+from src import tools
+from config import SITE
+
 ctlg_dir = SITE/"refs/catalogs"
-    
-    
+banks_df = pd.read_feather(ctlg_dir/"national-banks.feather")
+
+
 def zipcode_request(a_request, server="flask"): 
     try: 
         the_zipcode  = a_request["zipcode"]
@@ -39,11 +41,8 @@ def zipcode_request(a_request, server="flask"):
 
     
 
-    
 def banks_request(server="flask"): 
     try:
-        banks_df = pd.read_feather(ctlg_dir/"bancos.feather")
-
         banks_keys = { 
             "numberOfRecords" : "numberOfBanks",
             "attributes"      : "bankAttributes",
@@ -64,6 +63,37 @@ def banks_request(server="flask"):
         an_exception = HTTPException(status_code=code, detail=detail)
         raise an_exception
 
+
+def clabe_parse(clabe_key, server="flask"): 
+    try:
+        is_valid  = clabe.validate_clabe(clabe_key)
+        bank_code = clabe_key[0:3]
+        
+        in_banks = (bank_code == banks_df.code)
+        pre_resp = banks_df.loc[in_banks, :].to_dict(orient="records")
+
+        if   is_valid and any(in_banks): 
+            bank_resp = pre_resp
+            code = 200
+        elif is_valid and not any(in_banks): 
+            detail = "Associated Bank key is not registered."
+            code = 404
+        elif not is_valid:
+            detail = "CLABE is not valid."
+            code = 404
+        
+    except Exception as exc: 
+        detail    = str(exc)
+        bank_resp = {"an_exception": detail}
+        code      = 500
+
+    if server == "flask": 
+        return (jsonify(bank_resp), code)
+    elif (server == "fastapi") and (code == 200): 
+        return bank_resp
+    elif (server == "fastapi") and (code != 200): 
+        an_exception = HTTPException(status_code=code, detail=detail)
+        raise an_exception
 
 
 
