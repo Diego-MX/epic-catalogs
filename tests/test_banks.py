@@ -10,6 +10,10 @@ class TestBanks(TestCase):
         the_response = requests.get(f"{URL}/national-banks")
         self.assertEqual(the_response.status_code, 200)
 
+    def test_clabe_successful(self): 
+        clabe = "002180700845152894"
+        response = requests.post(f"{URL}/national-banks/parse-clabe/{clabe}")
+        self.assertEqual(response.status_code, 200)
     
 
 if __name__ == "__main__": 
@@ -36,8 +40,9 @@ if False:
     an_input   = setup_json["input"]
     a_request  = an_input["neighborhoodsRequest"]
     
-    a_response = requests.get(f"{URL}/national-banks")
-    a_response.status_code
+    clabe = "002180700845152894"
+    response = requests.post(f"{URL}/national-banks/parse-clabe/{clabe}")
+    
     print(a_response.text)
 
 

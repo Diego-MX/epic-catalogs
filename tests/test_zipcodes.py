@@ -28,7 +28,7 @@ def set_example(name=None):
             "output" : { } }
     elif name == "yussel": 
         example_request = {
-            "input"  : { "neighborhoodsRequest": { "zipcode" : "55280" } }, 
+            "input"  : { "neighborhoodsRequest": { "zipcode" : "15530" } }, 
             "output" : { } }
     return example_request
 
@@ -82,13 +82,13 @@ if False:
     from tests import test_zipcodes
     from config import URLS
 
-    ENV = "staging" # "local-fastapi" # "qa" # "local" # "qa" # 
+    ENV = "staging" # "staging" # "qa" # "local" # "qa" # 
     URL = URLS[ENV]
     
     reload(config)
     reload(test_zipcodes)
     
-    setup_json = set_example("no-nbhd")  # no-nbhd, no-city, yussel
+    setup_json = set_example("yussel")  # no-nbhd, no-city, yussel
     an_input   = setup_json["input"]
     a_request  = an_input["neighborhoodsRequest"]
     
