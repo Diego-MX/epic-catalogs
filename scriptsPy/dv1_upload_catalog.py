@@ -7,9 +7,8 @@
 # 3. Cargar el catálogo en el datalake.  
 
 from src import tools
-import config
+from config import SITE
 
-SITE = config.SITE
 
 
 which_ctlg = "national-banks"
@@ -18,21 +17,26 @@ path_ctlg = "epic/catalogs/operational/regulatory/national-banks.feather"
 
 # Lo hacemos para bancos, y después generalizamos. 
 
-ctlg_from = (SITE/"refs/catalogs/bancos.xlsx.lnk", "hoja_bancos", "bancos")
-ctlg_mid  =  SITE/"refs/catalogs/bancos.feather"
-
+bank      = (SITE/"refs/catalogs/api-catalogs.xlsx.lnk", "banks-aux", "tabla_297")
+plazas    = (SITE/"refs/catalogs/api-catalogs.xlsx.lnk", "banks-aux", "plazas_w")
+ctlg_mid  =  SITE/"refs/catalogs/national-banks.feather"
 
 bank_cols = {
     "NOMBRE" : "name", 
-    "BANCO"  : "code",  
-    "PARAMETRO Activo / Desactivo": "is_active"}
+    "CLABE"  : "code",  
+    "PARAMETRO Activo / Desactivo": "is_active", 
+    "Tipo banco" : "type"}
 
-ctlg_df = (tools.read_excel_table(*ctlg_from)
+plazas_cols = {
+    "Nombre" : "name",
+    "Plaza"  : "code"}
+
+
+ctlg_df = (tools.read_excel_table(*bank)
     .rename(columns=bank_cols)
-    .loc[:, bank_cols.values()]
-    .query("`is_active` == 'A' ")
+    .iloc[:, bank_cols.values()]
     .drop(columns="is_active")
-    .astype(str)    # Un bug de algo de Arrow. 
+    .astype(str)    
     .reset_index(drop=True))
 # Link del Bug. 
 # https://stackoverflow.com/questions/69578431/how-to-fix-streamlitapiexception-expected-bytes-got-a-int-object-conver
