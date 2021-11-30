@@ -14,7 +14,13 @@ class TestBanks(TestCase):
         clabe = "002180700845152894"
         response = requests.post(f"{URL}/national-banks/parse-clabe/{clabe}")
         self.assertEqual(response.status_code, 200)
-    
+
+    def test_card_number(self): 
+        card_num = "5499490544796915"
+        response = requests.post(f"{URL}/national-banks/card-number/{card_num}")
+        institucion = response.json()["Institución"]
+        self.assertEqual(institucion, "CITIBANAMEX")
+
 
 if __name__ == "__main__": 
     import sys

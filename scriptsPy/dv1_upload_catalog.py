@@ -20,22 +20,24 @@ path_ctlg = "epic/catalogs/operational/regulatory/national-banks.feather"
 bank      = (SITE/"refs/catalogs/api-catalogs.xlsx.lnk", "banks-aux", "tabla_297")
 plazas    = (SITE/"refs/catalogs/api-catalogs.xlsx.lnk", "banks-aux", "plazas_w")
 ctlg_mid  =  SITE/"refs/catalogs/national-banks.feather"
+plaza_mid =  SITE/"refs/catalogs/banks-plazas.feather"
 
 bank_cols = {
     "NOMBRE" : "name", 
-    "CLABE"  : "code",  
+    "CLAVE"  : "code",  
     "PARAMETRO Activo / Desactivo": "is_active", 
-    "Tipo banco" : "type"}
+    "Tipo banco" : "type", 
+    "warning": "warning"}
 
 plazas_cols = {
     "Nombre" : "name",
     "Plaza"  : "code"}
 
-
 ctlg_df = (tools.read_excel_table(*bank)
     .rename(columns=bank_cols)
-    .iloc[:, bank_cols.values()]
-    .drop(columns="is_active")
+    .assign(warning=lambda df: (df.is_active != 'A'))
+    .loc[:, bank_cols.values()]
+    .drop(columns=["is_active", "type"])
     .astype(str)    
     .reset_index(drop=True))
 # Link del Bug. 
@@ -43,7 +45,9 @@ ctlg_df = (tools.read_excel_table(*bank)
 
 ctlg_df.to_feather(ctlg_mid)
 
+ctlg_2 = (tools.read_excel_table(*plazas)
+    .rename(columns=plazas_cols)
+    .assign(code=lambda df: df.code.map(str).str.pad(3, fillchar="0")))
 
-
-
+ctlg_2.to_feather(plaza_mid)
 
