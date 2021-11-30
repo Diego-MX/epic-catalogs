@@ -1,4 +1,6 @@
 
+from json import loads
+from collections import defaultdict
 import pandas as pd
 
 from flask import jsonify
@@ -93,6 +95,44 @@ def clabe_parse(clabe_key, server="flask"):
         return bank_resp
     elif (server == "fastapi") and (code != 200): 
         an_exception = HTTPException(status_code=code, detail=detail)
+        raise an_exception
+
+
+def card_number_parse(card_num, server="flask"): 
+    try:
+        if len(card_num) != 16:
+            raise "Card Number has 16 digits."
+
+        bins_df  = pd.read_feather(ctlg_dir/"banks-bins.feather").set_index('BIN')
+
+        bin_lengths = defaultdict(list)
+        for bin, length in bins_df.Longitud.items():
+            bin_lengths[length].append(bin)
+
+        try_bin = False
+        for length in sorted(bin_lengths.keys(), reverse=True):
+            try_bin = int(card_num[:length]) in bin_lengths[length]
+
+            if try_bin: 
+                status  = 200
+                bin_int = int(card_num[:length])
+                pre_response = loads(bins_df.loc[bin_int, :].to_json())
+                break
+        else:
+            status = 404
+            detail = "Card Bin Not Found."
+        
+    except Exception as exc: 
+        detail = str(exc)
+        code   = 500
+        pre_response = {"an_exception": detail}
+        
+    if server == "flask": 
+        return (jsonify(pre_response), code)
+    elif (server == "fastapi") and (status == 200): 
+        return pre_response
+    elif (server == "fastapi") and (status != 200): 
+        an_exception = HTTPException(status_code=status, detail=detail)
         raise an_exception
 
 
