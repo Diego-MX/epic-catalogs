@@ -8,7 +8,7 @@ from src import engine
 
 
 app = FastAPI(title="Catálogos centralizados de uso de las Apps.",
-    version="1.0.14",
+    version="1.0.15",
     default_response_class=ORJSONResponse)
 
 
@@ -39,12 +39,12 @@ def get_banks():
     return engine.banks_request(server="fastapi")
 
 
-@app.post("/national-banks/parse-clabe/{clabe_key}")
+@app.get("/national-banks/parse-clabe/{clabe_key}")
 def post_banks(clabe_key: str): 
     return engine.clabe_parse(clabe_key, server="fastapi")
 
 
-@app.post("/national-banks/card-number/{card_num}")
+@app.get("/national-banks/card-number/{card_num}")
 def post_card_number(card_num: str): 
     bin_bank = engine.card_number_parse(card_num, server="fastapi")
     return bin_bank
