@@ -5,7 +5,6 @@ from fastapi.responses import JSONResponse
 from typing import List, Any, Optional, Tuple
 from orjson import dumps
 
-from src.engine import zipcode_query
 
 # Fix bugs. 
 class ORJSONResponse(JSONResponse): 
@@ -16,6 +15,7 @@ class ORJSONResponse(JSONResponse):
 
 
 # Request
+
 class NeighborhoodsRequest(BaseModel): 
     zipcode : str = Field(min_length=5, max_length=5)
 
