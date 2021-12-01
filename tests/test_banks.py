@@ -12,12 +12,12 @@ class TestBanks(TestCase):
 
     def test_clabe_successful(self): 
         clabe = "002180700845152894"
-        response = requests.post(f"{URL}/national-banks/parse-clabe/{clabe}")
+        response = requests.get(f"{URL}/national-banks/parse-clabe/{clabe}")
         self.assertEqual(response.status_code, 200)
 
     def test_card_number(self): 
         card_num = "5499490544796915"
-        response = requests.post(f"{URL}/national-banks/card-number/{card_num}")
+        response = requests.get(f"{URL}/national-banks/card-number/{card_num}")
         institucion = response.json()["Institución"]
         self.assertEqual(institucion, "CITIBANAMEX")
 
@@ -36,7 +36,7 @@ if False:
     from tests import test_zipcodes
     import config
 
-    ENV = "local-fastapi" # "local" # "qa" # "qa" # "staging" # 
+    ENV = "staging" # "local-fastapi" # "local" # "qa" # "qa" # "staging" # 
     URL = config.URLS[ENV]
     
     reload(config)

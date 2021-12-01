@@ -103,7 +103,7 @@ def card_number_parse(card_num, server="flask"):
         if len(card_num) != 16:
             raise "Card Number has 16 digits."
 
-        bins_df  = pd.read_feather(ctlg_dir/"banks-bins.feather").set_index('BIN')
+        bins_df = pd.read_feather(ctlg_dir/"banks-bins.feather").set_index('BIN')
 
         bin_lengths = defaultdict(list)
         for bin, length in bins_df.Longitud.items():
