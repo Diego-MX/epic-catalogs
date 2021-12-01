@@ -5,15 +5,15 @@ import uvicorn
 from .models import MetaRequestNbhd, NeighborhoodsResponse, ORJSONResponse
 from src import engine
 
-
+the_version = "1.0.17"
 app = FastAPI(title="Catálogos centralizados de uso de las Apps.",
-    version="1.0.16",
+    version=the_version,
     default_response_class=ORJSONResponse)
 
 
 @app.get("/")
 async def base_request():
-    return {"App Running Version": "1.0.16"}
+    return {"App Running Version": the_version}
 
 
 @app.post("/zipcode-neighborhoods", response_model=NeighborhoodsResponse)
@@ -32,7 +32,7 @@ async def get_zipcode_neighborhoods_req(a_request: MetaRequestNbhd):
 
 @app.get("/zipcode-neighborhoods/{zipcode}", response_model=NeighborhoodsResponse)
 async def get_zipcode_neighborhoods_str(zipcode: str):
-    return engine.zipcode_query(zipcode, server="fastapi")
+    return engine.zipcode_request({"zipcode": zipcode}, server="fastapi")
 
 
 @app.get("/national-banks")
@@ -52,8 +52,8 @@ def post_card_number(card_num: str):
 
 
 if __name__ == "__main__":
-    uvicorn.run("__main__:app", port=80, host="0.0.0.0", reload=True)
-    # uvicorn.run(app, port=80, host="0.0.0.0")
+    # uvicorn.run("__main__:app", port=80, host="0.0.0.0", reload=True)
+    uvicorn.run(app, port=80, host="0.0.0.0")
 
 
 

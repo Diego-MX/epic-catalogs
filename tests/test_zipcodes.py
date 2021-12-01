@@ -57,6 +57,12 @@ class TestZipcodes(TestCase):
         sample   = set_example()
         response = requests.post(f"{URL}/zipcode-neighborhoods", json=sample["input"])
         self.assertEqual(response.status_code, 200)
+    
+    def test_example_where_zipcode_in_url(self):
+        sample   = set_example()
+        zipcode  = sample["input"]["neighborhoodsRequest"]["zipcode"]
+        response = requests.get(f"{URL}/zipcode-neighborhoods/{zipcode}")
+        self.assertEqual(response.status_code, 200)
 
 
     def test_no_zipcodes_returns_404(self): 
