@@ -15,12 +15,12 @@ class ORJSONResponse(JSONResponse):
 
 
 # Request
-
 class NeighborhoodsRequest(BaseModel): 
     zipcode : str = Field(min_length=5, max_length=5)
 
 class MetaRequestNbhd(BaseModel): 
     neighborhoodsRequest : NeighborhoodsRequest
+
 
 # Response
 class Zipcode(BaseModel): 
