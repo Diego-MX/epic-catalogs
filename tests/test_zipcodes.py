@@ -42,7 +42,6 @@ class TestZipcodes(TestCase):
         response = requests.get(URL)
         self.assertEqual(response.status_code, 200)
 
-
     def test_no_city_returns_empty_str(self): 
         sample    = set_example(name="no-city")
         response  = requests.post(f"{URL}/zipcode-neighborhoods", json=sample["input"])
