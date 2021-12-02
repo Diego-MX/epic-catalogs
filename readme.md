@@ -2,7 +2,8 @@
 
 
 
-# AutenticaciÃ³n y recursos
+# Autenticación y recursos
+
 
 1. Registrar el app en _Active Directory_ como un servicio principado.  
     E.g. `prod_catalogs_app`. 
