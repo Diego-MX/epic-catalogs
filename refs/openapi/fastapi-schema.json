@@ -1,0 +1,389 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "App de catálogos centralizados.",
+    "version": "1.0.17"
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Verify Base Endpoint",
+        "operationId": "verify_base_endpoint__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+            } }
+      } } }
+    },
+    "/zipcode-neighborhoods": {
+      "get": {
+        "summary": "Get Zipcode Neighborhoods Legacy",
+        "operationId": "get_zipcode_neighborhoods_legacy_zipcode_neighborhoods_get",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MetaRequestNbhd"
+            } }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NeighborhoodsResponse"
+              } }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+              } }
+        } } }
+      },
+      "post": {
+        "summary": "Post Zipcode Neighborhoods Legacy",
+        "operationId": "post_zipcode_neighborhoods_legacy_zipcode_neighborhoods_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MetaRequestNbhd"
+            } }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NeighborhoodsResponse"
+              } }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+              } }
+        } } }
+      }
+    },
+    "/zipcode-neighborhoods/{zipcode}": {
+      "get": {
+        "summary": "Preferred Zipcode Neighborhoods",
+        "operationId": "preferred_zipcode_neighborhoods_zipcode_neighborhoods__zipcode__get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Zipcode",
+              "type": "string"
+            },
+            "name": "zipcode",
+            "in": "path"
+        } ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NeighborhoodsResponse"
+              } }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+              } }
+        } } }
+      }
+    },
+    "/national-banks": {
+      "get": {
+        "summary": "List All Banks",
+        "operationId": "list_all_banks_national_banks_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+            } }
+      } } }
+    },
+    "/national-banks/parse-clabe/{clabe_key}": {
+      "get": {
+        "summary": "Get Bank Details From Clabe",
+        "operationId": "get_bank_details_from_clabe_national_banks_parse_clabe__clabe_key__get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Clabe Key",
+              "type": "string"
+            },
+            "name": "clabe_key",
+            "in": "path"
+        } ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+            } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+              } }
+        } } }
+      }
+    },
+    "/national-banks/card-number/{card_number}": {
+      "get": {
+        "summary": "Get Bank Details From Card Number",
+        "operationId": "get_bank_details_from_card_number_national_banks_card_number__card_number__get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Card Number",
+              "type": "string"
+            },
+            "name": "card_number",
+            "in": "path"
+        } ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+            } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+              } }
+        } } }
+      }
+  } },
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "title": "HTTPValidationError",
+        "type": "object",
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+          } }
+        }
+      },
+      "MetaRequestNbhd": {
+        "title": "MetaRequestNbhd",
+        "required": [
+          "neighborhoodsRequest"
+        ],
+        "type": "object",
+        "properties": {
+          "neighborhoodsRequest": {
+            "$ref": "#/components/schemas/NeighborhoodsRequest"
+        } }
+      },
+      "Neighborhood": {
+        "title": "Neighborhood",
+        "required": [
+          "zipcode",
+          "name",
+          "zone",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "zipcode": {
+            "title": "Zipcode",
+            "maxLength": 5,
+            "minLength": 5,
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "zone": {
+            "title": "Zone",
+            "type": "string"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          },
+          "city": {
+            "title": "City",
+            "type": "string"
+          },
+          "city_id": {
+            "title": "City Id",
+            "type": "string"
+        } }
+      },
+      "Neighborhoods": {
+        "title": "Neighborhoods",
+        "required": [
+          "numberOfNeighborhoods",
+          "neighborhoodAttributes",
+          "neighborhoodsSet"
+        ],
+        "type": "object",
+        "properties": {
+          "numberOfNeighborhoods": {
+            "title": "Numberofneighborhoods",
+            "type": "integer"
+          },
+          "neighborhoodAttributes": {
+            "title": "Neighborhoodattributes",
+            "type": "array",
+            "items": {
+              "type": "string"
+          } },
+          "neighborhoodsSet": {
+            "title": "Neighborhoodsset",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Neighborhood"
+          } },
+          "neighborhoodsPagination": {
+            "$ref": "#/components/schemas/Pagination"
+        } }
+      },
+      "NeighborhoodsRequest": {
+        "title": "NeighborhoodsRequest",
+        "required": [
+          "zipcode"
+        ],
+        "type": "object",
+        "properties": {
+          "zipcode": {
+            "title": "Zipcode",
+            "maxLength": 5,
+            "minLength": 5,
+            "type": "string"
+        } }
+      },
+      "NeighborhoodsResponse": {
+        "title": "NeighborhoodsResponse",
+        "required": [
+          "zipcode",
+          "neighborhoods"
+        ],
+        "type": "object",
+        "properties": {
+          "zipcode": {
+            "$ref": "#/components/schemas/Zipcode"
+          },
+          "neighborhoods": {
+            "$ref": "#/components/schemas/Neighborhoods"
+        } }
+      },
+      "Pagination": {
+        "title": "Pagination",
+        "required": [
+          "hasPagination"
+        ],
+        "type": "object",
+        "properties": {
+          "hasPagination": {
+            "title": "Haspagination",
+            "type": "boolean"
+        } }
+      },
+      "ValidationError": {
+        "title": "ValidationError",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "loc": {
+            "title": "Location",
+            "type": "array",
+            "items": {
+              "type": "string"
+          } },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+        } }
+      },
+      "Zipcode": {
+        "title": "Zipcode",
+        "required": [
+          "zipcode",
+          "state",
+          "state_id",
+          "state_iso",
+          "borough",
+          "borough_id"
+        ],
+        "type": "object",
+        "properties": {
+          "zipcode": {
+            "title": "Zipcode",
+            "type": "string"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "state_id": {
+            "title": "State Id",
+            "type": "string"
+          },
+          "state_iso": {
+            "title": "State Iso",
+            "type": "string"
+          },
+          "borough": {
+            "title": "Borough",
+            "type": "string"
+          },
+          "borough_id": {
+            "title": "Borough Id",
+            "type": "string"
+        } }
+  } } }
+}

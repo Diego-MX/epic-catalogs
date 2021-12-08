@@ -10,8 +10,10 @@ from flask import jsonify
 import json
 from jsonschema import validate, exceptions
 from requests import auth
-
+from unidecode import unidecode
 #%%
+
+
 
 def str_camel_to_snake(cameled:str):
     subbed = re.sub('(.)([A-Z][a-z]+)',  r'\1_\2', cameled)
@@ -19,7 +21,9 @@ def str_camel_to_snake(cameled:str):
     return snaked
 
 
-def str_snake_to_camel(snaked:str, first_word_too=False):
+def str_snake_to_camel(snaked:str, first_word_too=False, decode=False):
+    if decode:
+        snaked = unidecode(snaked)
     splitted    = snaked.split("_")
     first_word  = splitted.pop(0)
     first_camel = first_word.title() if first_word_too else first_word.lower()
