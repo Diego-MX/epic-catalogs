@@ -1,9 +1,9 @@
-from datetime import date
 
 from pydantic import BaseModel, Field
 from fastapi.responses import JSONResponse
-from typing import List, Any, Optional, Tuple
+from typing import List, Any, Optional
 from orjson import dumps
+
 
 
 # Fix bugs. 
@@ -31,11 +31,6 @@ class Zipcode(BaseModel):
     borough    : str
     borough_id : str
 
-class Pagination(BaseModel): 
-    hasPagination  : bool
-    # pages          : Tuple[int, int]
-    # paginationURL  : Optional[str]
-    # pageExpiration : Optional[date]
 
 class Neighborhood(BaseModel): 
     zipcode : str = Field(min_length=5, max_length=5)
@@ -49,11 +44,28 @@ class Neighborhoods(BaseModel):
     numberOfNeighborhoods   : int
     neighborhoodAttributes  : List[str]
     neighborhoodsSet        : List[Neighborhood]
-    neighborhoodsPagination : Optional[Pagination]
+
 
 class NeighborhoodsResponse(BaseModel): 
     zipcode       : Zipcode
     neighborhoods : Neighborhoods
 
 
+class Bank(BaseModel): 
+    name    : str
+    code    : str
+    warning : Optional[bool]
+
+class BanksResponse(BaseModel): 
+    numberOfBanks   : int
+    bankAttributes  : List[str]
+    banksSet        : List[Bank]
+
+class CardsBin(BaseModel): 
+    bin    : str
+    length : int
+    bankId : str
+    bank   : str
+    nature : str
+    brand  : str 
 
