@@ -1,7 +1,6 @@
 library(testit)
 
 
-
 data_dir  <- "../data/codigos-postales/raw/estados_drive"
 
 codigos_0 <- read_delim("codigos_postales_tabla.txt" %>% file.path(data_dir, .), 
