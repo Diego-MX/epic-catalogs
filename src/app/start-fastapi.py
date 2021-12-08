@@ -8,7 +8,7 @@ from src import engine
 
 # Ajustar estos dos antes del Push / Pull Request. 
 debug = False
-the_version = "1.0.19"
+the_version = "1.0.20"
 
 app = FastAPI(title="App de catálogos centralizados.",
     version=the_version, 
