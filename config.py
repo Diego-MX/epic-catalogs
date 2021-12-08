@@ -13,5 +13,9 @@ URLS = {
 }
 
 ENV_VARS = {
-    ""
+    "app_sp" : {
+        "tenant_id"       : "AAD_TNT_ID",
+        "subscription_id" : "AAD_SCTN_ID", 
+        "client_id"       : "AAD_APP_ID", 
+        "client_secret"   : "AAD_APP_SCT"}, 
 }

@@ -33,9 +33,9 @@ class Zipcode(BaseModel):
 
 class Pagination(BaseModel): 
     hasPagination  : bool
-    pages          : Optional[Tuple[int, int]]
-    paginationURL  : Optional[str]
-    pageExpiration : Optional[date]
+    # pages          : Tuple[int, int]
+    # paginationURL  : Optional[str]
+    # pageExpiration : Optional[date]
 
 class Neighborhood(BaseModel): 
     zipcode : str = Field(min_length=5, max_length=5)
@@ -49,7 +49,7 @@ class Neighborhoods(BaseModel):
     numberOfNeighborhoods   : int
     neighborhoodAttributes  : List[str]
     neighborhoodsSet        : List[Neighborhood]
-    neighborhoodsPagination : Pagination
+    neighborhoodsPagination : Optional[Pagination]
 
 class NeighborhoodsResponse(BaseModel): 
     zipcode       : Zipcode
