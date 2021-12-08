@@ -11,14 +11,14 @@ class TestBanks(TestCase):
         self.assertEqual(the_response.status_code, 200)
 
     def test_clabe_successful(self): 
-        clabe = "002180700845152894"
-        response = requests.get(f"{URL}/national-banks/parse-clabe/{clabe}")
+        clabe_key = "002180700845152894"
+        response = requests.get(f"{URL}/national-banks/parse-clabe/{clabe_key}")
         self.assertEqual(response.status_code, 200)
 
     def test_card_number(self): 
         card_num = "5499490544796915"
         response = requests.get(f"{URL}/national-banks/card-number/{card_num}")
-        institucion = response.json()["Institución"]
+        institucion = response.json()["bank"]
         self.assertEqual(institucion, "CITIBANAMEX")
 
 
@@ -36,7 +36,7 @@ if False:
     from tests import test_zipcodes
     import config
 
-    ENV = "staging" # "local-fastapi" # "local" # "qa" # "qa" # "staging" # 
+    ENV = "local-fastapi" # "local-fastapi" # "local" # "qa" # "qa" # "staging" # 
     URL = config.URLS[ENV]
     
     reload(config)
@@ -46,8 +46,11 @@ if False:
     an_input   = setup_json["input"]
     a_request  = an_input["neighborhoodsRequest"]
     
-    clabe = "002180700845152894"
-    response = requests.post(f"{URL}/national-banks/parse-clabe/{clabe}")
+    card_num = "5499490544796915"
+    response = requests.get(f"{URL}/national-banks/card-number/{card_num}")
+    institucion = response.json()["name"]
+        
+    response = requests.get(f"{URL}/national-banks")
     
     print(a_response.text)
 

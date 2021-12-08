@@ -1,6 +1,8 @@
 
 from json import loads
 from collections import defaultdict
+import re
+from unidecode import unidecode
 import pandas as pd
 
 from flask import jsonify
@@ -49,8 +51,8 @@ def banks_request(server="flask"):
             "numberOfRecords" : "numberOfBanks",
             "attributes"      : "bankAttributes",
             "recordSet"       : "banksSet"}
-
-        banks_resp = tools.dataframe_response(banks_df, None, banks_keys)
+        banks_df_0 = banks_df.drop(columns="warning")
+        banks_resp = tools.dataframe_response(banks_df_0, None, banks_keys)
         code       = 200
     except Exception as exc:
         detail     = str(exc)
@@ -62,8 +64,7 @@ def banks_request(server="flask"):
     elif (server == "fastapi") and (code == 200): 
         return banks_resp
     elif (server == "fastapi") and (code != 200): 
-        an_exception = HTTPException(status_code=code, detail=detail)
-        raise an_exception
+        raise HTTPException(status_code=code, detail=detail)
 
 
 def clabe_parse(clabe_key, server="flask"): 
@@ -74,11 +75,11 @@ def clabe_parse(clabe_key, server="flask"):
         in_banks = (bank_code == banks_df.code)
         pre_resp = banks_df.loc[in_banks, :].to_dict(orient="records")
 
-        if   is_valid and any(in_banks): 
-            bank_resp = pre_resp
+        if   is_valid and (in_banks.sum() == 1): 
+            bank_resp = pre_resp[0]
             code = 200
-        elif is_valid and not any(in_banks): 
-            detail = "Associated Bank key is not registered."
+        elif is_valid and (in_banks.sum() != 1): 
+            detail = "Associated Bank key is not registered or unique."
             code = 404
         elif not is_valid:
             detail = "CLABE is not valid."
@@ -103,10 +104,26 @@ def card_number_parse(card_num, server="flask"):
         if len(card_num) != 16:
             raise "Card Number has 16 digits."
 
-        bins_df = pd.read_feather(ctlg_dir/"banks-bins.feather").set_index('BIN')
+        # ["Longitud", "Id Institución", "Institución", "Naturaleza", "Marca",
+        # "Tarjeta Chip", "BIN Virtual", "Ac Manual", "Ac TPV", 
+        # "Ac Cashback", "Ac ATMs", "Ac Ecommerce", "Ac Cargos Periódicos", 
+        # "Ac Ventas X Teléfono", "Ac Sucursal", "Ac Pagos en el Intercambio", 
+        # "Ac 3D Secure", "NFC", "MST", "Wallet", "PAN Din", "CVV/CVC Din", 
+        # "NIP", "Tokenización", "Vale", "Fecha de Alta", "Procesador"]
+        bin_cols = {
+            "Longitud"          : "length", 
+            "Id Institución"    : "bankId", 
+            "Institución"       : "bank", 
+            "Naturaleza"        : "nature", 
+            "Marca"             : "brand"}
+                
+        bins_df = (pd.read_feather(ctlg_dir/"banks-bins.feather")
+            .set_index('BIN')
+            .rename(columns=bin_cols)
+            .loc[:, bin_cols.values()])
 
         bin_lengths = defaultdict(list)
-        for bin, length in bins_df.Longitud.items():
+        for bin, length in bins_df["length"].items():
             bin_lengths[length].append(bin)
 
         try_bin = False
@@ -114,12 +131,14 @@ def card_number_parse(card_num, server="flask"):
             try_bin = int(card_num[:length]) in bin_lengths[length]
 
             if try_bin: 
-                status  = 200
+                code  = 200
                 bin_int = int(card_num[:length])
-                pre_response = loads(bins_df.loc[bin_int, :].to_json())
+                the_bin = bins_df.loc[bin_int, :]
+                pre_response = loads(the_bin.to_json())
+                pre_response["bin"] = str(the_bin.name)
                 break
         else:
-            status = 404
+            code = 404
             detail = "Card Bin Not Found."
         
     except Exception as exc: 
@@ -129,10 +148,10 @@ def card_number_parse(card_num, server="flask"):
         
     if server == "flask": 
         return (jsonify(pre_response), code)
-    elif (server == "fastapi") and (status == 200): 
+    elif (server == "fastapi") and (code == 200): 
         return pre_response
-    elif (server == "fastapi") and (status != 200): 
-        an_exception = HTTPException(status_code=status, detail=detail)
+    elif (server == "fastapi") and (code != 200): 
+        an_exception = HTTPException(status_code=code, detail=detail)
         raise an_exception
 
 
