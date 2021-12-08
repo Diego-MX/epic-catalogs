@@ -20,7 +20,6 @@ url_fuentes <- list(
   gobmx = c("https://www.correosdemexico.gob.mx/datosabiertos/poligonos/cp_%s.zip", 
             "http://www.correosdemexico.gob.mx/datosabiertos/cp/cpdescarga.txt"), 
   marco_geo = "https://www.inegi.org.mx/contenidos/productos/prod_serv/contenidos/espanol/bvinegi/productos/geografia/marcogeo/889463807469/889463807469_s.zip"
-
 ) 
 
 
@@ -78,8 +77,6 @@ descarga_y_descomprime <- function (fuente, directorio) {
       download.file(url_fuentes[["marco_geo"]], zip_1, mode="wb")}
     
     unzip(zip_1, exdir=dir_1)
-
-    
   })
 }
 
@@ -89,7 +86,6 @@ descarga_y_descomprime <- function (fuente, directorio) {
 directorio <- "../data/codigos-postales/raw"
 dir_inegi  <- "../data/marco-geo/raw"
 
-
 descarga_y_descomprime(dir_codigos, "drive")
 descarga_y_descomprime(dir_codigos, "gobmx")
-descarga_y_descomprime(dir_inegi, "marco_geo")
+descarga_y_descomprime(dir_inegi,   "marco_geo")
