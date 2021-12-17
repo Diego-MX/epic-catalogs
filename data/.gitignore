@@ -1,5 +1,8 @@
 *.zip
 *.csv
+*.xlsx
+*.txt
+*.feather
 
 *.dbf
 *.kml
