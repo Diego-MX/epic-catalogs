@@ -15,3 +15,8 @@ docker stop {la_instancia}
 
 # Para el Testing 
 python -m tests.test_rfc
+
+# Para correr R en Radian
+radian --r-binary=$home/AppData/Local/R/R-4.1.2/bin/R.exe
+
+&"$home\AppData\local\R\R-4.1.2\bin\RScript.exe" .\1b_download-censo.R
