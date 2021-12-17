@@ -9,6 +9,7 @@ orjson
 openpyxl
 pandas 
 pyarrow
+pyspark
 
 # Web Tools
 requests 

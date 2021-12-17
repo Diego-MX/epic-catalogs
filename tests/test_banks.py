@@ -36,7 +36,7 @@ if False:
     from tests import test_zipcodes
     import config
 
-    ENV = "local-fastapi" # "local-fastapi" # "local" # "qa" # "qa" # "staging" # 
+    ENV = "staging" # "local-fastapi" # "local" # "qa" # "qa" # "staging" # 
     URL = config.URLS[ENV]
     
     reload(config)
