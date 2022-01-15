@@ -1,24 +1,26 @@
+import sys
 from fastapi import FastAPI
 from json import loads
 import uvicorn
 
-from .models import (MetaRequestNbhd, NeighborhoodsResponse, ORJSONResponse, 
-    BanksResponse, Bank, CardsBin)
+from .models import (MetaRequestNbhd, NeighborhoodsResponse, 
+    ORJSONResponse, BanksResponse, Bank, CardsBin)
 from src import engine
+from config import VERSION
 
 # Ajustar estos dos antes del Push / Pull Request. 
-debug = False
-the_version = "1.0.20"
+debug = ("debug" in sys.argv)
+
 
 app = FastAPI(title="App de catálogos centralizados.",
-    version=the_version, 
+    version=VERSION, 
     root_path="data/docs/v1/catalogs",
     default_response_class=ORJSONResponse)
     
 
 @app.get("/")
 async def verify_base_endpoint():
-    return {"App Running Version": the_version}
+    return {"App Running Version": VERSION}
 
 
 @app.post("/zipcode-neighborhoods", response_model=NeighborhoodsResponse)

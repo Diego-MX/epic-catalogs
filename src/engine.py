@@ -1,8 +1,6 @@
 
 from json import loads
 from collections import defaultdict
-import re
-from unidecode import unidecode
 import pandas as pd
 
 from flask import jsonify
@@ -110,12 +108,13 @@ def card_number_parse(card_num, server="flask"):
         # "Ac Ventas X Teléfono", "Ac Sucursal", "Ac Pagos en el Intercambio", 
         # "Ac 3D Secure", "NFC", "MST", "Wallet", "PAN Din", "CVV/CVC Din", 
         # "NIP", "Tokenización", "Vale", "Fecha de Alta", "Procesador"]
+        # ... ID calculada.
         bin_cols = {
-            "Longitud"          : "length", 
-            "Id Institución"    : "bankId", 
-            "Institución"       : "bank", 
-            "Naturaleza"        : "nature", 
-            "Marca"             : "brand"}
+            "Longitud"      : "length", 
+            "ID"            : "bankId", 
+            "Institución"   : "bank", 
+            "Naturaleza"    : "nature", 
+            "Marca"         : "brand"}
                 
         bins_df = (pd.read_feather(ctlg_dir/"banks-bins.feather")
             .set_index('BIN')
