@@ -6,7 +6,7 @@ from orjson import dumps
 
 
 
-# Fix bugs. 
+# Fix some bugs. 
 class ORJSONResponse(JSONResponse): 
     media_type = "application/json"
 
@@ -54,12 +54,13 @@ class NeighborhoodsResponse(BaseModel):
 class Bank(BaseModel): 
     name    : str
     code    : str
-    warning : Optional[bool]
+
 
 class BanksResponse(BaseModel): 
     numberOfBanks   : int
     bankAttributes  : List[str]
     banksSet        : List[Bank]
+
 
 class CardsBin(BaseModel): 
     bin    : str
