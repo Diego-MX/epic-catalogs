@@ -9,10 +9,9 @@
 
 explore <- FALSE
 
-
 library(readxl)
 library(readr)
-readRenviron(".Renviron")
+library(rlang)
 
 filter <- dplyr::filter
 env <- Sys.getenv
@@ -21,6 +20,8 @@ env <- Sys.getenv
 #%%  Preparación de archivos. 
 
 if (explore) {
+  readRenviron(".Renviron")
+
   base_layout <- "%s/Layout PRM Buro HRC.xlsx" %>% sprintf(env("ONEDRIVE_INEGI"))
   inegi_0 <- read_excel(base_layout, sheet="Layout PRM", range="B2:F218")
   # inegi_0 <- read_excel("../refs/catalogs/cols_buro_prm.xlsx.lnk")
@@ -34,7 +35,8 @@ if (explore) {
   # COLS_1 se toman directo a nivel municipio. 
   cols_1 <- c("P_60YMAS", "PCDISC_MOT2", "PCDISC_MEN", "PCLIM_MOT2", "PCLIM_RE_CO", 
     "P3A5_NOA_F", "P12A14NOAF", "P15PRI_INM", "P15SEC_INF", "GRAPROES_F", "GRAPROES_M", 
-    "PDESOCUP_F", "PSINDER", "PDER_ISTE", "PDER_ISTEE", "PDER_SEGP", "POTRAS_REL", "PSIN_RELIG", "VPH_PISOTI", "VPH_1CUART", "VPH_2CUART", "VPH_AGUAFV")
+    "PDESOCUP_F", "PSINDER", "PDER_ISTE", "PDER_ISTEE", "PDER_SEGP", "POTRAS_REL", 
+    "PSIN_RELIG", "VPH_PISOTI", "VPH_1CUART", "VPH_2CUART", "VPH_AGUAFV")
 
   # COLS_2 se toman a nivel (manzana|ageb|localidad) y se agregan a nivel municipio. 
   
@@ -71,23 +73,34 @@ for (ii in seq(32)) {
 
 raw_base <- "../data/censo-inegi/raw/2020_datos-abiertos/%d_ageb_mza_urbana_%.2d_cpv2020_csv/ageb_mza_urbana_%.2d_cpv2020/conjunto_de_datos/conjunto_de_datos_ageb_urbana_%.2d_cpv2020.csv"
 
+# Equivale a: 
+# quos(MUN = str_pad( as.character(MUN), 3, "left", "0"), 
+#      LOC = str_pad( as.character(LOC), 4, "left", "0"), 
+# ... y similar para ENTIDAD, AGEB, MZA)
+
+pad_length <- c("ENTIDAD" = 2, "MUN" = 3, "LOC" = 4, "AGEB" = 4, "MZA" = 3) 
+
+pad_fns <- pad_length %>% map2(.x = names(.), .y = ., 
+         .f = ~quo(str_pad(!!as.name(.x), !!(.y), "left", "0")), .) %>% 
+         set_names(names(pad_length))
+
+obs_base = "MZA" # Para correr pruebas. 
 censo_municipio <- function (ii, obs_base="MZA") {
   # Simplifica procesamiento de lectura:  
   # ID (1..32) -> path_archivo -> Dataframe
 
   raw_path <- sprintf(raw_base, ii, ii, ii, ii) 
-  raw_df   <- read_csv(raw_path, col_types = cols())
+  raw_df   <- read_csv(raw_path, col_types = cols()) %>% 
+    mutate_at(1:8, as.character) %>% mutate_at(9:ncol(.), as.numeric) %>% 
+    mutate(!!!pad_fns) 
   
-  mun_df_1 <- raw_df %>% 
-    filter(MUN != "000", LOC == "0000") %>% 
-    select(ENTIDAD, MUN, one_of(cols_1))
-
   if (obs_base == "MZA") {
     el_filtro <- quos(MZA != "000")
   } else if (obs_base == "LOC") {
     el_filtro <- quos(LOC != "0000", MZA == "000")
   }
 
+  # Primero la agregación, para prepara el JOIN. 
   mun_df_2 <- raw_df %>% 
       mutate_at(cols_2, as.numeric) %>% 
       mutate(!!!mutacion_3) %>% 
@@ -97,21 +110,24 @@ censo_municipio <- function (ii, obs_base="MZA") {
       set_names(names(.) %>% 
           str_replace("(.*)_((mean|std|cv|max))", "\\2_\\1"))
 
-  mun_df <- full_join(mun_df_1, mun_df_2, by = c("ENTIDAD", "MUN")) %>% 
-    mutate(MUN = as.character(MUN)     %>% str_pad(3, "left", "0"),
-       ENTIDAD = as.character(ENTIDAD) %>% str_pad(2, "left", "0"))
+  mun_df_f <- raw_df %>% 
+    filter(MUN != "000", LOC == "0000") %>% 
+    select(ENTIDAD, MUN, one_of(cols_1)) %>%
+    mutate_at(cols_1, as.numeric) %>%  
+    full_join(mun_df_2, by = c("ENTIDAD", "MUN")) 
 
-  return (mun_df)
+  return (mun_df_f)
 }
 
 
-empty_0 <- c("ENTIDAD", "MUN") %>% map_dfc(~tibble(!!.x := character())) 
-empty_1 <- c("mean", "std", "cv", "max") %>% 
+char_0 <- c("ENTIDAD", "MUN") %>% 
+    map_dfc(~tibble(!!.x := character())) 
+num_0  <- c("mean", "std", "cv", "max") %>% 
     cross2(unique(c(cols_1,  cols_2))) %>% 
     map_chr(~str_c(.[1], .[2], sep="_")) %>% 
     map_dfc(~tibble(!!.x := numeric()))
 
-muns_df <- bind_cols(empty_0, empty_1)
+muns_df <- bind_cols(char_0, num_0)
 
 for (ii in seq(32)) {
   print("Trabaja la entidad %d de %d" %>% sprintf(ii, 32))

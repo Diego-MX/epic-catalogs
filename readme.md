@@ -48,4 +48,4 @@ Para hacer la lectura de archivos en el Datalake (Storage Container) hay varios 
 
 [azure-sdk]: https://docs.microsoft.com/en-us/azure/developer/python/azure-sdk-authenticate
 [local-env]: https://docs.microsoft.com/en-us/azure/developer/python/configure-local-development-environment?tabs=cmd
-[censo-inegi]: https://www.inegi.org.mx/programas/ccpv/2020/default.html#Microdatos
+[censo-inegi]: https://www.inegi.org.mx/programas/ccpv/2020/default.html#DatosAbiertos
