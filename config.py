@@ -3,7 +3,7 @@ from pathlib import Path
 
 SITE = Path(__file__).parent if "__file__" in globals() else Path(os.getcwd())
 
-DEFAULT_ENV = "staging"
+VERSION = "1.0.21"
 
 URLS = {
     "local-flask"   : "http://localhost:5000", 
@@ -19,3 +19,5 @@ ENV_VARS = {
         "client_id"       : "AAD_APP_ID", 
         "client_secret"   : "AAD_APP_SCT"}, 
 }
+
+DEFUALT_ENV = "staging"
