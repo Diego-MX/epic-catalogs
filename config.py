@@ -5,6 +5,7 @@ SITE = Path(__file__).parent if "__file__" in globals() else Path(os.getcwd())
 
 VERSION = "1.0.21"
 
+
 URLS = {
     "local-flask"   : "http://localhost:5000", 
     "local-fastapi" : "http://localhost:80", 
@@ -20,4 +21,4 @@ ENV_VARS = {
         "client_secret"   : "AAD_APP_SCT"}, 
 }
 
-DEFUALT_ENV = "staging"
+DEFAULT_ENV = "staging"
