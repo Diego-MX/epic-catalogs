@@ -36,7 +36,7 @@ if False:
     from tests import test_zipcodes
     import config
 
-    ENV = "staging" # "local-fastapi" # "local" # "qa" # "qa" # "staging" # 
+    ENV = "local-fastapi" # "local-fastapi" # "local" # "qa" # "staging" # 
     URL = config.URLS[ENV]
     
     reload(config)
@@ -48,8 +48,9 @@ if False:
     
     card_num = "5499490544796915"
     response = requests.get(f"{URL}/national-banks/card-number/{card_num}")
-    institucion = response.json()["name"]
-        
+
+
+    institucion = response.json()["name"]        
     response = requests.get(f"{URL}/national-banks")
     
     print(a_response.text)

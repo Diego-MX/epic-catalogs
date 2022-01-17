@@ -49,8 +49,7 @@ def banks_request(server="flask"):
             "numberOfRecords" : "numberOfBanks",
             "attributes"      : "bankAttributes",
             "recordSet"       : "banksSet"}
-        banks_df_0 = banks_df.drop(columns="warning")
-        banks_resp = tools.dataframe_response(banks_df_0, None, banks_keys)
+        banks_resp = tools.dataframe_response(banks_df, None, banks_keys)
         code       = 200
     except Exception as exc:
         detail     = str(exc)
@@ -116,7 +115,7 @@ def card_number_parse(card_num, server="flask"):
             "Naturaleza"    : "nature", 
             "Marca"         : "brand"}
                 
-        bins_df = (pd.read_feather(ctlg_dir/"banks-bins.feather")
+        bins_df = (pd.read_feather(ctlg_dir/"national-banks-bins.feather")
             .set_index('BIN')
             .rename(columns=bin_cols)
             .loc[:, bin_cols.values()])
