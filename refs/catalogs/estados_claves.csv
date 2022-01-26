@@ -1,29 +1,29 @@
 clave,nombre,ABR,Abr_1,ABR_2,renapo,ISO_3166,drive,gobmx,marco_geo,min_cp,max_cp,clave_2
-9,Ciudad de México,CDMX,C.D.Mx.,CX,DF,CMX,CdMx,CdMx,ciudaddemexico,1000,19999,9
 1,Aguascalientes,AGS,Ags.,AG,AS,AGU,Ags,Ags,aguascalientes,20000,20999,1
 2,Baja California,BC,B.C.,BC,BC,BCN,BC,bc,bajacalifornia,21000,22999,2
 3,Baja California Sur,BCS,B.C.S.,BS,BS,BCS,BCS,bcs,bajacaliforniasur,23000,23999,3
 4,Campeche,CAMP,Camp.,CM,CC,CAM,Camp,camp,campeche,24000,24999,4
-7,Chihuahua,CHIH,Chih.,CH,CH,CHH,Chih,chih,coahuiladezaragoza,25000,27999,5
-8,Chiapas,CHIS,Chis.,CS,CS,CHP,Chs,chis,colima,28000,28999,6
-5,Coahuila,COAH,Coah.,CO,CL,COA,Coah,coah,chiapas,29000,30999,7
-6,Colima,COL,Col.,CL,CM,COL,Col,col,chihuahua,31000,33999,8
+5,Coahuila,COAH,Coah.,CO,CL,COA,Coah,coah,coahuiladezaragoza,25000,27999,7
+6,Colima,COL,Col.,CL,CM,COL,Col,col,colima,28000,28999,8
+8,Chihuahua,CHIH,Chih.,CH,CH,CHH,Chih,chih,chihuahua,29000,30999,5
+7,Chiapas,CHIS,Chis.,CS,CS,CHP,Chs,chis,chiapas,31000,33999,6
+9,Ciudad de México,CDMX,C.D.Mx.,CX,DF,CMX,CdMx,CdMx,ciudaddemexico,1000,19999,9
 10,Durango,DGO,Dgo.,DG,DG,DUR,Dur,dgo,durango,34000,35999,10
-12,Guerrero,GRO,Gro.,GR,GR,GRO,Gro,gro,guerrero,36000,38999,11
-11,Guanajuato,GTO,Gto.,GT,GT,GUA,Gto,gto,guanajuato,39000,41999,12
+11,Guanajuato,GTO,Gto.,GT,GT,GUA,Gto,gto,guanajuato,36000,38999,12
+12,Guerrero,GRO,Gro.,GR,GR,GRO,Gro,gro,guerrero,39000,41999,11
 13,Hidalgo,HGO,Hgo.,HG,HG,HID,Hgo,hgo,hidalgo,42000,43999,13
 14,Jalisco,JAL,Jal.,JC,JC,JAL,Jal,jal,jalisco,44000,49999,14
 15,Estado de México,MEX,Edo.Méx.,EM,MC,MEX,EdoMex,mex,mexico,50000,57999,15
 16,Michoacán,MICH,Mich.,MI,MN,MIC,Mich,mich,michoacandeocampo,58000,61999,16
 17,Morelos,MOR,Mor.,MO,MS,MOR,Mor,mor,morelos,62000,62999,17
-19,Nuevo León,NL,N.L.,NL,NL,NLE,NL,nl,nayarit,63000,63999,18
-18,Nayarit,NAY,Nay.,NA,NT,NAY,Nay,nay,nuevoleon,64000,67999,19
+18,Nayarit,NAY,Nay.,NA,NT,NAY,Nay,nay,nayarit,63000,63999,19
+19,Nuevo León,NL,N.L.,NL,NL,NLE,NL,nl,nuevoleon,64000,67999,18
 20,Oaxaca,OAX,Oax.,OA,OC,OAX,Oax,oax,oaxaca,68000,71999,20
 21,Puebla,PUE,Pue.,PU,PL,PUE,Pue,pue,puebla,72000,75999,21
 22,Querétaro,QRO,Qro.,QT,QO,QUE,Qro,qro,queretaro,76000,76999,22
 23,Quintana Roo,QROO,Q.Roo.,QR,QR,ROO,QRoo,qroo,quintanaroo,77000,77999,23
-25,Sinaloa,SIN,Sin.,SI,SL,SIN,Sin,sin,sanluispotosi,78000,79999,24
-24,San Luis Potosí,SLP,S.L.P.,SL,SP,SLP,SLP,slp,sinaloa,80000,82999,25
+24,San Luis Potosí,SLP,S.L.P.,SL,SP,SLP,SLP,slp,sanluispotosi,78000,79999,25
+25,Sinaloa,SIN,Sin.,SI,SL,SIN,Sin,sin,sinaloa,80000,82999,24
 26,Sonora,SON,Son.,SO,SR,SON,Son,son,sonora,83000,85999,26
 27,Tabasco,TAB,Tab.,TB,TC,TAB,Tab,tab,tabasco,86000,86999,27
 28,Tamaulipas,TAMPS,Tamps.,TM,TS,TAM,Tamps,tamps,tamaulipas,87000,89999,28
