@@ -49,7 +49,6 @@ if False:
     card_num = "5499490544796915"
     response = requests.get(f"{URL}/national-banks/card-number/{card_num}")
 
-
     institucion = response.json()["name"]        
     response = requests.get(f"{URL}/national-banks")
     

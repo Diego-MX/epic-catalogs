@@ -18,6 +18,7 @@ class ORJSONResponse(JSONResponse):
 class NeighborhoodsRequest(BaseModel): 
     zipcode : str = Field(min_length=5, max_length=5)
 
+
 class MetaRequestNbhd(BaseModel): 
     neighborhoodsRequest : NeighborhoodsRequest
 
@@ -39,6 +40,7 @@ class Neighborhood(BaseModel):
     type    : str
     city    : Optional[str]
     city_id : Optional[str]
+
 
 class Neighborhoods(BaseModel): 
     numberOfNeighborhoods   : int

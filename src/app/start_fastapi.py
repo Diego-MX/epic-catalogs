@@ -8,50 +8,60 @@ from .models import (MetaRequestNbhd, NeighborhoodsResponse,
 from src import engine
 from config import VERSION
 
-# Ajustar estos dos antes del Push / Pull Request. 
+
 debug = ("debug" in sys.argv)
 
-
-app = FastAPI(title="App de catálogos centralizados.",
-    version=VERSION, 
+app = FastAPI(title="Catálogos centralizados.", version=VERSION, 
+    description="Servicio para interactuar con diversos catálogos.",
+    openapi_tags=[
+        { "name": "Zipcodes" },
+        { "name": "Banks" }, 
+        { "name": "Base", "description": "Verify base call and version." },
+        { "name": "Legacy" }],
     root_path="data/docs/v1/catalogs",
     default_response_class=ORJSONResponse)
     
 
-@app.get("/")
+@app.get("/", tags=["Base"])
 async def verify_base_endpoint():
     return {"App Running Version": VERSION}
 
 
-@app.post("/zipcode-neighborhoods", response_model=NeighborhoodsResponse)
-async def post_zipcode_neighborhoods_legacy(a_request: MetaRequestNbhd):
+@app.post("/zipcode-neighborhoods", 
+    response_model=NeighborhoodsResponse, tags=["Legacy"])
+async def post_zipcode_object(a_request: MetaRequestNbhd):
     an_input = loads(a_request.json())["neighborhoodsRequest"]
     return engine.zipcode_request(an_input, server="fastapi")
 
 
-@app.get("/zipcode-neighborhoods", response_model=NeighborhoodsResponse)
-async def get_zipcode_neighborhoods_legacy(a_request: MetaRequestNbhd):
+@app.get("/zipcode-neighborhoods", 
+    response_model=NeighborhoodsResponse, tags=["Legacy"])
+async def get_zipcode_object(a_request: MetaRequestNbhd):
     an_input = loads(a_request.json())["neighborhoodsRequest"]
     b_response = engine.zipcode_request(an_input, server="fastapi")
     return b_response
 
 
-@app.get("/zipcode-neighborhoods/{zipcode}", response_model=NeighborhoodsResponse)
+@app.get("/zipcode-neighborhoods/{zipcode}", 
+    response_model=NeighborhoodsResponse, tags=["Legacy"])
 async def preferred_zipcode_neighborhoods(zipcode: str):
     return engine.zipcode_request({"zipcode": zipcode}, server="fastapi")
 
 
-@app.get("/national-banks", response_model=BanksResponse)
+@app.get("/national-banks", 
+    response_model=BanksResponse, tags=["Banks"])
 def list_all_banks(): 
     return engine.banks_request(server="fastapi")
 
 
-@app.get("/national-banks/parse-clabe/{clabe_key}", response_model=Bank)
+@app.get("/national-banks/parse-clabe/{clabe_key}", 
+    response_model=Bank, tags=["Banks"])
 def get_bank_details_from_clabe(clabe_key: str): 
     return engine.clabe_parse(clabe_key, server="fastapi")
 
 
-@app.get("/national-banks/card-number/{card_number}", response_model=CardsBin)
+@app.get("/national-banks/card-number/{card_number}", 
+    response_model=CardsBin, tags=["Banks"])
 def get_bank_details_from_card_number(card_number: str): 
     bin_bank = engine.card_number_parse(card_number, server="fastapi")
     return bin_bank
