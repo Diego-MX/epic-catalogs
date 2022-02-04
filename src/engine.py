@@ -3,7 +3,6 @@ from json import loads
 from collections import defaultdict
 import pandas as pd
 
-from flask import jsonify
 from fastapi.exceptions import HTTPException
 
 import clabe
@@ -15,7 +14,7 @@ ctlg_dir = SITE/"refs/catalogs"
 banks_df = pd.read_feather(ctlg_dir/"national-banks.feather")
 
 
-def zipcode_request(a_request, server="flask"): 
+def zipcode_request(a_request): 
     try: 
         the_zipcode  = a_request["zipcode"]
         response_dfs = zipcode_query(the_zipcode)
@@ -33,17 +32,14 @@ def zipcode_request(a_request, server="flask"):
         the_response = {"exception": detail}
         code = 500
 
-    if server == "flask": 
-        return (jsonify(the_response), code)
-    elif (server == "fastapi") and (code == 200): 
+    if code == 200: 
         return the_response
-    elif (server == "fastapi") and (code != 200): 
+    elif code != 200: 
         an_exception = HTTPException(status_code=code, detail=detail)
         raise an_exception
 
-    
 
-def banks_request(server="flask"): 
+def banks_request(): 
     try:
         banks_keys = { 
             "numberOfRecords" : "numberOfBanks",
@@ -56,15 +52,13 @@ def banks_request(server="flask"):
         banks_resp = {"an_exception": detail}
         code       = 500
 
-    if server == "flask": 
-        return (jsonify(banks_resp), code)
-    elif (server == "fastapi") and (code == 200): 
+    if code == 200: 
         return banks_resp
-    elif (server == "fastapi") and (code != 200): 
+    elif code != 200: 
         raise HTTPException(status_code=code, detail=detail)
 
 
-def clabe_parse(clabe_key, server="flask"): 
+def clabe_parse(clabe_key): 
     try:
         is_valid  = clabe.validate_clabe(clabe_key)
         bank_code = clabe_key[0:3]
@@ -87,16 +81,14 @@ def clabe_parse(clabe_key, server="flask"):
         bank_resp = {"an_exception": detail}
         code      = 500
 
-    if server == "flask": 
-        return (jsonify(bank_resp), code)
-    elif (server == "fastapi") and (code == 200): 
+    if code == 200: 
         return bank_resp
-    elif (server == "fastapi") and (code != 200): 
+    elif code != 200: 
         an_exception = HTTPException(status_code=code, detail=detail)
         raise an_exception
 
 
-def card_number_parse(card_num, server="flask"): 
+def card_number_parse(card_num): 
     try:
         if len(card_num) != 16:
             raise "Card Number has 16 digits."
@@ -144,18 +136,15 @@ def card_number_parse(card_num, server="flask"):
         code   = 500
         pre_response = {"an_exception": detail}
         
-    if server == "flask": 
-        return (jsonify(pre_response), code)
-    elif (server == "fastapi") and (code == 200): 
+    if code == 200:
         return pre_response
-    elif (server == "fastapi") and (code != 200): 
+    elif code != 200: 
         an_exception = HTTPException(status_code=code, detail=detail)
         raise an_exception
 
 
 
-#%% Farther Down the Rabbit Hole. 
-
+#%% Down the Rabbit Hole. 
 
 def zipcode_query(a_zipcode): 
     tipo_asenta = pd.read_feather(ctlg_dir/"codigos_drive_tipo_asentamientos.feather")
