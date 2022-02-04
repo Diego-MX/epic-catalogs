@@ -11,8 +11,8 @@ from config import VERSION
 
 debug = ("debug" in sys.argv)
 
-app = FastAPI(title="Catálogos centralizados.", version=VERSION, 
-    description="Servicio para interactuar con diversos catálogos.",
+app = FastAPI(title="Centralized catalogs.", version=VERSION, 
+    description="Setup and query all-purpose catalogs.",
     openapi_tags=[
         { "name": "Zipcodes" },
         { "name": "Banks" }, 
@@ -31,21 +31,21 @@ async def verify_base_endpoint():
     response_model=NeighborhoodsResponse, tags=["Legacy"])
 async def post_zipcode_object(a_request: MetaRequestNbhd):
     an_input = loads(a_request.json())["neighborhoodsRequest"]
-    return engine.zipcode_request(an_input, server="fastapi")
+    return engine.zipcode_request(an_input)
 
 
 @app.get("/zipcode-neighborhoods", 
     response_model=NeighborhoodsResponse, tags=["Legacy"])
 async def get_zipcode_object(a_request: MetaRequestNbhd):
     an_input = loads(a_request.json())["neighborhoodsRequest"]
-    b_response = engine.zipcode_request(an_input, server="fastapi")
+    b_response = engine.zipcode_request(an_input)
     return b_response
 
 
 @app.get("/zipcode-neighborhoods/{zipcode}", 
-    response_model=NeighborhoodsResponse, tags=["Legacy"])
+    response_model=NeighborhoodsResponse, tags=["Zipcodes"])
 async def preferred_zipcode_neighborhoods(zipcode: str):
-    return engine.zipcode_request({"zipcode": zipcode}, server="fastapi")
+    return engine.zipcode_request({"zipcode": zipcode})
 
 
 @app.get("/national-banks", 
@@ -57,13 +57,13 @@ def list_all_banks():
 @app.get("/national-banks/parse-clabe/{clabe_key}", 
     response_model=Bank, tags=["Banks"])
 def get_bank_details_from_clabe(clabe_key: str): 
-    return engine.clabe_parse(clabe_key, server="fastapi")
+    return engine.clabe_parse(clabe_key)
 
 
 @app.get("/national-banks/card-number/{card_number}", 
     response_model=CardsBin, tags=["Banks"])
 def get_bank_details_from_card_number(card_number: str): 
-    bin_bank = engine.card_number_parse(card_number, server="fastapi")
+    bin_bank = engine.card_number_parse(card_number)
     return bin_bank
 
 
