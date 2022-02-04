@@ -1,0 +1,47 @@
+name: Deploy Zipcodes Catalog
+on: 
+  push:
+    branches: 
+      - qas
+
+env:
+  GH_REPO      : Bineo2/data-prod-catalogs
+  ACR_HOST     : acrCrossChannelDataQas.azurecr.io
+  AZURE_WEB    : as-catalogs-data-qas
+  DOCKER_IMAGE : prod-catalogs-webapp
+  DOCKER_TAG   : '1.0.24'
+        
+jobs:
+  build-and-deploy  : 
+    environment     : qas
+    runs-on         : ubuntu-latest
+    steps           :
+    
+    # https://github.com/actions/checkout
+    - name: Checkout GitHub Actions 
+      uses: actions/checkout@v2
+      with: 
+        repository: ${{ env.GH_REPO }}
+        ref       : qas
+
+    # https://github.com/mr-smithers-excellent/docker-build-push
+    - name: Build and push container image to registry
+      id  : container-registry
+      uses: mr-smithers-excellent/docker-build-push@v5.5
+      with: 
+        dockerfile: dockerfile.ci 
+        image     : ${{ env.DOCKER_IMAGE }}
+        tags      : ${{ env.DOCKER_TAG }}
+        registry  : ${{ env.ACR_HOST }}
+        username  : ${{ secrets.ACR_USERNAME }}
+        password  : ${{ secrets.ACR_PASSWORD }}
+    
+    # https://github.com/Azure/webapps-deploy
+    - name: Deploy to App Service
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name        : ${{ env.AZURE_WEB }}
+        images          : ${{ env.ACR_HOST }}/${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}
+        publish-profile : ${{ secrets.WAP_PUBLISH }}
+        
+     
