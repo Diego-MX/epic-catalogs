@@ -9,7 +9,7 @@ env:
   ACR_HOST     : prodcatalogsregistry.azurecr.io
   AZURE_WEB    : wap-prod-catalogs-dev
   DOCKER_IMAGE : prod-catalogs-webapp
-  DOCKER_TAG   : '1.0.23'
+  DOCKER_TAG   : '1.0.24'
         
 jobs:
   build-and-deploy  : 
@@ -35,18 +35,6 @@ jobs:
         registry  : ${{ env.ACR_HOST }}
         username  : ${{ secrets.ACR_USER }}
         password  : ${{ secrets.ACR_PASS }}
-        
-    # # Azure Login
-    # - uses: azure/login@v1
-    #   with:
-    #     creds: ${{ secrets.AZ_SP_CRED }}
-        
-    # # https://github.com/Azure/docker-login
-    # - uses: azure/docker-login@v1
-    #   with:
-    #     login-server: ${{ env.ACR_HOST }}
-    #     username: ${{ secrets.ACR_USER }}
-    #     password: ${{ secrets.ACR_PASS }}
     
     # https://github.com/Azure/webapps-deploy
     - name: Deploy to App Service
