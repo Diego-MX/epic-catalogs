@@ -1,4 +1,4 @@
-name: Deploy Zipcodes Catalog
+name: Deploy Catalog Dev
 on: 
   push:
     branches: 
@@ -12,7 +12,7 @@ env:
   DOCKER_TAG   : '1.0.24'
         
 jobs:
-  build-and-deploy  : 
+  build-and-deploy-dev : 
     environment     : dev
     runs-on         : ubuntu-latest
     steps           :
