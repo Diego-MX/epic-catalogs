@@ -1,4 +1,4 @@
-name: Deploy Zipcodes Catalog
+name: Deploy QAs
 on: 
   push:
     branches: 
@@ -12,7 +12,7 @@ env:
   DOCKER_TAG   : '1.0.24'
         
 jobs:
-  build-and-deploy  : 
+  build-and-deploy-qas  : 
     environment     : qas
     runs-on         : ubuntu-latest
     steps           :
