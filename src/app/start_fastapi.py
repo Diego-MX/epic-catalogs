@@ -51,7 +51,7 @@ async def preferred_zipcode_neighborhoods(zipcode: str):
 @app.get("/national-banks", 
     response_model=BanksResponse, tags=["Banks"])
 def list_all_banks(): 
-    return engine.banks_request(server="fastapi")
+    return engine.banks_request()
 
 
 @app.get("/national-banks/parse-clabe/{clabe_key}", 
