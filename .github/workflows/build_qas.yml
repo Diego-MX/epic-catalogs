@@ -1,4 +1,4 @@
-name: Deploy Zipcodes Catalog
+name: Deploy QAs
 on: 
   push:
     branches: 
@@ -9,10 +9,10 @@ env:
   ACR_HOST     : acrCrossChannelDataQas.azurecr.io
   AZURE_WEB    : as-catalogs-data-qas
   DOCKER_IMAGE : prod-catalogs-webapp
-  DOCKER_TAG   : '1.0.24'
+  DOCKER_TAG   : '1.0.25'
         
 jobs:
-  build-and-deploy  : 
+  build-and-deploy-qas  : 
     environment     : qas
     runs-on         : ubuntu-latest
     steps           :

@@ -1,4 +1,4 @@
-name: Deploy Zipcodes Catalog
+name: Build Dev
 on: 
   push:
     branches: 
@@ -9,10 +9,10 @@ env:
   ACR_HOST     : prodcatalogsregistry.azurecr.io
   AZURE_WEB    : wap-prod-catalogs-dev
   DOCKER_IMAGE : prod-catalogs-webapp
-  DOCKER_TAG   : '1.0.24'
+  DOCKER_TAG   : '1.0.25'
         
 jobs:
-  build-and-deploy  : 
+  build-and-deploy-dev : 
     environment     : dev
     runs-on         : ubuntu-latest
     steps           :
