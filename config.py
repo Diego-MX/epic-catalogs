@@ -3,9 +3,7 @@ from pathlib import Path
 
 SITE = Path(__file__).parent if '__file__' in globals() else Path(os.getcwd())
 
-VERSION = '1.0.26'
-
-ENV  = os.environ.get('ENV', 'local')  # local, dev, qas, databricks
+VERSION = "1.0.25"
 
 
 URLS = {
