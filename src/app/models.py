@@ -54,8 +54,9 @@ class NeighborhoodsResponse(BaseModel):
 
 
 class Bank(BaseModel): 
-    name    : str
-    code    : str
+    name      : str
+    code      : str
+    banxicoID : str
 
 
 class BanksResponse(BaseModel): 
