@@ -10,7 +10,7 @@ from config import SITE
 
 ctlg_dir = SITE/'refs/catalogs'
 banks_df = (pd.read_feather(ctlg_dir/'national-banks.feather')
-    .rename(columns={'banxico_id': 'banxicoID'}))
+    .rename(columns={'banxico_id': 'banxicoId'}))
 
 
 def zipcode_request(a_request): 
@@ -45,6 +45,7 @@ def banks_request():
             'attributes'      : 'bankAttributes',
             'recordSet'       : 'banksSet'}
         banks_resp = tools.dataframe_response(banks_df, None, banks_keys)
+        banks_resp.pop('pagination')
         return banks_resp
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))

@@ -9,11 +9,7 @@ env:
   ACR_HOST     : acrCrossChannelDataQas.azurecr.io
   AZURE_WEB    : as-catalogs-data-qas
   DOCKER_IMAGE : prod-catalogs-webapp
-<<<<<<< HEAD
-  DOCKER_TAG   : '1.0.26'
-=======
-  DOCKER_TAG   : '1.0.25'
->>>>>>> 7fc383e (Primer Push a QAs para pruebas con Backbase.  (#3))
+  DOCKER_TAG   : '1.0.27'
         
 jobs:
   build-and-deploy-qas  : 
