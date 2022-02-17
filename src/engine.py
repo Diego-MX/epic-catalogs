@@ -9,7 +9,8 @@ from src import tools
 from config import SITE
 
 ctlg_dir = SITE/'refs/catalogs'
-banks_df = pd.read_feather(ctlg_dir/'national-banks.feather')
+banks_df = (pd.read_feather(ctlg_dir/'national-banks.feather')
+    .rename(columns={'banxico_id': 'banxicoID'}))
 
 
 def zipcode_request(a_request): 
@@ -43,18 +44,10 @@ def banks_request():
             'numberOfRecords' : 'numberOfBanks',
             'attributes'      : 'bankAttributes',
             'recordSet'       : 'banksSet'}
-        banks_df_r = banks_df.rename(columns={'banxico_id': 'banxicoID'})
-        banks_resp = tools.dataframe_response(banks_df_r, None, banks_keys)
-        code       = 200
-    except Exception as exc:
-        detail     = str(exc)
-        banks_resp = {'an_exception': detail}
-        code       = 500
-
-    if   code == 200: 
+        banks_resp = tools.dataframe_response(banks_df, None, banks_keys)
         return banks_resp
-    elif code != 200: 
-        raise HTTPException(status_code=code, detail=detail)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
 
 
 def clabe_parse(clabe_key): 
@@ -65,26 +58,17 @@ def clabe_parse(clabe_key):
         in_banks = (bank_code == banks_df.code)
         pre_resp = banks_df.loc[in_banks, :].to_dict(orient='records')
 
-        if   is_valid and (in_banks.sum() == 1): 
-            bank_resp = pre_resp[0]
-            code = 200
+        if is_valid and (in_banks.sum() == 1): 
+            return pre_resp[0]
         elif is_valid and (in_banks.sum() != 1): 
-            detail = 'Associated Bank key is not registered or unique.'
-            code = 404
+            the_exception = HTTPException(status_code=404, 
+                    detail='Associated Bank key is not registered or unique.')
+            raise the_exception
         elif not is_valid:
-            detail = 'CLABE is not valid.'
-            code = 404
+            raise HTTPException(status_code=404, detail='CLABE is not valid.')
         
     except Exception as exc: 
-        detail    = str(exc)
-        bank_resp = {'an_exception': detail}
-        code      = 500
-
-    if code == 200: 
-        return bank_resp
-    elif code != 200: 
-        an_exception = HTTPException(status_code=code, detail=detail)
-        raise an_exception
+        raise HTTPException(status_code=500, detail=str(exc))
 
 
 def card_number_parse(card_num): 
@@ -101,7 +85,8 @@ def card_number_parse(card_num):
         # ... ID calculada.
         bin_cols = {
             'Longitud'      : 'length', 
-            'ID'            : 'bankId', 
+            'ID'            : 'bankId',
+            'banxico_id'    : 'banxicoId',
             'Institución'   : 'bank', 
             'Naturaleza'    : 'nature', 
             'Marca'         : 'brand'}
@@ -120,27 +105,17 @@ def card_number_parse(card_num):
             try_bin = int(card_num[:length]) in bin_lengths[length]
 
             if try_bin: 
-                code  = 200
                 bin_int = int(card_num[:length])
                 the_bin = bins_df.loc[bin_int, :]
                 pre_response = loads(the_bin.to_json())
                 pre_response['bin'] = str(the_bin.name)
-                break
+                return pre_response
         else:
-            code = 404
-            detail = 'Card Bin Not Found.'
-        
+            raise HTTPException(status_code=404, detail='Card Bin Not Found.')
+            
     except Exception as exc: 
-        detail = str(exc)
-        code   = 500
-        pre_response = {'an_exception': detail}
+        raise HTTPException(status_code=500, detail=str(exc))
         
-    if code == 200:
-        return pre_response
-    elif code != 200: 
-        an_exception = HTTPException(status_code=code, detail=detail)
-        raise an_exception
-
 
 
 #%% Down the Rabbit Hole. 
@@ -189,59 +164,65 @@ def zipcode_query(a_zipcode):
 
 
 def zipcode_response(nbhd_elems):
-    translator = {
-        'd_codigo'      : 'zipcode',    'd_asenta'      : 'name', 
-        'd_tipo_asenta' : 'type',       'd_zona'        : 'zone',
-        'd_ciudad'      : 'city',       'cve_ciudad'    : 'city_id', 
-        'd_estado'      : 'state',      'c_estado'      : 'state_id', 
-                                        'c_estado_iso'  : 'state_iso',
-        'd_mnpio'       : 'borough',    'cve_mnpio'     : 'borough_id'}
+    try: 
+        translator = {
+            'd_codigo'      : 'zipcode',    'd_asenta'      : 'name', 
+            'd_tipo_asenta' : 'type',       'd_zona'        : 'zone',
+            'd_ciudad'      : 'city',       'cve_ciudad'    : 'city_id', 
+            'd_estado'      : 'state',      'c_estado'      : 'state_id', 
+                                            'c_estado_iso'  : 'state_iso',
+            'd_mnpio'       : 'borough',    'cve_mnpio'     : 'borough_id'}
 
-    zpcd_df = nbhd_elems.get('zipcode_df').rename(columns=translator)
-    nbhd_df = nbhd_elems.get('neighborhoods_df').rename(columns=translator)
+        zpcd_df = nbhd_elems.get('zipcode_df').rename(columns=translator)
+        nbhd_df = nbhd_elems.get('neighborhoods_df').rename(columns=translator)
 
-    no_borough    = (zpcd_df.shape[0] == 0)
-    one_borough   = (zpcd_df.shape[0] == 1)
-    multi_borough = (zpcd_df.shape[0] >  1)
-    no_nghbrhoods = (nbhd_df.shape[0] == 0)
-    warnables     = (no_borough, multi_borough, no_nghbrhoods)
+        no_borough    = (zpcd_df.shape[0] == 0)
+        one_borough   = (zpcd_df.shape[0] == 1)
+        multi_borough = (zpcd_df.shape[0] >  1)
+        no_nghbrhoods = (nbhd_df.shape[0] == 0)
+        warnables     = (no_borough, multi_borough, no_nghbrhoods)
 
-    if one_borough:
-        zipcode_props = zpcd_df.to_dict(orient='records')[0]
-    else: # more than one
-        zipcode_props = zpcd_df.to_dict(orient='records')
+        if one_borough:
+            zipcode_props = zpcd_df.to_dict(orient='records')[0]
+        else: # more than one
+            zipcode_props = zpcd_df.to_dict(orient='records')
 
-    nbhd_cols = pd.DataFrame(data={
-            'nombre' : ['zipcode', 'name', 'zone', 'type', 'city', 'city_id'], 
-            'dtipo'  : 'character'})
+        nbhd_cols = pd.DataFrame(data={
+                'nombre' : ['zipcode', 'name', 'zone', 'type', 'city', 'city_id'], 
+                'dtipo'  : 'character'})
 
-    nbhd_keys = { 'numberOfRecords' : 'numberOfNeighborhoods',
-                  'attributes'      : 'neighborhoodAttributes',
-                  'recordSet'       : 'neighborhoodsSet',
-                  'pagination'      : 'neighborhoodsPagination'}
+        nbhd_keys = { 'numberOfRecords' : 'numberOfNeighborhoods',
+                    'attributes'      : 'neighborhoodAttributes',
+                    'recordSet'       : 'neighborhoodsSet',
+                    'pagination'      : 'neighborhoodsPagination'}
 
-    nbhd_dict = tools.dataframe_response(nbhd_df, nbhd_cols, nbhd_keys, drop_nas=False)
+        nbhd_dict = tools.dataframe_response(nbhd_df, nbhd_cols, nbhd_keys, drop_nas=False)
+        
+        pre_response = {
+            'zipcode'       : zipcode_props, 
+            'neighborhoods' : nbhd_dict }
+
+        the_response = zipcode_warnings(pre_response, warnables)
+        return the_response
+
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
     
-    pre_response = {
-        'zipcode'       : zipcode_props, 
-        'neighborhoods' : nbhd_dict }
-
-    the_response = zipcode_warnings(pre_response, warnables)
-    return the_response
-
 
 def zipcode_warnings(a_response, warnables):
-    warnings = {}
-    if   warnables[0]:
-        warnings['borough'] = (1, 'No se encontró municipio para CP')
-    elif warnables[1]:
-        warnings['borough'] = (2, 'Los municipios asociados no son únicos.')
+    try: 
+        warnings = {}
+        if   warnables[0]:
+            warnings['borough'] = (1, 'No se encontró municipio para CP')
+        elif warnables[1]:
+            warnings['borough'] = (2, 'Los municipios asociados no son únicos.')
 
-    if   warnables[2]:
-        warnings['zipcode'] = (3, 'No se encontraron asentamientos con el CP.')
-    
-    b_response = a_response.copy()
-    if len(warnings) > 0: 
-        b_response['warnings'] = warnings 
-
-    return b_response
+        if   warnables[2]:
+            warnings['zipcode'] = (3, 'No se encontraron asentamientos con el CP.')
+        
+        b_response = a_response.copy()
+        if len(warnings) > 0: 
+            b_response['warnings'] = warnings 
+        return b_response
+    except Exception as exc: 
+        raise HTTPException(status_code=500, detail=str(exc))
