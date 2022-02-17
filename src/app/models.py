@@ -56,7 +56,7 @@ class NeighborhoodsResponse(BaseModel):
 class Bank(BaseModel): 
     name      : str
     code      : str
-    banxicoID : str
+    banxicoId : str
 
 
 class BanksResponse(BaseModel): 
@@ -66,10 +66,11 @@ class BanksResponse(BaseModel):
 
 
 class CardsBin(BaseModel): 
-    bin    : str
-    length : int
-    bankId : str
-    bank   : str
-    nature : str
-    brand  : str 
+    bin       : str
+    length    : int
+    bankId    : str
+    bank      : str
+    banxicoId : str
+    nature    : str
+    brand     : str 
 
