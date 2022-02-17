@@ -27,13 +27,14 @@ excel_call = (local_path/'api-catalogs.xlsx.lnk', 'banks', 'tabla_297')
 df_colnames = {
     'NOMBRE' : 'name', 
     'CLAVE'  : 'code',
-    'BANCO'  : 'banxico_id', 
-    'PARAMETRO Activo / Desactivo': 'is_active', 
-    'Tipo banco' : 'type'}
+    'BANCO'  : 'banxico_id'}
+    # , 
+    # 'PARAMETRO Activo / Desactivo': 'is_active', 
+    # 'Tipo banco' : 'type'}
 
 ctlg_df = (read_excel_table(*excel_call)
     .rename(columns=df_colnames)
-    .loc[:, ['name', 'code', 'banxico_id']]
+    .loc[:, df_colnames.values()]
     .astype(str)
     .reset_index())
 
