@@ -9,7 +9,11 @@ env:
   ACR_HOST     : acrCrossChannelDataQas.azurecr.io
   AZURE_WEB    : as-catalogs-data-qas
   DOCKER_IMAGE : prod-catalogs-webapp
+<<<<<<< HEAD
   DOCKER_TAG   : '1.0.29'
+=======
+  DOCKER_TAG   : '1.0.27'
+>>>>>>> 7d91423 (Arreglar flujo de Bancos para entregar BanxicoId (#5))
         
 jobs:
   build-and-deploy-qas  : 
