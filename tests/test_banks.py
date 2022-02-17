@@ -7,22 +7,22 @@ import requests
 class TestBanks(TestCase): 
     
     def test_bank_successful(self): 
-        the_response = requests.get(f"{URL}/national-banks")
+        the_response = requests.get(f'{URL}/national-banks')
         self.assertEqual(the_response.status_code, 200)
 
     def test_clabe_successful(self): 
-        clabe_key = "002180700845152894"
-        response = requests.get(f"{URL}/national-banks/parse-clabe/{clabe_key}")
+        clabe_key = '002180700845152894'
+        response = requests.get(f'{URL}/national-banks/parse-clabe/{clabe_key}')
         self.assertEqual(response.status_code, 200)
 
     def test_card_number(self): 
-        card_num = "5499490544796915"
-        response = requests.get(f"{URL}/national-banks/card-number/{card_num}")
-        institucion = response.json()["bank"]
-        self.assertEqual(institucion, "CITIBANAMEX")
+        card_num = '5499490544796915'
+        response = requests.get(f'{URL}/national-banks/card-number/{card_num}')
+        institucion = response.json()['bank']
+        self.assertEqual(institucion, 'CITIBANAMEX')
 
 
-if __name__ == "__main__": 
+if __name__ == '__main__': 
     import sys
     import config
     
@@ -36,25 +36,24 @@ if False:
     from tests import test_zipcodes
     import config
 
-    ENV = "local-fastapi" # "local-fastapi" # "local" # "qa" # "staging" # 
+    ENV = 'local-fastapi' # 'local-fastapi' # 'local' # 'qa' # 'staging' # 
     URL = config.URLS[ENV]
     
     reload(config)
     reload(test_zipcodes)
-    
-    setup_json = set_example("no-city")
-    an_input   = setup_json["input"]
-    a_request  = an_input["neighborhoodsRequest"]
-    
-    card_num = "5499490544796915"
-    response = requests.get(f"{URL}/national-banks/card-number/{card_num}")
+        
+    card_num = '5499490544796915'
+    response = requests.get(f'{URL}/national-banks/card-number/{card_num}')
+    institucion = response.json()['name']        
 
-    institucion = response.json()["name"]        
-    response = requests.get(f"{URL}/national-banks")
-    
-    print(a_response.text)
+    clabe_key = '002180700845152894'
+    response = requests.get(f'{URL}/national-banks/parse-clabe/{clabe_key}')
 
 
+
+    response = requests.get(f'{URL}/national-banks')
+    
     b_response = requests.get(URL)
+    print(a_response.text)
 
     
