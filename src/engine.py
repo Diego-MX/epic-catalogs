@@ -53,21 +53,18 @@ def banks_request():
 
 def clabe_parse(clabe_key): 
     try:
-        is_valid  = clabe.validate_clabe(clabe_key)
-        bank_code = clabe_key[0:3]
-        
-        in_banks = (bank_code == banks_df.code)
-        pre_resp = banks_df.loc[in_banks, :].to_dict(orient='records')
-
-        if is_valid and (in_banks.sum() == 1): 
-            return pre_resp[0]
-        elif is_valid and (in_banks.sum() != 1): 
-            the_exception = HTTPException(status_code=404, 
-                    detail='Associated Bank key is not registered or unique.')
-            raise the_exception
-        elif not is_valid:
+        is_valid = clabe.validate_clabe(clabe_key)
+        if not is_valid: 
             raise HTTPException(status_code=404, detail='CLABE is not valid.')
-        
+
+        bank_code = clabe_key[0:3]        
+        in_banks = (bank_code == banks_df.code)
+
+        if in_banks.sum() != 1:
+            raise HTTPException(status_code=404, detail='Bank is not registered or unique.')
+
+        return banks_df.loc[in_banks, :].to_dict(orient='records')[0]
+
     except Exception as exc: 
         raise HTTPException(status_code=500, detail=str(exc))
 
