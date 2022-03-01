@@ -27,13 +27,9 @@ excel_call = (local_path/'api-catalogs.xlsx.lnk', 'banks', 'tabla_297')
 df_colnames = {
     'NOMBRE' : 'name', 
     'CLAVE'  : 'code',
-<<<<<<< HEAD
     'BANCO'  : 'banxico_id', 
     'nombre_corto': 'alias', 
     'SPEI'   : 'spei'}
-=======
-    'BANCO'  : 'banxico_id'}
->>>>>>> 7d91423 (Arreglar flujo de Bancos para entregar BanxicoId (#5))
     # , 
     # 'PARAMETRO Activo / Desactivo': 'is_active', 
     # 'Tipo banco' : 'type'}
