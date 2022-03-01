@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field
 from fastapi.responses import JSONResponse
 from typing import List, Any, Optional
 from orjson import dumps
+from sqlalchemy import alias
 
 
 
@@ -57,6 +58,8 @@ class Bank(BaseModel):
     name      : str
     code      : str
     banxicoId : str
+    alias     : str
+    spei      : bool
 
 
 class BanksResponse(BaseModel): 
