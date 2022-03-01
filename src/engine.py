@@ -38,13 +38,16 @@ def zipcode_request(a_request):
         raise an_exception
 
 
-def banks_request(): 
+def banks_request(filter_spei): 
     try:
+        resp_df = banks_df[banks_df['spei']] if filter_spei else banks_df
+
         banks_keys = { 
             'numberOfRecords' : 'numberOfBanks',
             'attributes'      : 'bankAttributes',
             'recordSet'       : 'banksSet'}
-        banks_resp = tools.dataframe_response(banks_df, None, banks_keys)
+        
+        banks_resp = tools.dataframe_response(resp_df, None, banks_keys)
         banks_resp.pop('pagination')
         return banks_resp
     except Exception as exc:
@@ -55,13 +58,15 @@ def clabe_parse(clabe_key):
     try:
         is_valid = clabe.validate_clabe(clabe_key)
         if not is_valid: 
-            raise HTTPException(status_code=404, detail='CLABE is not valid.')
+            raise HTTPException(status_code=404, 
+                    detail='CLABE is not valid.')
 
         bank_code = clabe_key[0:3]        
         in_banks = (bank_code == banks_df.code)
 
         if in_banks.sum() != 1:
-            raise HTTPException(status_code=404, detail='Bank is not registered or unique.')
+            raise HTTPException(status_code=404, 
+                    detail='Bank is not registered or unique.')
 
         return banks_df.loc[in_banks, :].to_dict(orient='records')[0]
 
