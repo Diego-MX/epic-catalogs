@@ -1,10 +1,10 @@
 
 # Iniciar la app: con Flask, o con FastAPI.
-python -m src.app.start-fastapi
-python ./src/app/start-fastapi.py
+python -m src.app.start
+python ./src/app/start.py
 
 
-uvicorn start-fastapi:app --port 80 --host 0.0.0.0
+uvicorn start:app --port 80 --host 0.0.0.0
 
 # Para el Docker
 docker build -f .\dockerfile.ci -t prod-catalogs-webapp:latest .
