@@ -27,7 +27,9 @@ excel_call = (local_path/'api-catalogs.xlsx.lnk', 'banks', 'tabla_297')
 df_colnames = {
     'NOMBRE' : 'name', 
     'CLAVE'  : 'code',
-    'BANCO'  : 'banxico_id'}
+    'BANCO'  : 'banxico_id', 
+    'nombre_corto': 'alias', 
+    'SPEI'   : 'spei'}
     # , 
     # 'PARAMETRO Activo / Desactivo': 'is_active', 
     # 'Tipo banco' : 'type'}
