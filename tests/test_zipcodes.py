@@ -1,4 +1,3 @@
-from pathlib import Path
 from unittest import TestCase, main as unit_main
 import requests
 
