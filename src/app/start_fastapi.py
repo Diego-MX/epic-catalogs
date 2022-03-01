@@ -48,8 +48,8 @@ async def preferred_zipcode_neighborhoods(zipcode: str):
 
 @app.get('/national-banks', 
     response_model=BanksResponse, tags=['Banks'])
-def list_all_banks(): 
-    return engine.banks_request()
+def list_all_banks(filter_spei: bool=True): 
+    return engine.banks_request(filter_spei)
 
 
 @app.get('/national-banks/parse-clabe/{clabe_key}', 

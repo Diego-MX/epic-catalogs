@@ -36,7 +36,11 @@ if False:
     from tests import test_zipcodes
     import config
 
+<<<<<<< HEAD
     ENV = 'local' # 'local-fastapi' # 'local' # 'qa' # 'staging' # 
+=======
+    ENV = 'local-fastapi' # 'local-fastapi' # 'local' # 'qa' # 'staging' # 
+>>>>>>> 7d914233bf4348678ad06e771fe82fc4dfbfd0f7
     URL = config.URLS[ENV]
     
     reload(config)
@@ -47,8 +51,11 @@ if False:
     institucion = response.json()['name']        
 
     clabe_key = '002180700845152894'
+<<<<<<< HEAD
     clabe_key = '012180029770826063'
     clabe_key = '012180029770826064'
+=======
+>>>>>>> 7d914233bf4348678ad06e771fe82fc4dfbfd0f7
     response = requests.get(f'{URL}/national-banks/parse-clabe/{clabe_key}')
 
 
