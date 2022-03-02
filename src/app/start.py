@@ -5,11 +5,9 @@ import uvicorn
 
 from src import engine
 from . import models 
-# (MetaRequestNbhd, NeighborhoodsResponse, ORJSONResponse, BanksResponse, Bank, CardsBin)
 from config import VERSION
 
 debug_mode = 'debug' in sys.argv
-
 root_path = 'data/docs/v1/catalogs' if not debug_mode else None
 
 
