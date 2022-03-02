@@ -51,8 +51,6 @@ if False:
     clabe_key = '012180029770826064'
     response = requests.get(f'{URL}/national-banks/parse-clabe/{clabe_key}')
 
-
-
     response = requests.get(f'{URL}/national-banks')
     
     b_response = requests.get(URL)
