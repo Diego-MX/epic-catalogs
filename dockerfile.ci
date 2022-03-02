@@ -2,10 +2,12 @@
 
 FROM python:3.8-slim
 
-WORKDIR /app
-COPY . .
-RUN pip install --trusted-host pypi.python.org -r /app/requirements.txt
- 
+WORKDIR /code
+COPY ./reqs_base.txt .
+RUN pip install --trusted-host pypi.python.org -r ./reqs_base.txt
+
+COPY . . 
+
 EXPOSE 80 
 CMD ["python", "-m", "src.app.start"]
 

@@ -1,22 +1,18 @@
-# Utilities
-unidecode
-azure-identity
-azure-storage-blob
-python-dotenv
-orjson
-
 # Data Tools
 openpyxl
+pyspark
+sqlalchemy
 pandas 
 pyarrow
-pyspark
 
 # Web Tools
 requests 
-Flask
 fastapi
 jsonschema
 uvicorn
+Flask
 
 # Func Tools
+unidecode
 clabe
+orjson
