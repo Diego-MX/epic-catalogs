@@ -15,11 +15,18 @@ class TestBanks(TestCase):
         response = requests.get(f'{URL}/national-banks/parse-clabe/{clabe_key}')
         self.assertEqual(response.status_code, 200)
 
+    def test_invalid_clabe_returns_404(self):
+        clabe_key = '002180700845152896'
+        response = requests.get(f'{URL}/national-banks/parse-clabe/{clabe_key}')
+        self.assertEqual(response.status_code, 404)
+
     def test_card_number(self): 
         card_num = '5499490544796915'
         response = requests.get(f'{URL}/national-banks/card-number/{card_num}')
         institucion = response.json()['bank']
         self.assertEqual(institucion, 'CITIBANAMEX')
+
+
 
 
 if __name__ == '__main__': 
