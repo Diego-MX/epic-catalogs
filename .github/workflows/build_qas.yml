@@ -9,13 +9,13 @@ env:
   ACR_HOST     : acrCrossChannelDataQas.azurecr.io
   AZURE_WEB    : as-catalogs-data-qas
   DOCKER_IMAGE : prod-catalogs-webapp
-  DOCKER_TAG   : '1.0.31'
+  DOCKER_TAG   : '1.0.32'
         
 jobs:
-  build-and-deploy-qas  : 
-    environment     : qas
-    runs-on         : ubuntu-latest
-    steps           :
+  build-and-deploy-qas: 
+    environment: qas
+    runs-on    : ubuntu-latest
+    steps      : 
     
     # https://github.com/actions/checkout
     - name: Checkout GitHub Actions 
