@@ -34,9 +34,9 @@ def zipcode_request(a_request):
     return the_response
 
 
-def banks_request(filter_spei): 
+def banks_request(include_non_spei): 
     try:
-        resp_df = banks_df[banks_df['spei']] if filter_spei else banks_df
+        resp_df = banks_df[banks_df['spei']] if include_non_spei else banks_df
         banks_keys = { 
             'numberOfRecords' : 'numberOfBanks',
             'attributes'      : 'bankAttributes',
