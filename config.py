@@ -3,7 +3,7 @@ from pathlib import Path
 
 SITE = Path(__file__).parent if '__file__' in globals() else Path(os.getcwd())
 
-VERSION = "1.0.32"
+VERSION = "1.0.33"
 
 ENV = os.environ.get('ENV', 'local')
 
@@ -32,4 +32,5 @@ ENV_VARS = {
             'url'   : 'https://stlakehylia.blob.core.windows.net/'}
     } 
 }
+
 
