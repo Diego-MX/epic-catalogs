@@ -11,8 +11,6 @@ import json
 from jsonschema import validate, exceptions
 from requests import auth
 from unidecode import unidecode
-#%%
-
 
 
 def str_camel_to_snake(cameled:str):
