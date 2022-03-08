@@ -3,7 +3,6 @@ from unittest import TestCase, main as unit_main
 import requests
 
 
-
 class TestBanks(TestCase): 
     
     def test_bank_successful(self): 
@@ -28,7 +27,6 @@ class TestBanks(TestCase):
 
 
 
-
 if __name__ == '__main__': 
     import sys
     import config
@@ -37,6 +35,7 @@ if __name__ == '__main__':
     URL = config.URLS.get(ENV)
 
     unit_main()
+
 
 if False:
     from importlib import reload
