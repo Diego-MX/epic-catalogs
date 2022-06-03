@@ -15,29 +15,29 @@ banks_df = (pd.read_feather(ctlg_dir/'national-banks.feather')
     .astype({'spei': bool}))
 
 
-def zipcode_request(a_request): 
-    try: 
+def zipcode_request(a_request):
+    try:
         the_zipcode  = a_request['zipcode']
         response_dfs = zipcode_query(the_zipcode)
         the_response = zipcode_response(response_dfs)
-        if (('warnings' in the_response) and 
-            ('zipcode'  in the_response['warnings']) and 
+        if (('warnings' in the_response) and
+            ('zipcode'  in the_response['warnings']) and
             (the_response['warnings']['zipcode'][0] == 3)):
             the_detail = the_response['warnings']['zipcode'][1]
             raise HTTPException(404, detail=the_detail)
-            
-    except HTTPException as exc: 
+
+    except HTTPException as exc:
         raise exc
     except Exception as exc:
-        raise HTTPException(500, str(exc)) 
-        
+        raise HTTPException(500, str(exc))
+
     return the_response
 
 
-def banks_request(include_non_spei): 
+def banks_request(include_non_spei):
     try:
         resp_df = banks_df[banks_df['spei']] if include_non_spei else banks_df
-        banks_keys = { 
+        banks_keys = {
             'numberOfRecords' : 'numberOfBanks',
             'attributes'      : 'bankAttributes',
             'recordSet'       : 'banksSet'}
@@ -49,49 +49,47 @@ def banks_request(include_non_spei):
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-def clabe_parse(clabe_key): 
+def clabe_parse(clabe_key):
     try:
-        is_valid = clabe.validate_clabe(clabe_key)
-        if not is_valid: 
-            raise HTTPException(status_code=404, 
-                    detail='CLABE is not valid.')
+        is_valid = (clabe_key[-1] == clabe.compute_control_digit(clabe_key[:-1]))
+        if not is_valid:
+            raise HTTPException(status_code=404, detail='CLABE is not valid.')
 
-        bank_code = clabe_key[0:3]        
+        bank_code = clabe_key[0:3]
         in_banks = (bank_code == banks_df.code)
 
         if in_banks.sum() != 1:
-            raise HTTPException(status_code=404, 
-                    detail='Bank is not registered or unique.')
+            raise HTTPException(status_code=404, detail='Bank is not registered or unique.')
 
         return banks_df.loc[in_banks, :].to_dict(orient='records')[0]
 
-    except HTTPException as exc: 
+    except HTTPException as exc:
         raise exc
 
-    except Exception as exc: 
+    except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-def card_number_parse(card_num): 
+def card_number_parse(card_num):
     try:
         if len(card_num) != 16:
-            raise HTTPException(400, 'Card Number has 16 digits.')
+            raise HTTPException(400, 'Card Number must have 16 digits.')
 
         # ['Longitud', 'Id Institución', 'Institución', 'Naturaleza', 'Marca',
-        # 'Tarjeta Chip', 'BIN Virtual', 'Ac Manual', 'Ac TPV', 
-        # 'Ac Cashback', 'Ac ATMs', 'Ac Ecommerce', 'Ac Cargos Periódicos', 
-        # 'Ac Ventas X Teléfono', 'Ac Sucursal', 'Ac Pagos en el Intercambio', 
-        # 'Ac 3D Secure', 'NFC', 'MST', 'Wallet', 'PAN Din', 'CVV/CVC Din', 
+        # 'Tarjeta Chip', 'BIN Virtual', 'Ac Manual', 'Ac TPV',
+        # 'Ac Cashback', 'Ac ATMs', 'Ac Ecommerce', 'Ac Cargos Periódicos',
+        # 'Ac Ventas X Teléfono', 'Ac Sucursal', 'Ac Pagos en el Intercambio',
+        # 'Ac 3D Secure', 'NFC', 'MST', 'Wallet', 'PAN Din', 'CVV/CVC Din',
         # 'NIP', 'Tokenización', 'Vale', 'Fecha de Alta', 'Procesador']
         # ... ID calculada.
         bin_cols = {
-            'Longitud'      : 'length', 
+            'Longitud'      : 'length',
             'ID'            : 'bankId',
             'banxico_id'    : 'banxicoId',
-            'Institución'   : 'bank', 
-            'Naturaleza'    : 'nature', 
+            'Institución'   : 'bank',
+            'Naturaleza'    : 'nature',
             'Marca'         : 'brand'}
-                
+
         bins_df = (pd.read_feather(ctlg_dir/'national-banks-bins.feather')
             .set_index('BIN')
             .rename(columns=bin_cols)
@@ -105,7 +103,7 @@ def card_number_parse(card_num):
         for length in sorted(bin_lengths.keys(), reverse=True):
             try_bin = int(card_num[:length]) in bin_lengths[length]
 
-            if try_bin: 
+            if try_bin:
                 bin_int = int(card_num[:length])
                 the_bin = bins_df.loc[bin_int, :]
                 pre_response = loads(the_bin.to_json())
@@ -114,18 +112,18 @@ def card_number_parse(card_num):
         else:
             raise HTTPException(status_code=404, detail='Card Bin Not Found.')
 
-    except HTTPException as exc: 
+    except HTTPException as exc:
         raise exc
 
-    except Exception as exc: 
+    except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
-        
 
 
-#%% Down the Rabbit Hole. 
 
-def zipcode_query(a_zipcode): 
-    try: 
+#%% Down the Rabbit Hole.
+
+def zipcode_query(a_zipcode):
+    try:
         tipo_asenta = pd.read_feather(ctlg_dir/'codigos_drive_tipo_asentamientos.feather')
         ciudades    = pd.read_feather(ctlg_dir/'codigos_drive_ciudades.feather')
         municipios  =(pd.read_feather(ctlg_dir/'codigos_drive_municipios.feather')
@@ -144,38 +142,38 @@ def zipcode_query(a_zipcode):
                 .drop_duplicates()
                 .merge(municipios, on=['c_estado', 'c_mnpio'], how='left')
                 .merge(estados, on='c_estado', how='left')
-                .loc[:, ['d_codigo', 'd_mnpio', 'd_estado', 
+                .loc[:, ['d_codigo', 'd_mnpio', 'd_estado',
                     'c_estado', 'c_estado_iso', 'cve_mnpio']])
         else:
             mun_estado = (municipios
-                .loc[(municipios.min_cp <= a_zipcode) & (a_zipcode <= municipios.max_cp), :] 
+                .loc[(municipios.min_cp <= a_zipcode) & (a_zipcode <= municipios.max_cp), :]
                 .assign(d_codigo=a_zipcode)
                 .merge(estados, on='c_estado', how='left')
-                .loc[:, ['d_codigo', 'd_mnpio', 'd_estado', 
+                .loc[:, ['d_codigo', 'd_mnpio', 'd_estado',
                     'c_estado', 'c_estado_iso', 'cve_mnpio']])
         sub_colonias = (las_colonias
             .merge(tipo_asenta, on='c_tipo_asenta', how='left')
             .merge(ciudades, on=['c_estado', 'c_cve_ciudad'], how='left')
             .sort_values('n_asenta', ascending=False)
             .assign(cve_ciudad = lambda df: df.c_estado.str.cat(df.c_cve_ciudad))
-            .loc[:, ['d_codigo', 'd_asenta', 'd_zona', 'd_tipo_asenta', 'd_ciudad', 
+            .loc[:, ['d_codigo', 'd_asenta', 'd_zona', 'd_tipo_asenta', 'd_ciudad',
                     'cve_ciudad']] )
         resp_elements = {
-            'zipcode_df'        : mun_estado, 
+            'zipcode_df'        : mun_estado,
             'neighborhoods_df'  : sub_colonias}
         return resp_elements
 
-    except Exception as exc: 
+    except Exception as exc:
         raise HTTPException(500, str(exc))
 
 
 def zipcode_response(nbhd_elems):
-    try: 
+    try:
         translator = {
-            'd_codigo'      : 'zipcode',    'd_asenta'      : 'name', 
+            'd_codigo'      : 'zipcode',    'd_asenta'      : 'name',
             'd_tipo_asenta' : 'type',       'd_zona'        : 'zone',
-            'd_ciudad'      : 'city',       'cve_ciudad'    : 'city_id', 
-            'd_estado'      : 'state',      'c_estado'      : 'state_id', 
+            'd_ciudad'      : 'city',       'cve_ciudad'    : 'city_id',
+            'd_estado'      : 'state',      'c_estado'      : 'state_id',
                                             'c_estado_iso'  : 'state_iso',
             'd_mnpio'       : 'borough',    'cve_mnpio'     : 'borough_id'}
 
@@ -194,7 +192,7 @@ def zipcode_response(nbhd_elems):
             zipcode_props = zpcd_df.to_dict(orient='records')
 
         nbhd_cols = pd.DataFrame(data={
-                'nombre' : ['zipcode', 'name', 'zone', 'type', 'city', 'city_id'], 
+                'nombre' : ['zipcode', 'name', 'zone', 'type', 'city', 'city_id'],
                 'dtipo'  : 'character'})
 
         nbhd_keys = { 'numberOfRecords' : 'numberOfNeighborhoods',
@@ -203,9 +201,9 @@ def zipcode_response(nbhd_elems):
                     'pagination'      : 'neighborhoodsPagination'}
 
         nbhd_dict = tools.dataframe_response(nbhd_df, nbhd_cols, nbhd_keys, drop_nas=False)
-        
+
         pre_response = {
-            'zipcode'       : zipcode_props, 
+            'zipcode'       : zipcode_props,
             'neighborhoods' : nbhd_dict }
 
         the_response = zipcode_warnings(pre_response, warnables)
@@ -213,10 +211,10 @@ def zipcode_response(nbhd_elems):
 
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
-    
+
 
 def zipcode_warnings(a_response, warnables):
-    try: 
+    try:
         warnings = {}
         if   warnables[0]:
             warnings['borough'] = (1, 'No se encontró municipio para CP')
@@ -225,10 +223,10 @@ def zipcode_warnings(a_response, warnables):
 
         if   warnables[2]:
             warnings['zipcode'] = (3, 'No se encontraron asentamientos con el CP.')
-        
+
         b_response = a_response.copy()
-        if len(warnings) > 0: 
-            b_response['warnings'] = warnings 
+        if len(warnings) > 0:
+            b_response['warnings'] = warnings
         return b_response
-    except Exception as exc: 
+    except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
