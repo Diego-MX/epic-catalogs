@@ -10,7 +10,6 @@ requests
 fastapi
 jsonschema
 uvicorn
-Flask
 
 # Func Tools
 unidecode
