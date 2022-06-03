@@ -34,10 +34,10 @@ def zipcode_request(a_request):
     return the_response
 
 
-def banks_request(include_non_spei): 
+def banks_request(include_non_spei):
     try:
         resp_df = banks_df[banks_df['spei']] if include_non_spei else banks_df
-        banks_keys = { 
+        banks_keys = {
             'numberOfRecords' : 'numberOfBanks',
             'attributes'      : 'bankAttributes',
             'recordSet'       : 'banksSet'}
@@ -63,10 +63,8 @@ def clabe_parse(clabe_key):
 
         return banks_df.loc[in_banks, :].to_dict(orient='records')[0]
 
+    except HTTPException as exc:
         raise exc
-
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
 
 
 def card_number_parse(card_num):
