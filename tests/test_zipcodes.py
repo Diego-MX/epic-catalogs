@@ -75,7 +75,7 @@ if __name__ == "__main__":
     import sys
     import config
     
-    ENV = config.DEFAULT_ENV if len(sys.argv) == 1 else sys.argv.pop()
+    ENV = config.TEST_ENV if len(sys.argv) == 1 else sys.argv.pop()
     URL = config.URLS.get(ENV)
 
     unit_main()

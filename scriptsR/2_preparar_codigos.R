@@ -55,7 +55,7 @@ muns_check <-  municipios %>%
 
 
 write_feather(municipios, "../refs/catalogs/codigos_drive_municipios.feather")
-write_csv(municipios, "../refs/catalogs/codigos_drive_municipios.csv")
+write_csv(municipios,     "../refs/catalogs/codigos_drive_municipios.csv")
 
 # 664 ciudades
 ciudades <- codigos_1 %>% 
