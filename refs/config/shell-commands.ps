@@ -1,5 +1,5 @@
 
-# Iniciar la app: con Flask, o con FastAPI.
+# Iniciar la app con FastAPI, antes Flask.
 python -m src.app.start
 python ./src/app/start.py
 
@@ -20,5 +20,11 @@ python -m tests.test_rfc
 radian --r-binary=$home/AppData/Local/R/R-4.1.2/bin/R.exe
 
 &"$home\AppData\local\R\R-4.1.2\bin\RScript.exe" .\1b_download-censo.R
+
+
+# Activar .venv
+./.venv/Scripts/activate.ps1
+python -m pip install -U {un-paquete}
+deactivate .venv
 
 
