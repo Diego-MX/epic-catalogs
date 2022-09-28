@@ -1,17 +1,29 @@
-import os
+from os import getcwd, environ
 from pathlib import Path
 
-SITE = Path(__file__).parent if '__file__' in globals() else Path(os.getcwd())
+SITE = Path(__file__).parent if '__file__' in globals() else Path(getcwd())
 
-VERSION = "1.0.34"
+VERSION = "1.0.35"
 
-ENV = os.environ.get('ENV', 'local')
+
+if 'ENV_TYPE' in environ: 
+    an_env = environ['ENV_TYPE']
+elif 'ENV' in environ: 
+    an_env = environ['ENV']
+else: 
+    an_env = 'local'
+
+
+ENV = an_env
+SERVER = environ.get('SERVER_TYPE', 'wap')
+TEST_ENV = 'local'
 
 URLS = {
     'local'     : 'http://localhost:80', 
     'staging'   : 'https://wap-prod-catalogs-dev.azurewebsites.net', 
     'qa'        : 'https://apim-crosschannel-tech-dev.azure-api.net/data/catalogs/v1'
 }
+
 
 ENV_VARS = {
     'local' : {

@@ -6,11 +6,16 @@ import re
 from openpyxl import load_workbook, utils as xl_utils
 import pandas as pd
 
-from flask import jsonify
+
 import json
 from jsonschema import validate, exceptions
 from requests import auth
 from unidecode import unidecode
+
+try: 
+    from flask import jsonify
+except ImportError: 
+    jsonify = None
 
 
 def str_camel_to_snake(cameled:str):
