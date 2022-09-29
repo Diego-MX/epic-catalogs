@@ -48,4 +48,3 @@ jobs:
         images          : ${{env.ACR_HOST}}/${{ env.DOCKER_IMAGE}}:${{ env.DOCKER_TAG}}
         publish-profile : ${{secrets.WAP_PUBLISH}}
         
-     

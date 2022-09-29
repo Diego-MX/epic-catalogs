@@ -25,8 +25,7 @@ dar click en `[Descargar]`.
 
 
 
-# Autenticaci�n y recursos
-
+# Autenticación y recursos
 
 Para hacer la lectura de archivos en el Datalake (Storage Container) hay varios métodos. 
 - Obtener el _connection string_ y guardarlo en una variable de ambiente. 
