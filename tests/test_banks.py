@@ -62,4 +62,3 @@ if False:
     b_response = requests.get(URL)
     print(a_response.text)
 
-    

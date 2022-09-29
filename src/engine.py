@@ -63,7 +63,8 @@ def clabe_parse(clabe_key):
 
         return banks_df.loc[in_banks, :].to_dict(orient='records')[0]
 
-        raise exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
 
 
 def card_number_parse(card_num):
