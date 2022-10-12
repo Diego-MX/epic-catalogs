@@ -10,7 +10,7 @@ env:
   ACR_HOST     : prodcatalogsregistry.azurecr.io
   AZURE_WEB    : wap-prod-catalogs-dev
   DOCKER_IMAGE : prod-catalogs-webapp
-  DOCKER_TAG   : '1.0.35'
+  DOCKER_TAG   : '1.0.36'
   # ACR_HOST     : acrCrossChannelDataQas.azurecr.io
   # AZURE_WEB    : as-catalogs-data-qas
 
