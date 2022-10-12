@@ -1,4 +1,8 @@
 library(testit)
+# Read: data/codigos-postales/raw/estados_drive/codigos_postales_tabla.txt, 
+#       
+# Write: refs/catalogos/codigos_drive_(municipios|ciudades|asentamientos).(feather|csv)
+# 
 
 
 checks_codigos <- function (codigos_df) {
