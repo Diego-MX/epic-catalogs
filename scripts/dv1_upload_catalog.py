@@ -1,6 +1,9 @@
 # Diego Villamil, EPIC
 # CDMX, 11 de noviembre de 2021
 
+# Lectura: refs/catalogos/api-catalogs.xlsx -> (tabla_297, plazas_w)
+# Write:   (national-banks|banks-plazas).feather
+
 # Objetivo. 
 # 1. Identificar catálogo fuente por archivo u otro método. 
 # 2. Identificar path del catálogo en el datalake. 
