@@ -1,6 +1,5 @@
 # Data Tools
 openpyxl
-pyspark
 sqlalchemy
 pandas 
 pyarrow
@@ -16,4 +15,3 @@ unidecode
 clabe
 orjson
 
-# 
