@@ -3,7 +3,7 @@ from pathlib import Path
 
 SITE = Path(__file__).parent if '__file__' in globals() else Path(getcwd())
 
-VERSION = "1.0.35"
+VERSION = "1.0.36"
 
 
 if 'ENV_TYPE' in environ: 

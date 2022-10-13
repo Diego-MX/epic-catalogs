@@ -1,4 +1,4 @@
-name: Deploy Catalog Dev
+name: Build Dev
 on: 
   push:
     branches: 
@@ -10,7 +10,7 @@ env:
   ACR_HOST     : prodcatalogsregistry.azurecr.io
   AZURE_WEB    : wap-prod-catalogs-dev
   DOCKER_IMAGE : prod-catalogs-webapp
-  DOCKER_TAG   : '1.0.35'
+  DOCKER_TAG   : '1.0.36'
   # ACR_HOST     : acrCrossChannelDataQas.azurecr.io
   # AZURE_WEB    : as-catalogs-data-qas
 
@@ -48,4 +48,3 @@ jobs:
         images          : ${{env.ACR_HOST}}/${{ env.DOCKER_IMAGE}}:${{ env.DOCKER_TAG}}
         publish-profile : ${{secrets.WAP_PUBLISH}}
         
-     
