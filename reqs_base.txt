@@ -1,6 +1,5 @@
 # Data Tools
 openpyxl
-pyspark
 sqlalchemy
 pandas 
 pyarrow
@@ -10,9 +9,9 @@ requests
 fastapi
 jsonschema
 uvicorn
-Flask
 
 # Func Tools
 unidecode
 clabe
 orjson
+
