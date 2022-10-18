@@ -6,9 +6,9 @@ on:
 env:
   GH_REPO      : Bineo2/data-prod-catalogs
   DOCKER_IMAGE : prod-catalogs-webapp
-  DOCKER_TAG   : '1.0.33'
-  # ACR_HOST  -> INIT.OUTPUTS.REGISTRY-HOST
-  # AZURE_WEB -> 
+  DOCKER_TAG   : '1.0.37'
+  # ACR_HOST  -> init.outputs.registry
+  # AZURE_WEB -> init.outputs.app-name 
 
 jobs:
   init: 
@@ -22,7 +22,7 @@ jobs:
       - name : Set Variables
         id   : set-variables
         run  : |
-          CASE ${{github.base_ref##*/}} IN
+          case ${GITHUB_BASE_REF##*/} in
             "dev") 
               echo "::set-output name=env-branch::dev"
               echo "::set-output name=registry::prodcatalogsregistry.azurecr.io"
@@ -36,9 +36,9 @@ jobs:
             "stg")
               echo "::set-output name=env-branch::stg"
               echo "::set-output name=registry::acrCrossChannelDataQas.azurecr.io"
-              echo "::set-output app-name::as-catalogs-adm-qas"
+              echo "::set-output app-name::as-catalogs-adm-stg"
               ;;
-          ESAC
+          esac
 
   build-and-deploy :     
     runs-on     : ubuntu-latest
