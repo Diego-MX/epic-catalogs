@@ -22,7 +22,7 @@ jobs:
       - name : Set Variables
         id   : set-variables
         run  : |
-          CASE ${{github.base_ref##*/}} IN
+          CASE ${GITHUB_REF##*/} IN
             "dev") 
               echo "::set-output name=env-branch::dev"
               echo "::set-output name=registry::prodcatalogsregistry.azurecr.io"
