@@ -22,7 +22,7 @@ jobs:
       - name : Set Variables
         id   : set-variables
         run  : |
-          CASE ${GITHUB_REF##*/} IN
+          case ${GITHUB_REF##*/} in
             "dev") 
               echo "::set-output name=env-branch::dev"
               echo "::set-output name=registry::prodcatalogsregistry.azurecr.io"
@@ -38,7 +38,7 @@ jobs:
               echo "::set-output name=registry::acrCrossChannelDataQas.azurecr.io"
               echo "::set-output app-name::as-catalogs-adm-stg"
               ;;
-          ESAC
+          esac
 
   build-and-deploy :     
     runs-on     : ubuntu-latest
