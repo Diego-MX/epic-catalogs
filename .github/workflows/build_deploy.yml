@@ -31,12 +31,12 @@ jobs:
             "qas")
               echo "::set-output name=env-branch::qas"
               echo "::set-output name=registry::acrCrossChannelDataQas.azurecr.io"
-              echo "::set-output app-name::as-catalogs-data-qas"
+              echo "::set-output name=app-name::as-catalogs-data-qas"
               ;;
             "stg")
               echo "::set-output name=env-branch::stg"
               echo "::set-output name=registry::acrCrossChannelDataQas.azurecr.io"
-              echo "::set-output app-name::as-catalogs-adm-stg"
+              echo "::set-output name=app-name::as-catalogs-adm-stg"
               ;;
           esac
 
