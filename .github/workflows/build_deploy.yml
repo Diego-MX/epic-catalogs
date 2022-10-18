@@ -1,0 +1,76 @@
+name: Build and Deploy
+on: 
+  pull_request:
+    branches: ['dev', 'qas', 'stg', 'prd']
+
+env:
+  GH_REPO      : Bineo2/data-prod-catalogs
+  DOCKER_IMAGE : prod-catalogs-webapp
+  DOCKER_TAG   : '1.0.33'
+  # ACR_HOST  -> INIT.OUTPUTS.REGISTRY-HOST
+  # AZURE_WEB -> 
+
+jobs:
+  init: 
+    runs-on: ubuntu-latest
+    outputs: 
+      env-branch : ${{steps.set-variables.outputs.env-branch}}
+      app-name   : ${{steps.set-variables.outputs.app-name}}
+      registry   : ${{steps.set-variables.outputs.registry}} 
+  
+    steps: 
+      - name : Set Variables
+        id   : set-variables
+        run  : |
+          CASE ${{github.base_ref##*/}} IN
+            "dev") 
+              echo "::set-output name=env-branch::dev"
+              echo "::set-output name=registry::prodcatalogsregistry.azurecr.io"
+              echo "::set-output name=app-name::wap-prod-catalogs-dev"
+              ;;
+            "qas")
+              echo "::set-output name=env-branch::qas"
+              echo "::set-output name=registry::acrCrossChannelDataQas.azurecr.io"
+              echo "::set-output app-name::as-catalogs-data-qas"
+              ;;
+            "stg")
+              echo "::set-output name=env-branch::stg"
+              echo "::set-output name=registry::acrCrossChannelDataQas.azurecr.io"
+              echo "::set-output app-name::as-catalogs-adm-qas"
+              ;;
+          ESAC
+
+  build-and-deploy :     
+    runs-on     : ubuntu-latest
+    needs       : init
+    environment : ${{needs.init.outputs.env-branch}}
+    
+    steps: 
+    # https://github.com/actions/checkout
+    - name : Checkout GitHub Actions 
+      uses : actions/checkout@v2
+      with : 
+        repository : ${{env.GH_REPO}}
+        ref        : ${{needs.init.outputs.env-branch}}
+
+    # https://github.com/mr-smithers-excellent/docker-build-push
+    - name : Build and push container image to registry
+      id   : container-registry
+      uses : mr-smithers-excellent/docker-build-push@v5.5
+      with : 
+        dockerfile : dockerfile.ci 
+        image      : ${{env.DOCKER_IMAGE}}
+        tags       : ${{env.DOCKER_TAG}}
+        registry   : ${{needs.init.outputs.registry}}
+        username   : ${{secrets.ACR_USER}}
+        password   : ${{secrets.ACR_PASS}}
+    
+    # https://github.com/Azure/webapps-deploy
+    - name : Deploy to App Service
+      uses : azure/webapps-deploy@v2
+      with :
+        app-name        : ${{needs.init.outputs.app-name}}
+        images          : ${{needs.init.output.registry}}/${{env.DOCKER_IMAGE}}:${{env.DOCKER_TAG}}
+        publish-profile : ${{secrets.WAP_PUBLISH}}
+        
+     
