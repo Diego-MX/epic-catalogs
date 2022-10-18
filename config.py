@@ -1,22 +1,15 @@
 from os import getcwd, environ
 from pathlib import Path
+from src.tools import dict_get
 
 SITE = Path(__file__).parent if '__file__' in globals() else Path(getcwd())
 
-VERSION = "1.0.36"
+VERSION  = "1.0.37"
 
-
-if 'ENV_TYPE' in environ: 
-    an_env = environ['ENV_TYPE']
-elif 'ENV' in environ: 
-    an_env = environ['ENV']
-else: 
-    an_env = 'local'
-
-
-ENV = an_env
-SERVER = environ.get('SERVER_TYPE', 'wap')
+ENV      = dict_get(environ, ['ENV_TYPE', 'ENV'], 'wap')
+SERVER   = environ.get('SERVER_TYPE', 'wap')
 TEST_ENV = 'local'
+
 
 URLS = {
     'local'     : 'http://localhost:80', 
