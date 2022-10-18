@@ -6,7 +6,7 @@ on:
 env:
   GH_REPO      : Bineo2/data-prod-catalogs
   DOCKER_IMAGE : prod-catalogs-webapp
-  DOCKER_TAG   : '1.0.33'
+  DOCKER_TAG   : '1.0.36'
   # ACR_HOST  -> INIT.OUTPUTS.REGISTRY-HOST
   # AZURE_WEB -> 
 
