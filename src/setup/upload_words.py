@@ -31,7 +31,7 @@ for wrd_ls in words_lists["nombre"].values:
             "offensive-words", wrd_ls)
         .assign(Type = wrd_ls)
         .rename(columns = {"Frase": "Phrase"}))
-    words_df = words_df.append(wrd_df, ignore_index=True)
+    words_df = pd.concat([words_df, wrd_df], axis=0, ignore_index=True)
 
 words_df.to_feather(mid_file)
 
