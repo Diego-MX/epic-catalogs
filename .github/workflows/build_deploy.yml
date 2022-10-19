@@ -7,8 +7,6 @@ env:
   GH_REPO   : Bineo2/data-prod-catalogs
   DKR_IMAGE : prod-catalogs-webapp
   DKR_TAG   : '1.0.38'
-  # ACR_HOST  -> init.outputs.registry
-  # AZURE_WEB -> init.outputs.app-name 
 
 jobs:
   init: 
@@ -46,12 +44,12 @@ jobs:
     environment : ${{needs.init.outputs.env-branch}}
     
     steps : 
-    # https://github.com/actions/checkout
+    # https:/:/github.com/actions/checkout
     - name : Checkout GitHub Actions 
       uses : actions/checkout@v2
       with : 
-        repository : ${{env.GH_REPO}}
         ref        : ${{needs.init.outputs.env-branch}}
+        repository : ${{env.GH_REPO}}
 
     # https://github.com/mr-smithers-excellent/docker-build-push
     - name : Build and push container image to registry
@@ -63,15 +61,15 @@ jobs:
         tags       : ${{env.DKR_TAG}}
         username   : ${{needs.init.outputs.reg-user}}
         password   : ${{secrets.ACR_PASS}}
-        registry   : '${{needs.init.outputs.reg-user}}.azurecr.io'
-        buildArgs  : 'SERVER_TYPE=wap,ENV_TYPE=${{needs.init.outputs.environment}}'
+        registry  : '${{needs.init.outputs.reg-user}}.azurecr.io'
+        buildArgs : 'SERVER_TYPE=wap,ENV_TYPE=${{needs.init.outputs.env-branch}}'
     
     # https://github.com/Azure/webapps-deploy
     - name : Deploy to App Service
       uses : azure/webapps-deploy@v2
       with :
-        images         : '${{needs.init.outputs.reg-user}}.azurecr.io/${{env.DKR_IMAGE}}:${{env.DKR_TAG}}'
-        app-name       :  ${{needs.init.outputs.app-name}}
+        images   : '${{needs.init.outputs.reg-user}}.azurecr.io/${{env.DKR_IMAGE}}:${{env.DKR_TAG}}'
+        app-name :  ${{needs.init.outputs.app-name}}
         publish-profile : ${{secrets.WAP_PUBLISH}}
         
      
