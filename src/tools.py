@@ -18,6 +18,16 @@ except ImportError:
     jsonify = None
 
 
+def dict_get(a_dict: dict, keys_ls, val_else): 
+    for a_key in keys_ls: 
+        if a_key in a_dict: 
+            a_val = a_dict[a_key] 
+            break
+    else: 
+        a_val = val_else
+    return a_val
+
+
 def str_camel_to_snake(cameled:str):
     subbed = re.sub('(.)([A-Z][a-z]+)',  r'\1_\2', cameled)
     snaked = re.sub('([a-z0-9])([A-Z])', r'\1_\2', subbed).lower()
