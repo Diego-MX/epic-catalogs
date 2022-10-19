@@ -20,7 +20,7 @@ jobs:
       - name : Set Variables
         id   : set-variables
         run  : |
-          case ${GITHUB_REF} in
+          case ${GITHUB_BASE_REF} in
             "dev") 
               echo "::set-output name=env-branch::dev"
               echo "::set-output name=reg-user::prodcatalogsregistry"
