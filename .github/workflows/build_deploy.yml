@@ -4,9 +4,9 @@ on:
     branches: ['dev', 'qas', 'stg', 'prd']
 
 env:
-  GH_REPO      : Bineo2/data-prod-catalogs
-  DOCKER_IMAGE : prod-catalogs-webapp
-  DOCKER_TAG   : '1.0.37'
+  GH_REPO   : Bineo2/data-prod-catalogs
+  DKR_IMAGE : prod-catalogs-webapp
+  DKR_TAG   : '1.0.38'
   # ACR_HOST  -> init.outputs.registry
   # AZURE_WEB -> init.outputs.app-name 
 
@@ -16,7 +16,7 @@ jobs:
     outputs: 
       env-branch : ${{steps.set-variables.outputs.env-branch}}
       app-name   : ${{steps.set-variables.outputs.app-name}}
-      registry   : ${{steps.set-variables.outputs.registry}} 
+      reg-user   : ${{steps.set-variables.outputs.reg-user}} 
   
     steps: 
       - name : Set Variables
@@ -25,17 +25,17 @@ jobs:
           case ${GITHUB_BASE_REF##*/} in
             "dev") 
               echo "::set-output name=env-branch::dev"
-              echo "::set-output name=registry::prodcatalogsregistry.azurecr.io"
+              echo "::set-output name=reg-user::prodcatalogsregistry"
               echo "::set-output name=app-name::wap-prod-catalogs-dev"
               ;;
             "qas")
               echo "::set-output name=env-branch::qas"
-              echo "::set-output name=registry::acrCrossChannelDataQas.azurecr.io"
+              echo "::set-output name=reg-user::acrCrossChannelDataQas"
               echo "::set-output name=app-name::as-catalogs-data-qas"
               ;;
             "stg")
               echo "::set-output name=env-branch::stg"
-              echo "::set-output name=registry::acrCrossChannelDataQas.azurecr.io"
+              echo "::set-output name=reg-user::acrCrossChannelDataQas"
               echo "::set-output name=app-name::as-catalogs-adm-stg"
               ;;
           esac
@@ -45,7 +45,7 @@ jobs:
     needs       : init
     environment : ${{needs.init.outputs.env-branch}}
     
-    steps: 
+    steps : 
     # https://github.com/actions/checkout
     - name : Checkout GitHub Actions 
       uses : actions/checkout@v2
@@ -59,18 +59,19 @@ jobs:
       uses : mr-smithers-excellent/docker-build-push@v5.5
       with : 
         dockerfile : dockerfile.ci 
-        image      : ${{env.DOCKER_IMAGE}}
-        tags       : ${{env.DOCKER_TAG}}
-        registry   : ${{needs.init.outputs.registry}}
-        username   : ${{secrets.ACR_USER}}
+        image      : ${{env.DKR_IMAGE}}
+        tags       : ${{env.DKR_TAG}}
+        username   : ${{needs.init.outputs.reg-user}}
         password   : ${{secrets.ACR_PASS}}
+        registry   : '${{needs.init.outputs.reg-user}}.azurecr.io'
+        buildArgs  : 'SERVER_TYPE=wap,ENV_TYPE=${{needs.init.outputs.environment}}'
     
     # https://github.com/Azure/webapps-deploy
     - name : Deploy to App Service
       uses : azure/webapps-deploy@v2
       with :
-        app-name        : ${{needs.init.outputs.app-name}}
-        images          : ${{needs.init.output.registry}}/${{env.DOCKER_IMAGE}}:${{env.DOCKER_TAG}}
+        images         : '${{needs.init.outputs.reg-user}}.azurecr.io/${{env.DKR_IMAGE}}:${{env.DKR_TAG}}'
+        app-name       :  ${{needs.init.outputs.app-name}}
         publish-profile : ${{secrets.WAP_PUBLISH}}
         
      
