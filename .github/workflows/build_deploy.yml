@@ -6,7 +6,7 @@ on:
 env:
   GH_REPO   : Bineo2/data-prod-catalogs
   DKR_IMAGE : prod-catalogs-webapp
-  DKR_TAG   : '1.0.38'
+  DKR_TAG   : '1.0.39'
 
 jobs:
   init: 
@@ -14,7 +14,6 @@ jobs:
     outputs: 
       env-branch : ${{steps.set-variables.outputs.env-branch}}
       app-name   : ${{steps.set-variables.outputs.app-name}}
-      reg-user   : ${{steps.set-variables.outputs.reg-user}} 
   
     steps: 
       - name : Set Variables
@@ -23,17 +22,14 @@ jobs:
           case ${GITHUB_BASE_REF} in
             "dev") 
               echo "::set-output name=env-branch::dev"
-              echo "::set-output name=reg-user::prodcatalogsregistry"
               echo "::set-output name=app-name::wap-prod-catalogs-dev"
               ;;
             "qas")
               echo "::set-output name=env-branch::qas"
-              echo "::set-output name=reg-user::acrCrossChannelDataQas"
               echo "::set-output name=app-name::as-catalogs-data-qas"
               ;;
             "stg")
               echo "::set-output name=env-branch::stg"
-              echo "::set-output name=reg-user::acrCrossChannelDataQas"
               echo "::set-output name=app-name::as-catalogs-adm-stg"
               ;;
           esac
@@ -59,16 +55,16 @@ jobs:
         dockerfile : dockerfile.ci 
         image      : ${{env.DKR_IMAGE}}
         tags       : ${{env.DKR_TAG}}
-        username   : ${{needs.init.outputs.reg-user}}
+        username   : ${{secrets.ACR_USER}}
         password   : ${{secrets.ACR_PASS}}
-        registry  : '${{needs.init.outputs.reg-user}}.azurecr.io'
+        registry  : '${{secrets.ACR_USER}}.azurecr.io'
         buildArgs : 'SERVER_TYPE=wap,ENV_TYPE=${{needs.init.outputs.env-branch}}'
     
     # https://github.com/Azure/webapps-deploy
     - name : Deploy to App Service
       uses : azure/webapps-deploy@v2
       with :
-        images   : '${{needs.init.outputs.reg-user}}.azurecr.io/${{env.DKR_IMAGE}}:${{env.DKR_TAG}}'
+        images   : '${{secrets.ACR_USER}}.azurecr.io/${{env.DKR_IMAGE}}:${{env.DKR_TAG}}'
         app-name :  ${{needs.init.outputs.app-name}}
         publish-profile : ${{secrets.WAP_PUBLISH}}
         
