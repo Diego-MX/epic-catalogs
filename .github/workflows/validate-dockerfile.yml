@@ -49,7 +49,7 @@ jobs:
     # https://github.com/mr-smithers-excellent/docker-build-push
     - name : Build image
       id   : container-registry
-      uses : mr-smithers-excellent/docker-build-push@v5.5
+      uses : mr-smithers-excellent/docker-build-push@v5.8
       with : 
         pushImage : false
         dockerfile : dockerfile.ci 
