@@ -14,4 +14,3 @@ uvicorn
 unidecode
 clabe
 orjson
-
