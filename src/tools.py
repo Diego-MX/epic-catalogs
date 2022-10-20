@@ -1,12 +1,9 @@
 
 from base64 import b64encode as enc64
-from datetime import datetime as dt
 from openpyxl import load_workbook, utils as xl_utils
 import pandas as pd
 import re
 
-import json
-from jsonschema import validate, exceptions
 from requests import auth
 from unidecode import unidecode
 
