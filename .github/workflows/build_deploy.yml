@@ -1,21 +1,21 @@
-name: Build and Deploy
-on: 
-  pull_request:
-    branches: ['dev', 'qas', 'stg', 'prd']
+name : Build and Deploy
+on : 
+  pull_request :
+    branches : ['dev', 'qas', 'stg', 'prd']
 
-env:
+env :
   GH_REPO   : Bineo2/data-prod-catalogs
   DKR_IMAGE : prod-catalogs-webapp
-  DKR_TAG   : '1.0.39'
+  DKR_TAG   : '1.0.40'
 
-jobs:
-  init: 
-    runs-on: ubuntu-latest
-    outputs: 
+jobs :
+  init : 
+    runs-on : ubuntu-latest
+    outputs : 
       env-branch : ${{steps.set-variables.outputs.env-branch}}
       app-name   : ${{steps.set-variables.outputs.app-name}}
   
-    steps: 
+    steps : 
       - name : Set Variables
         id   : set-variables
         run  : |
@@ -23,15 +23,15 @@ jobs:
             "dev") 
               echo "::set-output name=env-branch::dev"
               echo "::set-output name=app-name::wap-prod-catalogs-dev"
-              ;;
+            ;;
             "qas")
               echo "::set-output name=env-branch::qas"
               echo "::set-output name=app-name::as-catalogs-data-qas"
-              ;;
+            ;;
             "stg")
               echo "::set-output name=env-branch::stg"
               echo "::set-output name=app-name::as-catalogs-adm-stg"
-              ;;
+            ;;
           esac
 
   build-and-deploy :     
@@ -52,20 +52,20 @@ jobs:
       id   : container-registry
       uses : mr-smithers-excellent/docker-build-push@v5.5
       with : 
-        dockerfile : dockerfile.ci 
-        image      : ${{env.DKR_IMAGE}}
-        tags       : ${{env.DKR_TAG}}
+        registry   : ${{secrets.ACR_USER}}.azurecr.io
         username   : ${{secrets.ACR_USER}}
         password   : ${{secrets.ACR_PASS}}
-        registry  : '${{secrets.ACR_USER}}.azurecr.io'
-        buildArgs : 'SERVER_TYPE=wap,ENV_TYPE=${{needs.init.outputs.env-branch}}'
+        image      : ${{env.DKR_IMAGE}}
+        tags       : ${{env.DKR_TAG}}
+        dockerfile : dockerfile.ci 
+        buildArgs  : SERVER_TYPE=wap,ENV_TYPE=${{needs.init.outputs.env-branch}}
     
     # https://github.com/Azure/webapps-deploy
     - name : Deploy to App Service
       uses : azure/webapps-deploy@v2
       with :
-        images   : '${{secrets.ACR_USER}}.azurecr.io/${{env.DKR_IMAGE}}:${{env.DKR_TAG}}'
-        app-name :  ${{needs.init.outputs.app-name}}
+        images   : ${{secrets.ACR_USER}}.azurecr.io/${{env.DKR_IMAGE}}:${{env.DKR_TAG}}
+        app-name : ${{needs.init.outputs.app-name}}
         publish-profile : ${{secrets.WAP_PUBLISH}}
         
      
