@@ -55,4 +55,7 @@ jobs:
         dockerfile : dockerfile.ci 
         image      : ${{env.DKR_IMAGE}}
         tags       : ${{env.DKR_TAG}}
+        username   : ''
+        password   : ''
+        registry  : ''
         buildArgs : 'SERVER_TYPE=wap,ENV_TYPE=${{needs.init.outputs.env-branch}}'
