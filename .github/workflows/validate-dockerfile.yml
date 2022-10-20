@@ -34,7 +34,7 @@ jobs:
               ;;
           esac
 
-  build-and-deploy :     
+  build :     
     runs-on     : ubuntu-latest
     needs       : init
     environment : ${{needs.init.outputs.env-branch}}
