@@ -1,6 +1,6 @@
 name: Build and Deploy
 on: 
-  push:
+  pull_request:
     branches: ['dev', 'qas', 'stg', 'prd']
 
 env:
@@ -44,7 +44,7 @@ jobs:
     - name : Checkout GitHub Actions 
       uses : actions/checkout@v2
       with : 
-        ref        : ${{needs.init.outputs.env-branch}}
+        ref        : ${{github.ref}}
         repository : ${{env.GH_REPO}}
 
     # https://github.com/mr-smithers-excellent/docker-build-push
@@ -52,7 +52,7 @@ jobs:
       id   : container-registry
       uses : mr-smithers-excellent/docker-build-push@v5.5
       with : 
-        pushImage : true
+        pushImage : false
         dockerfile : dockerfile.ci 
         image      : ${{env.DKR_IMAGE}}
         tags       : ${{env.DKR_TAG}}
@@ -60,13 +60,3 @@ jobs:
         password   : ${{secrets.ACR_PASS}}
         registry  : '${{secrets.ACR_USER}}.azurecr.io'
         buildArgs : 'SERVER_TYPE=wap,ENV_TYPE=${{needs.init.outputs.env-branch}}'
-    
-    # https://github.com/Azure/webapps-deploy
-    - name : Deploy to App Service
-      uses : azure/webapps-deploy@v2
-      with :
-        images   : '${{secrets.ACR_USER}}.azurecr.io/${{env.DKR_IMAGE}}:${{env.DKR_TAG}}'
-        app-name :  ${{needs.init.outputs.app-name}}
-        publish-profile : ${{secrets.WAP_PUBLISH}}
-        
-     
