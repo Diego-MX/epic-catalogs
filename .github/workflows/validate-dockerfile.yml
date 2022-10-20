@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: Compile Dockerfile
 on: 
   pull_request:
     branches: ['dev', 'qas', 'stg', 'prd']
@@ -48,7 +48,7 @@ jobs:
         repository : ${{env.GH_REPO}}
 
     # https://github.com/mr-smithers-excellent/docker-build-push
-    - name : Build and push container image to registry
+    - name : Build image
       id   : container-registry
       uses : mr-smithers-excellent/docker-build-push@v5.5
       with : 
