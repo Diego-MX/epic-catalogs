@@ -44,7 +44,7 @@ jobs :
           image      : ${{env.DKR_IMAGE}}
           tags       : ${{env.DKR_TAG}}-${{env.BRANCH_ENV}}
           dockerfile : dockerfile.ci 
-          buildArgs  : ENV_TYPE=${{env.BRANCH_EVN}},SERVER_TYPE=wap
+          buildArgs  : ENV_TYPE=${{env.BRANCH_ENV}},SERVER_TYPE=wap
       
       # https://github.com/Azure/webapps-deploy
       - name : Deploy to App Service
