@@ -13,6 +13,7 @@ jobs :
   build-and-deploy :     
     runs-on     : ubuntu-latest
     environment : ${{github.base_ref || github.ref_name}}
+    
     steps : 
       - name : Set Variables
         run  : |
