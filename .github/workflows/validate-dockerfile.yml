@@ -25,6 +25,7 @@ jobs :
             echo "WAP_NAME=as-catalogs-adm-stg" >> $GITHUB_ENV;;
           "prd") 
             echo "WAP_NAME=as-catalogs-adm-prd" >> $GITHUB_ENV;;
+        esac
 
     # https:/:/github.com/actions/checkout
     - name : Checkout GitHub Actions 
