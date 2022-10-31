@@ -67,6 +67,14 @@ def get_bank_details_from_card_number(card_number: str):
     return bin_bank
 
 
+@app.get('/national-banks/acquiring/{card_number}', tags=['Banks'], 
+        response_model=models.CardsBin)
+def get_acquiring_bank_details(card_number: str): 
+    bin_bank = engine.card_number_parse(card_number)
+    return bin_bank
+
+
+
 if __name__ == '__main__':
     if debug_mode: 
         uvicorn.run('__main__:app', port=80, host='0.0.0.0', reload=True)

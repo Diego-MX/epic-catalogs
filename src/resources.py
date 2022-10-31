@@ -17,7 +17,7 @@ class AzureResourcer():
             params = self.config['app_sp']
             self.credentials = ClientSecretCredential(**{k: os.getenv(v) 
                 for (k, v) in params.items()})
-        if self.env in ['dev', 'qas']: 
+        if self.env in ['dev', 'qas', 'stg', 'prd']: 
             self.credentials = DefaultAzureCredential()
 
     def get_blob_service(self):

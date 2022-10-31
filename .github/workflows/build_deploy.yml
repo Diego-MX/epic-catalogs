@@ -1,76 +1,56 @@
 name: Build and Deploy
-on: 
-  push:
-    branches: ['dev', 'qas', 'stg', 'prd']
+on : 
+  push :  # PUSH utiliza REF_NAME como el branch (y el ambiente para los secretos).  
+    branches : [dev, qas, stg, prd]   # PULL_REQUEST, utiliza BASE_REF.  
 
-env:
+env :
   GH_REPO   : Bineo2/data-prod-catalogs
   DKR_IMAGE : prod-catalogs-webapp
-  DKR_TAG   : '1.0.391'
+  DKR_TAG   : '1.0.41'
 
-jobs:
-  init: 
-    runs-on: ubuntu-latest
-    outputs: 
-      env-branch : ${{steps.set-variables.outputs.env-branch}}
-      app-name   : ${{steps.set-variables.outputs.app-name}}
-  
-    steps: 
-      - name : Set Variables
-        id   : set-variables
-        run  : |
-          if [[ "${{github.base_ref}}" == "main" || "${{github.ref}}" == "refs/heads/main" ]]; then
-            echo "::set-output name=env-branch::prd"
-            echo "::set-output name=app-name::as-catalogs-data-prd"
-          fi
-
-          if [[ "${{github.base_ref}}" == "stg" || "${{github.ref}}" == "refs/heads/stg" ]]; then
-            echo "::set-output name=env-branch::stg"
-            echo "::set-output name=app-name::as-catalogs-adm-stg"
-          fi
-
-          if [[ "${{github.base_ref}}" == "qas" || "${{github.ref}}" == "refs/heads/qas" ]]; then
-            echo "::set-output name=env-branch::qas"
-            echo "::set-output name=app-name::as-catalogs-data-qas"
-          fi
-
-          if [[ "${{github.base_ref}}" == "dev" || "${{github.ref}}" == "refs/heads/dev" ]]; then
-            echo "::set-output name=env-branch::dev"
-            echo "::set-output name=app-name::wap-prod-catalogs-dev"
-          fi
-
+jobs :
   build-and-deploy :     
     runs-on     : ubuntu-latest
-    needs       : init
-    environment : ${{needs.init.outputs.env-branch}}
-    
+    environment : ${{github.ref_name}}
     steps : 
-    # https:/:/github.com/actions/checkout
-    - name : Checkout GitHub Actions 
-      uses : actions/checkout@v2
-      with : 
-        ref        : ${{needs.init.outputs.env-branch}}
-        repository : ${{env.GH_REPO}}
+      - name : Set Variables
+        run  : |
+          case ${{github.ref_name}} in
+            "prd")
+              echo "WAP_NAME=as-catalogs-data-prd"  >> $GITHUB_ENV;;
+            "stg")
+              echo "WAP_NAME=as-catalogs-adm-stg"   >> $GITHUB_ENV;;
+            "qas")
+              echo "WAP_NAME=as-catalogs-data-qas"  >> $GITHUB_ENV;;
+            "dev")
+              echo "WAP_NAME=wap-prod-catalogs-dev" >> $GITHUB_ENV;;
+          esac
 
-    # https://github.com/mr-smithers-excellent/docker-build-push
-    - name : Build and push container image to registry
-      id   : container-registry
-      uses : mr-smithers-excellent/docker-build-push@v5.5
-      with : 
-        dockerfile : dockerfile.ci 
-        image      : ${{env.DKR_IMAGE}}
-        tags       : ${{env.DKR_TAG}}
-        username   : ${{secrets.ACR_USER}}
-        password   : ${{secrets.ACR_PASS}}
-        registry  : '${{secrets.ACR_USER}}.azurecr.io'
-        buildArgs : 'SERVER_TYPE=wap,ENV_TYPE=${{needs.init.outputs.env-branch}}'
-    
-    # https://github.com/Azure/webapps-deploy
-    - name : Deploy to App Service
-      uses : azure/webapps-deploy@v2
-      with :
-        images   : '${{secrets.ACR_USER}}.azurecr.io/${{env.DKR_IMAGE}}:${{env.DKR_TAG}}'
-        app-name :  ${{needs.init.outputs.app-name}}
-        publish-profile : ${{secrets.WAP_PUBLISH}}
-        
-     
+    # https:/:/github.com/actions/checkout
+      - name : Checkout GitHub Actions
+        uses : actions/checkout@v2
+        with : 
+          ref        : ${{github.ref_name}}
+          repository : ${{env.GH_REPO}}
+
+      # https://github.com/mr-smithers-excellent/docker-build-push
+      - name : Build and push container image to registry
+        uses : mr-smithers-excellent/docker-build-push@v5.5
+        with : 
+          registry   : ${{secrets.ACR_USER}}.azurecr.io
+          username   : ${{secrets.ACR_USER}}
+          password   : ${{secrets.ACR_PASS}}
+          image      : ${{env.DKR_IMAGE}}
+          tags       : ${{env.DKR_TAG}}-${{github.ref_name}}
+          dockerfile : dockerfile.ci 
+          buildArgs  : ENV_TYPE=${{github.ref_name}},SERVER_TYPE=wap
+      
+      # https://github.com/Azure/webapps-deploy
+      - name : Deploy to App Service
+        uses : azure/webapps-deploy@v2
+        with :
+          images   : ${{secrets.ACR_USER}}.azurecr.io/${{env.DKR_IMAGE}}:${{env.DKR_TAG}}-${{github.ref_name}}
+          app-name : ${{env.WAP_NAME}}
+          publish-profile : ${{secrets.WAP_PUBLISH}}
+          
+      

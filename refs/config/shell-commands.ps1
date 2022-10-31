@@ -7,9 +7,11 @@ python ./src/app/start.py
 uvicorn start:app --port 80 --host 0.0.0.0
 
 # Para el Docker
-docker build --build-arg SERVER_TYPE=docker -f .\dockerfile.ci -t prod-catalogs-webapp:latest .
+docker build --build-arg SERVER_TYPE=docker --build-arg ENV_TYPE=dev -f .\dockerfile.ci -t prod-catalogs-webapp:latest .
 docker run -p 80:80 --rm prod-catalogs-webapp
 docker ps -a 
+PS1> ... <la_instancia>
+
 docker stop {la_instancia}
 
 
