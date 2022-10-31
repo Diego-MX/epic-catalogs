@@ -6,49 +6,31 @@ on:
 env:
   GH_REPO   : Bineo2/data-prod-catalogs
   DKR_IMAGE : prod-catalogs-webapp
-  DKR_TAG   : '1.0.391'
+  DKR_TAG   : '1.0.44'
+  BRANCH_ENV : ${{github.base_ref || github.ref_name}}
 
-jobs:
-  init: 
-    runs-on: ubuntu-latest
-    outputs: 
-      env-branch : ${{steps.set-variables.outputs.env-branch}}
-      app-name   : ${{steps.set-variables.outputs.app-name}}
-  
-    steps: 
-      - name : Set Variables
-        id   : set-variables
-        run  : |
-          if [[ "${{github.base_ref}}" == "main" || "${{github.ref}}" == "refs/heads/main" ]]; then
-            echo "::set-output name=env-branch::prd"
-            echo "::set-output name=app-name::as-catalogs-data-prd"
-          fi
-
-          if [[ "${{github.base_ref}}" == "stg" || "${{github.ref}}" == "refs/heads/stg" ]]; then
-            echo "::set-output name=env-branch::stg"
-            echo "::set-output name=app-name::as-catalogs-adm-stg"
-          fi
-
-          if [[ "${{github.base_ref}}" == "qas" || "${{github.ref}}" == "refs/heads/qas" ]]; then
-            echo "::set-output name=env-branch::qas"
-            echo "::set-output name=app-name::as-catalogs-data-qas"
-          fi
-
-          if [[ "${{github.base_ref}}" == "dev" || "${{github.ref}}" == "refs/heads/dev" ]]; then
-            echo "::set-output name=env-branch::dev"
-            echo "::set-output name=app-name::wap-prod-catalogs-dev"
-          fi
-
+jobs :
   build :     
-    runs-on     : ubuntu-latest
-    needs       : init
+    runs-on : ubuntu-latest
     
     steps : 
+    - name : Set Variables 
+      run : |
+        case ${{env.BRANCH_ENV}} in
+          "dev") 
+            echo "WAP_NAME=wap-prod-catalogs-dev" >> $GITHUB_ENV;;
+          "qas") 
+            echo "WAP_NAME=as-catalogs-data-qas" >> $GITHUB_ENV;;
+          "stg") 
+            echo "WAP_NAME=as-catalogs-adm-stg" >> $GITHUB_ENV;;
+          "prd") 
+            echo "WAP_NAME=as-catalogs-adm-prd" >> $GITHUB_ENV;;
+
     # https:/:/github.com/actions/checkout
     - name : Checkout GitHub Actions 
       uses : actions/checkout@v2
       with : 
-        ref        : ${{github.ref}}
+        ref        : ${{env.BRANCH_ENV}}
         repository : ${{env.GH_REPO}}
 
     # https://github.com/mr-smithers-excellent/docker-build-push
@@ -62,5 +44,5 @@ jobs:
         tags       : ${{env.DKR_TAG}}
         username   : 'dummy'
         password   : 'dummy'
-        registry  : 'dummy'
-        buildArgs : 'SERVER_TYPE=wap,ENV_TYPE=${{needs.init.outputs.env-branch}}'
+        registry   : 'dummy'
+        buildArgs  : 'SERVER_TYPE=wap,ENV_TYPE=${{env.BRANCH_env}}'
