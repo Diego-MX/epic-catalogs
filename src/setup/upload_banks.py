@@ -3,16 +3,19 @@
 
 # From Excel to Feather to Blob
 
+# Read:  api-catalogs.xlsx!(tabla_297|plazas_w|anexo_1,anexo_1c)
+# Write: national-banks(-plazas|-bins)?
+
 
 from src.resources import AzureResourcer
 from src.tools import read_excel_table
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
-from config import SITE, ENV
+from config import SITE, ENV, SERVER
 
 
-#'  General considerations
+#  General considerations
 local_path = SITE/'refs/catalogs'
 storage_path = 'product/epic-catalogs/app-services'
 
@@ -24,19 +27,19 @@ ctlg_files = {
 #' Banks
 
 excel_call = (local_path/'api-catalogs.xlsx.lnk', 'banks', 'tabla_297')
-df_colnames = {
-    'NOMBRE' : 'name', 
-    'CLAVE'  : 'code',
-    'BANCO'  : 'banxico_id', 
-    'nombre_corto': 'alias', 
-    'SPEI'   : 'spei'}
+dict_colnames = {
+    'NOMBRE'      : 'name',
+    'CLAVE'       : 'code',
+    'BANCO'       : 'banxico_id',
+    'nombre_corto': 'alias',
+    'SPEI'        : 'spei'}
     # , 
     # 'PARAMETRO Activo / Desactivo': 'is_active', 
     # 'Tipo banco' : 'type'}
 
 ctlg_df = (read_excel_table(*excel_call)
-    .rename(columns=df_colnames)
-    .loc[:, df_colnames.values()]
+    .rename(columns=dict_colnames)
+    .loc[:, dict_colnames.values()]
     .astype(str)
     .reset_index())
 
@@ -46,12 +49,13 @@ ctlg_df.to_feather(local_path/f"{ctlg_files['banks']}.feather")
 
 excel_call = (local_path/'api-catalogs.xlsx.lnk', 'banks', 'plazas_w')
 
-df_colnames = {
+dict_colnames = {
     'Nombre' : 'name',
     'Plaza'  : 'code'}
 
+
 ctlg_df = (read_excel_table(*excel_call)
-    .rename(columns=df_colnames)
+    .rename(columns=dict_colnames)
     .assign(code=lambda df: df.code.map(str).str.pad(3, fillchar='0')))
 
 ctlg_df.to_feather(local_path/f'{ctlg_files["plazas"]}.feather')
@@ -89,7 +93,7 @@ bins.to_feather(local_path/f'{ctlg_files["bins"]}.feather')
 # Development Mode keeps Env variables. 
 
 
-resourcer = AzureResourcer(ENV)
+resourcer = AzureResourcer(ENV, SERVER)
 blob_container = resourcer.get_blob_service()
 
 for each_file in ctlg_files.values(): 

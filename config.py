@@ -1,17 +1,22 @@
-import os
+from os import getcwd, environ
 from pathlib import Path
+from src.tools import dict_get
 
-SITE = Path(__file__).parent if '__file__' in globals() else Path(os.getcwd())
+SITE = Path(__file__).parent if '__file__' in globals() else Path(getcwd())
 
-VERSION = "1.0.34"
+VERSION  = "1.0.44"
 
-ENV = os.environ.get('ENV', 'local')
+ENV      = dict_get(environ, ['ENV_TYPE', 'ENV'], 'wap')
+SERVER   = environ.get('SERVER_TYPE', 'wap')
+TEST_ENV = 'local'
+
 
 URLS = {
     'local'     : 'http://localhost:80', 
     'staging'   : 'https://wap-prod-catalogs-dev.azurewebsites.net', 
     'qa'        : 'https://apim-crosschannel-tech-dev.azure-api.net/data/catalogs/v1'
 }
+
 
 ENV_VARS = {
     'local' : {
@@ -29,7 +34,15 @@ ENV_VARS = {
     }, 
     'qas' : {
         'storage' : {
-            'url'   : 'https://stlakehylia.blob.core.windows.net/'}
+            'url'   : 'https://stlakehyliaqas.blob.core.windows.net/'}
+    }, 
+    'stg' : {
+        'storage' : {
+            'url'   : 'https://stlakehyliastg.blob.core.windows.net/'}
+    }, 
+    'prd' : {
+        'storage' : {
+            'url'   : 'https://stlakehyliaprd.blob.core.windows.net/'}
     } 
 }
 

@@ -15,7 +15,7 @@ class TestBanks(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_invalid_clabe_returns_404(self):
-        clabe_key = '002180700845152896'
+        clabe_key = '002180700845282896'
         response = requests.get(f'{URL}/national-banks/parse-clabe/{clabe_key}')
         self.assertEqual(response.status_code, 404)
 
@@ -31,7 +31,7 @@ if __name__ == '__main__':
     import sys
     import config
     
-    ENV = config.DEFAULT_ENV if len(sys.argv) == 1 else sys.argv.pop()
+    ENV = config.TEST_ENV if len(sys.argv) == 1 else sys.argv.pop()
     URL = config.URLS.get(ENV)
 
     unit_main()
@@ -52,6 +52,7 @@ if False:
     response = requests.get(f'{URL}/national-banks/card-number/{card_num}')
     institucion = response.json()['name']        
 
+    clabe_key = '002180700845282896'  #invalida
     clabe_key = '002180700845152894'
     clabe_key = '012180029770826063'
     clabe_key = '012180029770826064'
@@ -62,4 +63,3 @@ if False:
     b_response = requests.get(URL)
     print(a_response.text)
 
-    

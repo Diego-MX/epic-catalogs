@@ -1,16 +1,22 @@
-from datetime import datetime as dt
 
 from base64 import b64encode as enc64
-import re
-
 from openpyxl import load_workbook, utils as xl_utils
 import pandas as pd
+import re
 
-from flask import jsonify
-import json
-from jsonschema import validate, exceptions
 from requests import auth
 from unidecode import unidecode
+
+
+
+def dict_get(a_dict: dict, keys_ls, val_else): 
+    for a_key in keys_ls: 
+        if a_key in a_dict: 
+            a_val = a_dict[a_key] 
+            break
+    else: 
+        a_val = val_else
+    return a_val
 
 
 def str_camel_to_snake(cameled:str):
@@ -27,24 +33,6 @@ def str_snake_to_camel(snaked:str, first_word_too=False, decode=False):
     first_camel = first_word.title() if first_word_too else first_word.lower()
     cameled     = first_camel + ''.join(word.title() for word in splitted)
     return cameled
-
-
-def response_validate(payload, input_file):
-    try: 
-        with open(input_file, 'r') as _f:
-            input_schema = json.load(_f)
-        validate(instance=payload, schema=input_schema)
-        an_object = {'error' : False}
-    except exceptions.ValidationError as err:
-        response = {
-            'code'          : '0001',
-            'type'          : 'validation/input',
-            'status_code'   : '400',
-            'timestamp'     : str(dt.now()),
-            'instance'      : 'input/messages_strategy/invalid_structure',
-            'detail'        : str(err) }
-        an_object = {'error' : 400, 'output' : (jsonify(response), 400)}
-    return an_object
 
 
 def shortcut_target(filename, file_ext=None):

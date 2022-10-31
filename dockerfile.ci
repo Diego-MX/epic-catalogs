@@ -8,6 +8,10 @@ RUN pip install --trusted-host pypi.python.org -r ./reqs_base.txt
 
 COPY . . 
 
+ARG SERVER_TYPE
+ARG ENV_TYPE
+ENV SERVER_TYPE ${SERVER_TYPE}
+ENV ENV_TYPE ${ENV_TYPE}
 EXPOSE 80 
 CMD ["python", "-m", "src.app.start"]
 
