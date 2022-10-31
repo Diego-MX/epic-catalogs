@@ -12,7 +12,7 @@ from src.tools import read_excel_table
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
-from config import SITE, ENV
+from config import SITE, ENV, SERVER
 
 
 #  General considerations
@@ -93,7 +93,7 @@ bins.to_feather(local_path/f'{ctlg_files["bins"]}.feather')
 # Development Mode keeps Env variables. 
 
 
-resourcer = AzureResourcer(ENV)
+resourcer = AzureResourcer(ENV, SERVER)
 blob_container = resourcer.get_blob_service()
 
 for each_file in ctlg_files.values(): 

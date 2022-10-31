@@ -15,3 +15,5 @@ unidecode
 clabe
 orjson
 
+azure-storage-blob
+azure-identity
