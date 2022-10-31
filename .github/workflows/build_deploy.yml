@@ -4,18 +4,20 @@ on :
     branches : [dev, qas, stg, prd]   # PULL_REQUEST, utiliza BASE_REF.  
 
 env :
-  GH_REPO   : Bineo2/data-prod-catalogs
-  DKR_IMAGE : prod-catalogs-webapp
-  DKR_TAG   : '1.0.41'
+  BRANCH_ENV : ${{github.base_ref || github.ref_name}}
+  GH_REPO    : Bineo2/data-prod-catalogs
+  DKR_IMAGE  : prod-catalogs-webapp
+  DKR_TAG    : '1.0.44'
 
 jobs :
   build-and-deploy :     
     runs-on     : ubuntu-latest
-    environment : ${{github.ref_name}}
+    environment : ${{github.base_ref || github.ref_name}}
+    
     steps : 
       - name : Set Variables
         run  : |
-          case ${{github.ref_name}} in
+          case ${{env.BRANCH_ENV}} in
             "prd")
               echo "WAP_NAME=as-catalogs-data-prd"  >> $GITHUB_ENV;;
             "stg")
@@ -30,8 +32,8 @@ jobs :
       - name : Checkout GitHub Actions
         uses : actions/checkout@v2
         with : 
-          ref        : ${{github.ref_name}}
-          repository : ${{env.GH_REPO}}
+          repository : ${{env.GH_REPO}}  # No deja cargar ENV.BRANCH_ENV 
+          ref : ${{env.BRANCH_ENV}}  
 
       # https://github.com/mr-smithers-excellent/docker-build-push
       - name : Build and push container image to registry
@@ -41,15 +43,15 @@ jobs :
           username   : ${{secrets.ACR_USER}}
           password   : ${{secrets.ACR_PASS}}
           image      : ${{env.DKR_IMAGE}}
-          tags       : ${{env.DKR_TAG}}-${{github.ref_name}}
+          tags       : ${{env.DKR_TAG}}-${{env.BRANCH_ENV}}
           dockerfile : dockerfile.ci 
-          buildArgs  : ENV_TYPE=${{github.ref_name}},SERVER_TYPE=wap
+          buildArgs  : ENV_TYPE=${{env.BRANCH_ENV}},SERVER_TYPE=wap
       
       # https://github.com/Azure/webapps-deploy
       - name : Deploy to App Service
         uses : azure/webapps-deploy@v2
         with :
-          images   : ${{secrets.ACR_USER}}.azurecr.io/${{env.DKR_IMAGE}}:${{env.DKR_TAG}}-${{github.ref_name}}
+          images   : ${{secrets.ACR_USER}}.azurecr.io/${{env.DKR_IMAGE}}:${{env.DKR_TAG}}-${{env.BRANCH_ENV}}
           app-name : ${{env.WAP_NAME}}
           publish-profile : ${{secrets.WAP_PUBLISH}}
           
