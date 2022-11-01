@@ -6,7 +6,7 @@ on:
 env:
   GH_REPO   : Bineo2/data-prod-catalogs
   DKR_IMAGE : prod-catalogs-webapp
-  DKR_TAG   : '1.0.44'
+  DKR_TAG   : '1.0.45'
   BRANCH_ENV : ${{github.base_ref || github.ref_name}}
 
 jobs :
@@ -20,11 +20,11 @@ jobs :
           "dev") 
             echo "WAP_NAME=wap-prod-catalogs-dev" >> $GITHUB_ENV;;
           "qas") 
-            echo "WAP_NAME=as-catalogs-data-qas" >> $GITHUB_ENV;;
+            echo "WAP_NAME=as-catalogs-data-qas"  >> $GITHUB_ENV;;
           "stg") 
-            echo "WAP_NAME=as-catalogs-adm-stg" >> $GITHUB_ENV;;
+            echo "WAP_NAME=as-catalogs-adm-stg"   >> $GITHUB_ENV;;
           "prd") 
-            echo "WAP_NAME=as-catalogs-adm-prd" >> $GITHUB_ENV;;
+            echo "WAP_NAME=as-catalogs-data-prd"  >> $GITHUB_ENV;;
         esac
 
     # https:/:/github.com/actions/checkout
@@ -46,4 +46,4 @@ jobs :
         username   : 'dummy'
         password   : 'dummy'
         registry   : 'dummy'
-        buildArgs  : 'SERVER_TYPE=wap,ENV_TYPE=${{env.BRANCH_env}}'
+        buildArgs  : 'SERVER_TYPE=wap,ENV_TYPE=${{env.BRANCH_ENV}}'
