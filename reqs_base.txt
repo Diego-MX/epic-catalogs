@@ -1,6 +1,5 @@
 # Data Tools
 openpyxl
-pyspark
 sqlalchemy
 pandas 
 pyarrow
@@ -15,3 +14,6 @@ uvicorn
 unidecode
 clabe
 orjson
+
+azure-storage-blob
+azure-identity

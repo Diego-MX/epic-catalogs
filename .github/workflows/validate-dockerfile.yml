@@ -1,0 +1,49 @@
+name: Compile Dockerfile
+on: 
+  pull_request:
+    branches: ['dev', 'qas', 'stg', 'prd']
+
+env:
+  GH_REPO   : Bineo2/data-prod-catalogs
+  DKR_IMAGE : prod-catalogs-webapp
+  DKR_TAG   : '1.0.44'
+  BRANCH_ENV : ${{github.base_ref || github.ref_name}}
+
+jobs :
+  build :     
+    runs-on : ubuntu-latest
+    
+    steps : 
+    - name : Set Variables 
+      run : |
+        case ${{env.BRANCH_ENV}} in
+          "dev") 
+            echo "WAP_NAME=wap-prod-catalogs-dev" >> $GITHUB_ENV;;
+          "qas") 
+            echo "WAP_NAME=as-catalogs-data-qas" >> $GITHUB_ENV;;
+          "stg") 
+            echo "WAP_NAME=as-catalogs-adm-stg" >> $GITHUB_ENV;;
+          "prd") 
+            echo "WAP_NAME=as-catalogs-adm-prd" >> $GITHUB_ENV;;
+        esac
+
+    # https:/:/github.com/actions/checkout
+    - name : Checkout GitHub Actions 
+      uses : actions/checkout@v2
+      with : 
+        ref        : ${{env.BRANCH_ENV}}
+        repository : ${{env.GH_REPO}}
+
+    # https://github.com/mr-smithers-excellent/docker-build-push
+    - name : Build image
+      id   : container-registry
+      uses : mr-smithers-excellent/docker-build-push@v5.8
+      with : 
+        pushImage : false
+        dockerfile : dockerfile.ci 
+        image      : ${{env.DKR_IMAGE}}
+        tags       : ${{env.DKR_TAG}}
+        username   : 'dummy'
+        password   : 'dummy'
+        registry   : 'dummy'
+        buildArgs  : 'SERVER_TYPE=wap,ENV_TYPE=${{env.BRANCH_env}}'
