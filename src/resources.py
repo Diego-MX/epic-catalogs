@@ -7,17 +7,18 @@ from config import ENV_VARS
 
 
 class AzureResourcer():
-    def __init__(self, env: str): 
+    def __init__(self, env: str, server=None): 
         self.env = env
+        self.server = server
         self.config = ENV_VARS[env]
         self.set_credentials()
 
     def set_credentials(self): 
-        if self.env == 'local':
+        if self.server == 'local':
             params = self.config['app_sp']
             self.credentials = ClientSecretCredential(**{k: os.getenv(v) 
                 for (k, v) in params.items()})
-        if self.env in ['dev', 'qas', 'stg', 'prd']: 
+        else: 
             self.credentials = DefaultAzureCredential()
 
     def get_blob_service(self):
