@@ -4,7 +4,7 @@ from src.tools import dict_get
 
 SITE = Path(__file__).parent if '__file__' in globals() else Path(getcwd())
 
-VERSION  = "1.0.45"
+VERSION  = "1.0.46"
 
 ENV      = dict_get(environ, ['ENV_TYPE', 'ENV'], 'wap')
 SERVER   = environ.get('SERVER_TYPE', 'wap')
@@ -19,18 +19,14 @@ URLS = {
 
 
 ENV_VARS = {
-    'local' : {
+    'dev' : {
+        'storage' : {
+            'url'   : 'https://lakehylia.blob.core.windows.net/'}, 
         'app_sp' : {
             'tenant_id'       : 'AAD_TNT_ID',
             'subscription_id' : 'AAD_SCTN_ID', 
             'client_id'       : 'AAD_APP_ID', 
-            'client_secret'   : 'AAD_APP_SCT'},
-        'storage' : {
-            'url'   : 'https://lakehylia.blob.core.windows.net/'}
-    }, 
-    'dev' : {
-        'storage' : {
-            'url'   : 'https://lakehylia.blob.core.windows.net/'}
+            'client_secret'   : 'AAD_APP_SCT'} 
     }, 
     'qas' : {
         'storage' : {

@@ -5,6 +5,7 @@ import pandas as pd
 from fastapi.exceptions import HTTPException
 
 import clabe
+from src.app import models 
 from src import tools
 from config import SITE
 
@@ -119,6 +120,35 @@ def card_number_parse(card_num):
         raise HTTPException(status_code=500, detail=str(exc))
 
 
+def bank_acquiring(acquiring_code): 
+    try: 
+        acq_cols = {
+            'Institución' : 'name', 
+            'ID Adquirente' : 'codeAcquiring'
+        }
+        acquiring_banks = (pd.read_feather(ctlg_dir/'national-banks-acquiring.feather')
+            .rename(columns=acq_cols))
+
+        find_any = (acquiring_banks['codeAcquiring'] == acquiring_code)
+        
+        if find_any.sum() != 1: 
+            raise HTTPException(status_code=404, 
+                detail='Acquiring Bank is not registered or unique.')            
+        else: 
+            return acquiring_banks[find_any].to_dict(orient='records')[0]
+
+    except HTTPException as exc: 
+        raise exc
+
+    except Exception as exc: 
+        raise HTTPException(status_code=500, detail=str(exc)) 
+        
+        
+
+        
+
+
+
 
 #%% Down the Rabbit Hole.
 
@@ -128,6 +158,7 @@ def zipcode_query(a_zipcode):
         ciudades    = pd.read_feather(ctlg_dir/'codigos_drive_ciudades.feather')
         municipios  =(pd.read_feather(ctlg_dir/'codigos_drive_municipios.feather')
             .assign(cve_mnpio=lambda df: df.c_estado.str.cat(df.c_mnpio)))
+
         estados     =(pd.read_csv(    ctlg_dir/'estados_claves.csv')
             .assign(c_estado = lambda df: df.clave.map(str).str.pad(2, fillchar='0'))
             .rename(columns={'nombre': 'd_estado', 'ISO_3166': 'c_estado_iso'})
@@ -151,6 +182,7 @@ def zipcode_query(a_zipcode):
                 .merge(estados, on='c_estado', how='left')
                 .loc[:, ['d_codigo', 'd_mnpio', 'd_estado',
                     'c_estado', 'c_estado_iso', 'cve_mnpio']])
+
         sub_colonias = (las_colonias
             .merge(tipo_asenta, on='c_tipo_asenta', how='left')
             .merge(ciudades, on=['c_estado', 'c_cve_ciudad'], how='left')
