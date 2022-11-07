@@ -22,6 +22,9 @@ class AzureResourcer():
             self.credentials = DefaultAzureCredential()
 
     def get_blob_service(self):
+        if not hasattr(self, 'credentials'): 
+            self.set_credentials()
+
         params = self.config['storage']
         blob_serv = BlobServiceClient(params['url'], self.credentials)
         return blob_serv

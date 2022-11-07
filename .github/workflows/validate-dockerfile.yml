@@ -6,7 +6,7 @@ on:
 env:
   GH_REPO   : Bineo2/data-prod-catalogs
   DKR_IMAGE : prod-catalogs-webapp
-  DKR_TAG   : '1.0.45'
+  DKR_TAG   : '1.0.46'
   BRANCH_ENV : ${{github.base_ref || github.ref_name}}
 
 jobs :
@@ -31,8 +31,8 @@ jobs :
     - name : Checkout GitHub Actions 
       uses : actions/checkout@v2
       with : 
-        ref        : ${{env.BRANCH_ENV}}
         repository : ${{env.GH_REPO}}
+        ref        : ${{env.BRANCH_ENV}}
 
     # https://github.com/mr-smithers-excellent/docker-build-push
     - name : Build image
