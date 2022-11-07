@@ -56,7 +56,7 @@ class NeighborhoodsResponse(BaseModel):
 
 class Bank(BaseModel): 
     name      : str
-    code      : str
+    code      : Optional[str]
     banxicoId : str
     alias     : str
     spei      : bool
@@ -66,6 +66,12 @@ class BanksResponse(BaseModel):
     numberOfBanks   : int
     bankAttributes  : List[str]
     banksSet        : List[Bank]
+
+
+class BankAcquiring(BaseModel): 
+    name  : str
+    codeAcquiring : Optional[str]
+
 
 
 class CardsBin(BaseModel): 

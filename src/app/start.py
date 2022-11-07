@@ -67,11 +67,11 @@ def get_bank_details_from_card_number(card_number: str):
     return bin_bank
 
 
-@app.get('/national-banks/acquiring/{card_number}', tags=['Banks'], 
-        response_model=models.CardsBin)
-def get_acquiring_bank_details(card_number: str): 
-    bin_bank = engine.card_number_parse(card_number)
-    return bin_bank
+@app.get('/national-banks/acquiring/{acquire_code}', tags=['Banks'], 
+        response_model=models.BankAcquiring)
+def get_acquiring_bank_details(acquire_code: str): 
+    acquirer = engine.bank_acquiring(acquire_code)
+    return acquirer
 
 
 

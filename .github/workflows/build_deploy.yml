@@ -4,18 +4,19 @@ on :
     branches : [dev, qas, stg, prd]   # PULL_REQUEST, utiliza BASE_REF.  
 
 env :
-  BRANCH_ENV : ${{github.base_ref || github.ref_name}}
   GH_REPO    : Bineo2/data-prod-catalogs
+  BRANCH_ENV : ${{github.base_ref || github.ref_name}}
   DKR_IMAGE  : prod-catalogs-webapp
-  DKR_TAG    : '1.0.45' # Ajustar VALIDATE_DOCKERFILE también. 
+  DKR_TAG    : '1.0.46'   # Ajustar VALIDATE_DOCKERFILE también. 
 
 jobs :
   build-and-deploy :     
     runs-on     : ubuntu-latest
     environment : ${{github.base_ref || github.ref_name}}
-    
     steps : 
+      
       - name : Set Variables
+        id   : set-variables   
         run  : |
           case ${{env.BRANCH_ENV}} in
             "prd")
@@ -32,11 +33,12 @@ jobs :
       - name : Checkout GitHub Actions
         uses : actions/checkout@v2
         with : 
-          repository : ${{env.GH_REPO}}  # No deja cargar ENV.BRANCH_ENV 
-          ref : ${{env.BRANCH_ENV}}  
+          repository : ${{env.GH_REPO}}  
+          ref        : ${{env.BRANCH_ENV}}  
 
       # https://github.com/mr-smithers-excellent/docker-build-push
       - name : Build and push container image to registry
+        id   : container-registry
         uses : mr-smithers-excellent/docker-build-push@v5.5
         with : 
           registry   : ${{secrets.ACR_USER}}.azurecr.io
@@ -51,7 +53,7 @@ jobs :
       - name : Deploy to App Service
         uses : azure/webapps-deploy@v2
         with :
-          images   : ${{secrets.ACR_USER}}.azurecr.io/${{env.DKR_IMAGE}}:${{env.DKR_TAG}}-${{env.BRANCH_ENV}}
+          images :  '${{secrets.ACR_USER}}.azurecr.io/${{env.DKR_IMAGE}}:${{env.DKR_TAG}}-${{env.BRANCH_ENV}}'
           app-name : ${{env.WAP_NAME}}
           publish-profile : ${{secrets.WAP_PUBLISH}}
           
