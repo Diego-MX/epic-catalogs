@@ -1,12 +1,12 @@
 name: Compile Dockerfile
 on: 
   pull_request:
-    branches: ['dev', 'qas', 'stg', 'prd']
+    branches: ['dev', 'qas', 'stg', 'prd', 'drp']
 
 env:
   GH_REPO   : Bineo2/data-prod-catalogs
   DKR_IMAGE : prod-catalogs-webapp
-  DKR_TAG   : '1.0.46'
+  DKR_TAG   : '1.0.47'
   BRANCH_ENV : ${{github.base_ref || github.ref_name}}
 
 jobs :
@@ -23,6 +23,8 @@ jobs :
             echo "WAP_NAME=as-catalogs-data-qas"  >> $GITHUB_ENV;;
           "stg") 
             echo "WAP_NAME=as-catalogs-adm-stg"   >> $GITHUB_ENV;;
+          "drp")
+            echo "WAP_NAME=as-catalogs-data-drp"  >> $GITHUB_ENV;;
           "prd") 
             echo "WAP_NAME=as-catalogs-data-prd"  >> $GITHUB_ENV;;
         esac
