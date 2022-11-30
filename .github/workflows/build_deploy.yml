@@ -1,13 +1,13 @@
 name: Build and Deploy
 on : 
   push :  # PUSH utiliza REF_NAME como el branch (y el ambiente para los secretos).  
-    branches : [dev, qas, stg, prd]   # PULL_REQUEST, utiliza BASE_REF.  
+    branches : [dev, qas, stg, drp, prd]   # PULL_REQUEST, utiliza BASE_REF.  
 
 env :
   GH_REPO    : Bineo2/data-prod-catalogs
   BRANCH_ENV : ${{github.base_ref || github.ref_name}}
   DKR_IMAGE  : prod-catalogs-webapp
-  DKR_TAG    : '1.0.46'   # Ajustar VALIDATE_DOCKERFILE también. 
+  DKR_TAG    : '1.0.47'   # Ajustar VALIDATE_DOCKERFILE también. 
 
 jobs :
   build-and-deploy :     
@@ -21,6 +21,8 @@ jobs :
           case ${{env.BRANCH_ENV}} in
             "prd")
               echo "WAP_NAME=as-catalogs-data-prd"  >> $GITHUB_ENV;;
+            "drp")
+              echo "WAP_NAME=as-catalogs-data-drp"  >> $GITHUB_ENV;;
             "stg")
               echo "WAP_NAME=as-catalogs-adm-stg"   >> $GITHUB_ENV;;
             "qas")
