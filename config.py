@@ -4,7 +4,7 @@ from src.tools import dict_get
 
 SITE = Path(__file__).parent if '__file__' in globals() else Path(getcwd())
 
-VERSION  = "1.0.46"
+VERSION  = "1.0.47"
 
 ENV      = dict_get(environ, ['ENV_TYPE', 'ENV'], 'wap')
 SERVER   = environ.get('SERVER_TYPE', 'wap')
@@ -39,6 +39,10 @@ ENV_VARS = {
     'prd' : {
         'storage' : {
             'url'   : 'https://stlakehyliaprd.blob.core.windows.net/'}
+    }, 
+    'drp' : {
+        'storage' : {
+            'url'   : 'https://stlakehyliadrp.blob.core.windows.net/'}
     } 
 }
 
