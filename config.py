@@ -3,7 +3,6 @@ from pathlib import Path
 from src.tools import dict_get
 from dotenv import load_dotenv
 
-load_dotenv('.env', override=True)
 
 SITE = Path(__file__).parent if '__file__' in globals() else Path(getcwd())
 
