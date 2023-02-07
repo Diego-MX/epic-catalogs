@@ -5,7 +5,6 @@ import pandas as pd
 from fastapi.exceptions import HTTPException
 
 import clabe
-from src.app import models 
 from src import tools
 from config import SITE
 
@@ -62,7 +61,15 @@ def clabe_parse(clabe_key):
         if in_banks.sum() != 1:
             raise HTTPException(status_code=404, detail='Bank is not registered or unique.')
 
-        return banks_df.loc[in_banks, :].to_dict(orient='records')[0]
+        el_banco =  banks_df.loc[in_banks, :]
+        es_banorte   = clabe_key[0:3] == '072'
+        es_indirecto = clabe_key[3:5] == '99'
+        es_bineo     = clabe_key[7:9] == '20'
+
+        if es_banorte and es_indirecto and es_bineo: 
+            el_banco = banks_df.loc[banks_df.code == '40165']
+
+        return el_banco.to_dict(orient='records')[0]
 
     except HTTPException as exc: 
         raise exc
