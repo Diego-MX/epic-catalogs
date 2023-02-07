@@ -9,7 +9,7 @@ env :
   GH_REPO    : Bineo2/data-prod-catalogs
   BRANCH_ENV : ${{github.base_ref || github.ref_name}}
   DKR_IMAGE  : prod-catalogs-webapp
-  DKR_TAG    : '1.0.52'   # Ajustar VALIDATE_DOCKERFILE también. 
+  DKR_TAG    : '1.0.53'   # Ajustar VALIDATE_DOCKERFILE también. 
 
 jobs :
   build-and-deploy :     
@@ -48,8 +48,8 @@ jobs :
           registry   : ${{secrets.ACR_HOST}}
           username   : ${{secrets.ACR_USER}}
           password   : ${{secrets.ACR_PASS}}
-          image      : ${{env.DKR_IMAGE}}
-          tags       : ${{env.DKR_TAG}}-${{env.BRANCH_ENV}}
+          image      : ${{env.DKR_IMAGE}}-${{env.BRANCH_ENV}}
+          tags       : ${{env.BRANCH_ENV}}
           dockerfile : dockerfile.ci 
           buildArgs  : ENV_TYPE=${{env.BRANCH_ENV}},SERVER_TYPE=wap
       

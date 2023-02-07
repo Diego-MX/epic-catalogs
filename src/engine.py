@@ -55,19 +55,20 @@ def clabe_parse(clabe_key):
         if not is_valid:
             raise HTTPException(status_code=404, detail='CLABE is not valid.')
 
-        bank_code = clabe_key[0:3]
-        in_banks = (bank_code == banks_df.code)
+        gfb_code = '072'
+        bineo_code = '165'
 
+        bank_code    = clabe_key[0:3]
+        es_indirecto = clabe_key[3:5] == '99'
+        gfb_a_bineo  = clabe_key[7:9] == '20'
+        
+        in_banks = (bank_code == banks_df.code)
         if in_banks.sum() != 1:
             raise HTTPException(status_code=404, detail='Bank is not registered or unique.')
-
         el_banco =  banks_df.loc[in_banks, :]
-        es_banorte   = clabe_key[0:3] == '072'
-        es_indirecto = clabe_key[3:5] == '99'
-        es_bineo     = clabe_key[7:9] == '20'
 
-        if es_banorte and es_indirecto and es_bineo: 
-            el_banco = banks_df.loc[banks_df.code == '40165']
+        if (bank_code == gfb_code) and es_indirecto and gfb_a_bineo: 
+            el_banco = banks_df.loc[banks_df.code == bineo_code]
 
         return el_banco.to_dict(orient='records')[0]
 
