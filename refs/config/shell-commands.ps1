@@ -4,6 +4,8 @@ python -m src.app.start
 python ./src/app/start.py
 
 
+$env:ENV_TYPE = 'dev'
+$env:SERVER_TYPE = 'local'
 uvicorn start:app --port 80 --host 0.0.0.0
 
 # Para el Docker
