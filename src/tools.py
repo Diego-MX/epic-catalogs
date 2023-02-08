@@ -9,13 +9,16 @@ from unidecode import unidecode
 
 
 
-def dict_get(a_dict: dict, keys_ls, val_else): 
+def dict_get(a_dict: dict, keys_ls, val_else=None): 
     for a_key in keys_ls: 
         if a_key in a_dict: 
             a_val = a_dict[a_key] 
             break
     else: 
-        a_val = val_else
+        if val_else: 
+            a_val = val_else
+        else: 
+            raise Exception('Keys not found, and value not provided.')
     return a_val
 
 
