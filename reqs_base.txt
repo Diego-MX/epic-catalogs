@@ -1,8 +1,9 @@
 # Data Tools
 openpyxl
-sqlalchemy
 pandas 
 pyarrow
+python-dotenv
+sqlalchemy
 
 # Web Tools
 requests 
