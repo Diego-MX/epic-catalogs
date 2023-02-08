@@ -65,8 +65,8 @@ def clabe_parse(clabe_key):
         in_banks = (bank_code == banks_df.code)
         if in_banks.sum() != 1:
             raise HTTPException(status_code=404, detail='Bank is not registered or unique.')
+        
         el_banco =  banks_df.loc[in_banks, :]
-
         if (bank_code == gfb_code) and es_indirecto and gfb_a_bineo: 
             el_banco = banks_df.loc[banks_df.code == bineo_code]
 
