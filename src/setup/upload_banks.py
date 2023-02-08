@@ -17,7 +17,6 @@ from config import SITE, ENV, SERVER
 
 #  General considerations
 local_path = SITE/'refs/catalogs'
-storage_path = 'product/epic-catalogs/app-services'
 
 ctlg_files = {
     'banks'    : 'national-banks',
@@ -112,6 +111,7 @@ acq_tbl.to_feather(local_path/f"{ctlg_files['acquiring']}.feather")
 # Las variables se guardan localmente cuando ENV='dev'. 
 
 
+storage_path = 'product/epic-catalogs/app-services'
 resourcer = AzureResourcer(ENV, SERVER)
 blob_container = resourcer.get_blob_service()
 
