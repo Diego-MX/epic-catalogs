@@ -12,7 +12,7 @@ ctlg_dir = SITE/'refs/catalogs'
 
 banks_df = (pd.read_feather(ctlg_dir/'national-banks.feather')
     .rename(columns={'banxico_id': 'banxicoId'})
-    .astype({'spei': bool}))
+    .astype({'spei': bool, 'portability': bool}))
 
 
 def zipcode_request(a_request):

@@ -13,6 +13,7 @@ class AzureResourcer():
         self.config = ENV_VARS[env]
         self.set_credentials()
 
+    
     def set_credentials(self): 
         if self.server == 'local':
             params = self.config['app_sp']
@@ -20,6 +21,7 @@ class AzureResourcer():
                 for (k, v) in params.items()})
         else: 
             self.credentials = DefaultAzureCredential()
+
 
     def get_blob_service(self):
         if not hasattr(self, 'credentials'): 
