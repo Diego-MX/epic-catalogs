@@ -6,7 +6,6 @@
 # https://www.correosdemexico.gob.mx/SSLServicios/ConsultaCP/imagenes/btnDescarga.jpg
 #
 # 7-oct-21| https://datos.gob.mx/busca/dataset/informacion-geografica-de-los-codigos-postales-asentamientos-humanos-y-colonias-de-cada-estado- 
-#
 
 # (Google Drive)
 # https://drive.google.com/u/0/open?id=0B-4W2dww7ELNQlRSTGVmT295REU
