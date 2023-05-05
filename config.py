@@ -5,7 +5,7 @@ from src.tools import dict_get
 
 SITE = Path(__file__).parent if '__file__' in globals() else Path(getcwd())
 
-VERSION  = "1.0.57"
+VERSION  = "1.0.58"
 
 ENV      = dict_get(environ, ['ENV_TYPE', 'ENV'])
 SERVER   = environ.get('SERVER_TYPE', 'wap')
@@ -21,30 +21,25 @@ URLS = {
 
 ENV_VARS = {
     'dev' : {
-        'storage' : {
-            'url'   : 'https://lakehylia.blob.core.windows.net/'}, 
         'app_sp' : {
             'tenant_id'       : 'AAD_TNT_ID',
             'subscription_id' : 'AAD_SCTN_ID', 
             'client_id'       : 'AAD_APP_ID', 
-            'client_secret'   : 'AAD_APP_SCT'} 
+            'client_secret'   : 'AAD_APP_SCT'}, 
+        'storage':  {'url': 'https://lakehylia.blob.core.windows.net/'}, 
     }, 
-    'qas' : {
-        'storage' : {
-            'url'   : 'https://stlakehyliaqas.blob.core.windows.net/'}
-    }, 
-    'stg' : {
-        'storage' : {
-            'url'   : 'https://stlakehyliastg.blob.core.windows.net/'}
-    }, 
-    'prd' : {
-        'storage' : {
-            'url'   : 'https://stlakehyliaprd.blob.core.windows.net/'}
-    }, 
-    'drp' : {
-        'storage' : {
-            'url'   : 'https://stlakehyliadrp.blob.core.windows.net/'}
-    } 
 }
 
 
+AZURE_VARS = {
+    'dev': {
+        'blob-storage': 'lakehylia'},
+    'qas' : {  # url: 'https://{}.blob.core.windows.net/'
+        'blob-storage': 'stalakehyliaqas'}, 
+    'stg' : {
+        'blob-storage': 'stlakehyliastg'}, 
+    'prd' : {
+        'blob-storage': 'stlakehyliaprd'}, 
+    'drp' : {
+        'blob-storage': 'stlakehyliadrp'},
+}
