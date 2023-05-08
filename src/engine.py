@@ -10,9 +10,12 @@ from config import SITE
 
 ctlg_dir = SITE/'refs/catalogs'
 
+str_to_bool = lambda srs: srs == 'True'
+
 banks_df = (pd.read_feather(ctlg_dir/'national-banks.feather')
     .rename(columns={'banxico_id': 'banxicoId'})
-    .astype({'spei': bool}))
+    .assign(spei = lambda df: str_to_bool(df['spei']), 
+        portability = lambda df: str_to_bool(df['portability'])))
 
 
 def zipcode_request(a_request):
