@@ -95,7 +95,8 @@ if __name__ == '__main__':
     base_excel = local_path/'api-catalogs.xlsx.lnk'
 
     banks_pre = read_excel_table(base_excel, 'banks', 'tabla_297')
-    banks_df  = process_banks(banks_pre).reset_index()
+    banks_df  = process_banks(banks_pre).reset_index().astype(str)
+    # ASTYPE STR se aplica para arreglar un error de feather. 
     banks_df.to_feather(local_path/f"{ctlg_files['banks']}.feather")
     
     plaza_pre = read_excel_table(base_excel, 'banks', 'plazas_w')
