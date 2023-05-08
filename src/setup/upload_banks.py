@@ -17,7 +17,7 @@ def process_banks(tbl_297:pd_DF):
         'BANCO'       : 'banxico_id',
         'nombre_corto': 'alias',
         'SPEI'        : 'spei', 
-        'portabilidad': 'portabilidad', 
+        'portabilidad': 'portability', 
         }    
         # 'PARAMETRO Activo / Desactivo': 'is_active', 
         #  'ordenante'   : 'ordenante'
@@ -25,7 +25,7 @@ def process_banks(tbl_297:pd_DF):
     bank_df = (tbl_297 
         .rename(columns=dict_colnames)
         .loc[:, dict_colnames.values()]
-        .assign(portabilidad=lambda df: df['portabilidad'] != -1)
+        .assign(portability=lambda df: df['portability'] != -1)
         .astype(str))
     return bank_df
 
