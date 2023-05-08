@@ -55,11 +55,12 @@ class NeighborhoodsResponse(BaseModel):
 
 
 class Bank(BaseModel): 
-    name      : str
-    code      : Optional[str]
-    banxicoId : str
-    alias     : str
-    spei      : bool
+    name        : str
+    code        : Optional[str]
+    banxicoId   : str
+    alias       : str
+    spei        : bool
+    portability : bool
 
 
 class BanksResponse(BaseModel): 
