@@ -1,4 +1,4 @@
-name: webapps
+name: webapp
 
 channels: 
   - conda-forge
