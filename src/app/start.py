@@ -1,6 +1,7 @@
 import sys
 from json import loads
 from fastapi import FastAPI
+from typing import Union
 import uvicorn
 
 from src import engine
@@ -61,7 +62,7 @@ def get_bank_details_from_clabe(clabe_key: str):
 
 
 @app.get('/national-banks/card-number/{card_number}', tags=['Banks'], 
-        response_model=models.CardsBin)
+        response_model=Union[models.CardsBin, models.Bank])
 def get_bank_details_from_card_number(card_number: str): 
     bin_bank = engine.card_number_parse(card_number)
     return bin_bank

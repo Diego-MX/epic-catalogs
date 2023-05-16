@@ -82,7 +82,7 @@ def clabe_parse(clabe_key):
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-def card_number_parse(card_num):
+def card_number_parse(card_num, response_obj='bin'):
     try:
         if len(card_num) != 16:
             raise HTTPException(400, 'Card Number must have 16 digits.')
@@ -106,7 +106,7 @@ def card_number_parse(card_num):
             .set_index('BIN')
             .rename(columns=bin_cols)
             .loc[:, bin_cols.values()])
-
+        
         bin_lengths = defaultdict(list)
         for bin, length in bins_df['length'].items():
             bin_lengths[length].append(bin)
@@ -118,8 +118,17 @@ def card_number_parse(card_num):
             if try_bin:
                 bin_int = int(card_num[:length])
                 the_bin = bins_df.loc[bin_int, :]
-                pre_response = loads(the_bin.to_json())
-                pre_response['bin'] = str(the_bin.name)
+
+                if response_obj == 'bin': 
+                    pre_response = loads(the_bin.to_json())
+                    pre_response['bin'] = str(the_bin.name)
+                
+                elif response_obj == 'bank': 
+                    its_bank = banks_df.set_index('banxicoId').loc[the_bin.banxicoId]
+                    pre_response = loads(its_bank.to_json())
+                    pre_response['banxicoId'] = the_bin.banxicoId
+                    pre_response.pop('index')
+
                 return pre_response
         else:
             raise HTTPException(status_code=404, detail='Card Bin Not Found.')
