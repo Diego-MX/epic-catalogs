@@ -61,10 +61,12 @@ def get_bank_details_from_clabe(clabe_key: str):
     return engine.clabe_parse(clabe_key)
 
 
-@app.get('/national-banks/card-number/{card_number}', tags=['Banks'], 
+@app.get('/national-banks/card-number/{card_number}/{response_obj}', tags=['Banks'], 
         response_model=Union[models.CardsBin, models.Bank])
-def get_bank_details_from_card_number(card_number: str): 
-    bin_bank = engine.card_number_parse(card_number)
+def get_bank_details_from_card_number(card_number:str, response_obj=None): 
+    if response_obj is None: 
+        response_obj = 'bin'
+    bin_bank = engine.card_number_parse(card_number, response_obj)
     return bin_bank
 
 
