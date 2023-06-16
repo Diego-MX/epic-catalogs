@@ -1,6 +1,6 @@
 import sys
 from json import loads
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from typing import Union
 import uvicorn
 
@@ -61,12 +61,13 @@ def get_bank_details_from_clabe(clabe_key: str):
     return engine.clabe_parse(clabe_key)
 
 
-@app.get('/national-banks/card-number/{card_number}/{response_obj}', tags=['Banks'], 
+@app.get('/national-banks/card-number/{card_number}', tags=['Banks'], 
         response_model=Union[models.CardsBin, models.Bank])
-def get_bank_details_from_card_number(card_number:str, response_obj=None): 
-    if response_obj is None: 
-        response_obj = 'bin'
-    bin_bank = engine.card_number_parse(card_number, response_obj)
+def get_bank_details_from_card_number(card_number:str, response: Response): 
+    if "application/bankobject+json" in response.headers.get("Accept", ""):
+        bin_bank = engine.card_number_parse(card_number, 'bank')
+    else: 
+        bin_bank = engine.card_number_parse(card_number, 'bin')
     return bin_bank
 
 
