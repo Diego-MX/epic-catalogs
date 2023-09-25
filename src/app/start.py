@@ -1,6 +1,6 @@
 import sys
 from json import loads
-from fastapi import FastAPI
+from fastapi import FastAPI, Request 
 from typing import Union
 import uvicorn
 
@@ -63,8 +63,11 @@ def get_bank_details_from_clabe(clabe_key: str):
 
 @app.get('/national-banks/card-number/{card_number}', tags=['Banks'], 
         response_model=Union[models.CardsBin, models.Bank])
-def get_bank_details_from_card_number(card_number: str): 
-    bin_bank = engine.card_number_parse(card_number)
+def get_bank_details_from_card_number(card_number:str, request:Request): 
+    if "application/bankobject+json" in request.headers.get("Accept", ""):
+        bin_bank = engine.card_number_parse(card_number, 'bank')
+    else: 
+        bin_bank = engine.card_number_parse(card_number, 'bin')
     return bin_bank
 
 
@@ -74,6 +77,10 @@ def get_acquiring_bank_details(acquire_code: str):
     acquirer = engine.bank_acquiring(acquire_code)
     return acquirer
 
+
+#@app.exception_handler(406)
+#async def media_type_not_acceptable(request, exc):
+#    return JSONResponse(content={"error": "Media type not acceptable"}, status_code=406)
 
 
 if __name__ == '__main__':
