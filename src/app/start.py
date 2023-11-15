@@ -66,6 +66,7 @@ def get_bank_details_from_clabe(clabe_key: str):
 def get_bank_details_from_card_number(card_number:str, request:Request): 
     if "application/bankobject+json" in request.headers.get("Accept", ""):
         bin_bank = engine.card_number_parse(card_number, 'bank')
+    # elif 'application/cardbinobject-json': 
     else: 
         bin_bank = engine.card_number_parse(card_number, 'bin')
     return bin_bank

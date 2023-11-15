@@ -1,26 +1,26 @@
 name: Build and Deploy
-on : 
-  push :  # PUSH utiliza REF_NAME como el branch (y el ambiente para los secretos).  
-    branches : [dev, qas, stg, drp, prd]   # PULL_REQUEST, utiliza BASE_REF.  
-  pull_request : 
-    branches : [dev, qas, stg, drp, prd]
+on: 
+  workflow_dispatch:
+    inputs:
+      deploy_to:
+        description:  Github environment contains secrets about its corresponding Azure counterpart.
+        required: true
+        default:  dev
 
 env :
   GH_REPO    : Bineo2/data-prod-catalogs
-  BRANCH_ENV : ${{github.base_ref || github.ref_name}}
   DKR_IMAGE  : prod-catalogs-webapp
-  DKR_TAG    : '1.0.64'   # Ajustar VALIDATE_DOCKERFILE también. 
+  DKR_TAG    : '1.0.65'   # Ajustar VALIDATE_DOCKERFILE también. 
 
 jobs :
   build-and-deploy :     
     runs-on     : ubuntu-latest
-    environment : ${{github.base_ref || github.ref_name}}
+    environment : ${{github.event.inputs.deploy_to}}
     steps : 
-      
       - name : Set Variables
         id   : set-variables   
         run  : |
-          case ${{env.BRANCH_ENV}} in
+          case ${{github.event.inputs.deploy_to}} in
             "prd")
               echo "WAP_NAME=as-catalogs-data-prd"  >> $GITHUB_ENV;;
             "drp")
@@ -32,14 +32,12 @@ jobs :
             "dev")
               echo "WAP_NAME=wap-prod-catalogs-dev" >> $GITHUB_ENV;;
           esac
-
-    # https:/:/github.com/actions/checkout
+      # https:/:/github.com/actions/checkout
       - name : Checkout GitHub Actions
         uses : actions/checkout@v2
         with : 
           repository : ${{env.GH_REPO}}  
-          ref        : ${{env.BRANCH_ENV}}  
-
+          ref        : ${{github.event.inputs.deploy_to}}  
       # https://github.com/mr-smithers-excellent/docker-build-push
       - name : Build and push container image to registry
         id   : container-registry
@@ -49,16 +47,14 @@ jobs :
           username   : ${{secrets.ACR_USER}}
           password   : ${{secrets.ACR_PASS}}
           image      : ${{env.DKR_IMAGE}}
-          tags       : ${{env.DKR_TAG}}-${{env.BRANCH_ENV}}
+          tags       : ${{env.DKR_TAG}}-${{github.event.inputs.deploy_to}}
           dockerfile : dockerfile.ci 
-          buildArgs  : ENV_TYPE=${{env.BRANCH_ENV}},SERVER_TYPE=wap
-      
+          buildArgs  : ENV_TYPE=${{github.event.inputs.deploy_to}},SERVER_TYPE=wap
       # https://github.com/Azure/webapps-deploy
       - name : Deploy to App Service
         uses : azure/webapps-deploy@v2
         with :
-          images :  ${{secrets.ACR_HOST}}/${{env.DKR_IMAGE}}:${{env.DKR_TAG}}-${{env.BRANCH_ENV}}
+          images :  ${{secrets.ACR_HOST}}/${{env.DKR_IMAGE}}:${{env.DKR_TAG}}-${{github.event.inputs.deploy_to}}
           app-name : ${{env.WAP_NAME}}
           publish-profile : ${{secrets.WAP_PUBLISH}}
           
-      
