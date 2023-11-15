@@ -242,10 +242,11 @@ def zipcode_response(nbhd_elems):
                 'nombre' : ['zipcode', 'name', 'zone', 'type', 'city', 'city_id'],
                 'dtipo'  : 'character'})
 
-        nbhd_keys = { 'numberOfRecords' : 'numberOfNeighborhoods',
-                    'attributes'      : 'neighborhoodAttributes',
-                    'recordSet'       : 'neighborhoodsSet',
-                    'pagination'      : 'neighborhoodsPagination'}
+        nbhd_keys = {
+            'numberOfRecords' : 'numberOfNeighborhoods',
+            'attributes'      : 'neighborhoodAttributes',
+            'recordSet'       : 'neighborhoodsSet',
+            'pagination'      : 'neighborhoodsPagination'}
 
         nbhd_dict = tools.dataframe_response(nbhd_df, nbhd_cols, nbhd_keys, drop_nas=False)
 
