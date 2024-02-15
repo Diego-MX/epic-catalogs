@@ -6,13 +6,12 @@ on:
 env:
   GH_REPO   : Bineo2/data-prod-catalogs
   DKR_IMAGE : prod-catalogs-webapp
-  DKR_TAG   : '1.0.64'
+  DKR_TAG   : '1.0.66'
   BRANCH_ENV : ${{github.base_ref || github.ref_name}}
 
 jobs :
   build :     
     runs-on : ubuntu-latest
-    
     steps : 
     - name : Set Variables 
       run : |
@@ -28,14 +27,12 @@ jobs :
           "prd") 
             echo "WAP_NAME=as-catalogs-data-prd"  >> $GITHUB_ENV;;
         esac
-
     # https:/:/github.com/actions/checkout
     - name : Checkout GitHub Actions 
       uses : actions/checkout@v2
       with : 
         repository : ${{env.GH_REPO}}
         ref        : ${{env.BRANCH_ENV}}
-
     # https://github.com/mr-smithers-excellent/docker-build-push
     - name : Build image
       id   : container-registry
