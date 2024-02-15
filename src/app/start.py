@@ -2,7 +2,7 @@ import sys
 from json import loads
 from typing import Union
 
-from fastapi import FastAPI, Request 
+from fastapi import FastAPI, Request
 import uvicorn
 
 from config import VERSION
@@ -78,10 +78,6 @@ def get_acquiring_bank_details(acquire_code: str):
     acquirer = engine.bank_acquiring(acquire_code)
     return acquirer
 
-
-#@app.exception_handler(406)
-#async def media_type_not_acceptable(request, exc):
-#    return JSONResponse(content={"error": "Media type not acceptable"}, status_code=406)
 
 
 if __name__ == '__main__':

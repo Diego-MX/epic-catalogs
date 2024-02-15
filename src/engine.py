@@ -5,8 +5,9 @@ import clabe
 from fastapi.exceptions import HTTPException
 import pandas as pd
 
-from . import tools
 import config
+from . import tools
+
 
 ctlg_dir = config.SITE/'refs/catalogs'
 
@@ -28,12 +29,10 @@ def zipcode_request(a_request):
             (the_response['warnings']['zipcode'][0] == 3)):
             the_detail = the_response['warnings']['zipcode'][1]
             raise HTTPException(404, detail=the_detail)
-
     except HTTPException as frying_pan:
         raise frying_pan
     except Exception as frying_pan:
         raise HTTPException(500) from frying_pan
-
     return the_response
 
 
@@ -54,25 +53,28 @@ def banks_request(include_non_spei):
 
 def clabe_parse(clabe_key):
     try:
-        is_valid = (clabe_key[-1] == clabe.compute_control_digit(clabe_key[:-1]))
-        if not is_valid:
-            raise HTTPException(status_code=404, detail='CLABE is not valid.')
-
         gfb_code = '072'
         bineo_code = '165'
-
-        bank_code    = clabe_key[0:3]
+        
+        bank_code = clabe_key[0:3]
         es_indirecto = clabe_key[3:5] == '99'
-        gfb_a_bineo  = clabe_key[7:9] == '20'
-        
-        in_banks = (bank_code == banks_df.code)
-        if in_banks.sum() != 1:
-            raise HTTPException(status_code=404, detail='Bank is not registered or unique.')
-        
-        el_banco = banks_df.loc[in_banks, :]
-        if (bank_code == gfb_code) and es_indirecto and gfb_a_bineo: 
-            el_banco = banks_df.loc[banks_df.code == bineo_code]
+        gfb_a_bineo = clabe_key[7:9] == '20'
 
+        verificator = clabe.compute_control_digit(clabe_key[:-1])
+        if (clabe_key[-1] != verificator):
+            raise HTTPException(status_code=404, detail='CLABE is not valid.')
+
+        bank_code = clabe_key[0:3]
+        in_banks = (bank_code == banks_df.code)
+
+        if in_banks.sum() != 1:
+            raise HTTPException(status_code=404, detail='Bank is not registered or unique.')       
+
+        el_banco = banks_df.loc[in_banks, :]
+        
+        if (bank_code == gfb_code) and es_indirecto and gfb_a_bineo: 
+            el_banco = banks_df.loc[banks_df.code == bineo_code]     
+        
         return el_banco.to_dict(orient='records')[0]
 
     except HTTPException as frying_pan: 
@@ -80,6 +82,7 @@ def clabe_parse(clabe_key):
 
     except Exception as frying_pan:
         raise HTTPException(status_code=500) from frying_pan
+    
 
 
 

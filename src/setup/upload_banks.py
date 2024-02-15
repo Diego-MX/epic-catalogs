@@ -1,14 +1,13 @@
 # Diego Villamil, EPIC
 # CDMX, 1 de diciembre de 2021
 
-# From Excel to Feather to Blob
+import pandas as pd
+from pandas import DataFrame as pd_DF
+# pylint: disable=redefined-outer-name
+
 
 # Read:  api-catalogs.xlsx!(tabla_297|plazas_w|anexo_1,anexo_1c)
 # Write: national-banks(-plazas|-bins)?
-import pandas as pd
-from pandas import DataFrame as pd_DF
-
-
 
 def process_banks(tbl_297:pd_DF): 
     dict_colnames = {
@@ -41,7 +40,7 @@ def process_plazas(tbl_plz:pd_DF):
     return ctlg_df
 
 
-def process_bins(bins_df:pd_DF, bins_1c:pd_DF, bins_cols:pd_DF): 
+def process_bins(bins_df:pd_DF, bins_1c:pd_DF, bins_cols:pd_DF):
     the_types = {'integer': int, 'character': str, 'date': 'datetime64[ns]'}
     bins_rename = { row['Ref Nombre']: the_types[row['Tipo']]
             for _, row in bins_cols.iterrows() if row['Tipo'] }
@@ -61,7 +60,7 @@ def process_bins(bins_df:pd_DF, bins_1c:pd_DF, bins_cols:pd_DF):
     return bins
 
 
-def process_adquirentes(tbl_29:pd_DF, acq_cols:pd_DF): 
+def process_adquirentes(tbl_29:pd_DF, acq_cols:pd_DF):
     df_types = {'int': int, 'str': str, 'date': 'datetime64[ns]'}
     acq_rename   = {row.nombre: df_types[row.type] 
             for _, row in acq_cols.iterrows() if row.type}
@@ -76,15 +75,15 @@ def process_adquirentes(tbl_29:pd_DF, acq_cols:pd_DF):
 
 if __name__ == '__main__': 
     from dotenv import load_dotenv
+    load_dotenv(override=True)
 
     from src.resources import AzureResourcer
     from src.tools import read_excel_table
-    load_dotenv(override=True)
     from config import SITE, ENV, SERVER
 
 
     local_path = SITE/'refs/catalogs'
-    storage_path = 'product/epic-catalogs/app-services'
+    storage_path = 'product/epic-catalogs/app-services'    # pylint: disable=invalid-name 
 
     ctlg_files = {
         'banks'    : 'national-banks',
@@ -96,7 +95,6 @@ if __name__ == '__main__':
 
     banks_pre = read_excel_table(base_excel, 'banks', 'tabla_297')
     banks_df  = process_banks(banks_pre).reset_index().astype(str)
-    # ASTYPE STR se aplica para arreglar un error de feather. 
     banks_df.to_feather(local_path/f"{ctlg_files['banks']}.feather")
     
     plaza_pre = read_excel_table(base_excel, 'banks', 'plazas_w')
