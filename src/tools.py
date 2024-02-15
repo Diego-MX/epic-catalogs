@@ -1,12 +1,11 @@
 
 from base64 import b64encode as enc64
-from openpyxl import load_workbook, utils as xl_utils
-import pandas as pd
 import re
 
+from openpyxl import load_workbook, utils as xl_utils
+import pandas as pd
 from requests import auth
 from unidecode import unidecode
-
 
 
 def dict_get(a_dict: dict, keys_ls, val_else=None): 
@@ -18,23 +17,23 @@ def dict_get(a_dict: dict, keys_ls, val_else=None):
         if val_else: 
             a_val = val_else
         else: 
-            raise Exception('Keys not found, and value not provided.')
+            raise ValueError('Keys not found, and value not provided.')
     return a_val
 
 
-def str_camel_to_snake(cameled:str):
+def str_camel_to_snake(cameled: str):
     subbed = re.sub('(.)([A-Z][a-z]+)',  r'\1_\2', cameled)
     snaked = re.sub('([a-z0-9])([A-Z])', r'\1_\2', subbed).lower()
     return snaked
 
 
-def str_snake_to_camel(snaked:str, first_word_too=False, decode=False):
+def str_snake_to_camel(snaked: str, first_word_too=False, decode=False):
     if decode:
         snaked = unidecode(snaked)
-    splitted    = snaked.split('_')
-    first_word  = splitted.pop(0)
+    splitted = snaked.split('_')
+    first_word = splitted.pop(0)
     first_camel = first_word.title() if first_word_too else first_word.lower()
-    cameled     = first_camel + ''.join(word.title() for word in splitted)
+    cameled = first_camel + ''.join(word.title() for word in splitted)
     return cameled
 
 
@@ -47,7 +46,7 @@ def shortcut_target(filename, file_ext=None):
         elif isinstance(file_ext, list):
             ext_reg = f"{'|'.join(file_ext)}"
         else:
-            raise 'FILE_EXT format is not supported.'
+            raise ValueError('FILE_EXT format is not supported.')
         return ext_reg
     
     file_regex = fr'C:\\.*\.{ ext_regex(file_ext) }'
@@ -55,7 +54,7 @@ def shortcut_target(filename, file_ext=None):
         a_path = a_path = re.findall(file_regex, _f.read(), flags=re.DOTALL)
 
     if len(a_path) != 1: 
-        raise 'Not unique or No shortcut targets found in link.'
+        raise 'Not unique or No shortcut targets found in link.'    # pylint: disable=raising-bad-type
     return a_path[0]
 
 
