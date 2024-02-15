@@ -1,5 +1,5 @@
 azure-identity==1.15.0
-azure-keyvault-secrets=4.7.0
+azure-keyvault-secrets==4.7.0
 azure-storage-blob==12.19.0
 clabe==1.2.8
 databricks-sql-connector==2.5.1
