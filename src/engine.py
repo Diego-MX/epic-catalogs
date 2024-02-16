@@ -99,7 +99,7 @@ def card_number_parse(card_num, response_obj='bin'):
         # 'NIP', 'Tokenización', 'Vale', 'Fecha de Alta', 'Procesador']
         # ... ID calculada.
         bin_cols = {
-            'Longitud'      : 'length',
+            'Rango'         : 'length',
             'ID'            : 'bankId',
             'banxico_id'    : 'banxicoId',
             'Institución'   : 'bank',
