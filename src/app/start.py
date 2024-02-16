@@ -1,16 +1,17 @@
 import sys
 from json import loads
-from fastapi import FastAPI, Request 
 from typing import Union
+
+from fastapi import FastAPI, Request
 import uvicorn
 
-from src import engine
-from . import models 
 from config import VERSION
+from . import models 
+from .. import engine
+
 
 debug_mode = 'debug' in sys.argv
 root_path = 'data/docs/v1/catalogs' if not debug_mode else None
-
 
 app = FastAPI(title='Centralized catalogs.', version=VERSION, 
     description='Setup and query all-purpose catalogs.',
@@ -78,16 +79,9 @@ def get_acquiring_bank_details(acquire_code: str):
     return acquirer
 
 
-#@app.exception_handler(406)
-#async def media_type_not_acceptable(request, exc):
-#    return JSONResponse(content={"error": "Media type not acceptable"}, status_code=406)
-
 
 if __name__ == '__main__':
     if debug_mode: 
         uvicorn.run('__main__:app', port=80, host='0.0.0.0', reload=True)
     else: 
         uvicorn.run(app, port=80, host='0.0.0.0')
-
-
-

@@ -4,7 +4,9 @@ info:
   description: Get information from catalogs
   version: v1
 servers:
-  - url: https://apim-crosschannel-tech-dev.azure-api.net/data/catalogs/v1
+  - url: https://api-qas.bineo.com/data/catalogs/v1
+  - url: https://webhook-sap-qas.bineo.com/data/catalogs/v1
+  - url: https://apis-qas.bineo.com/data/catalogs/v1
 paths:
   /zipcode-neighborhoods:
     post:
@@ -13,7 +15,7 @@ paths:
       operationId: 617828401ce5f12c72360439
       responses:
         '200':
-          description: 
+          description: 'null'
   /national-banks:
     get:
       summary: get-banks
@@ -21,7 +23,7 @@ paths:
       operationId: get-banks
       responses:
         '200':
-          description: 
+          description: 'null'
   '/zipcode-neighborhoods/{zipcode}':
     get:
       summary: zipcode-neighborhoods
@@ -35,7 +37,7 @@ paths:
             type: string
       responses:
         '200':
-          description: 
+          description: 'null'
     post:
       summary: zipcode-neighborhoods
       description: Neighborhood zipcodes
@@ -48,10 +50,11 @@ paths:
             type: string
       responses:
         '200':
-          description: 
+          description: 'null'
   '/national-banks/parse-clabe/{clabe}':
     get:
       summary: national-banks-clabe
+      description: national-banks-clabe
       operationId: national-banks-clabe
       parameters:
         - name: clabe
@@ -61,10 +64,11 @@ paths:
             type: ''
       responses:
         '200':
-          description: 
+          description: 'null'
   '/national-banks/card-number/{card-num}/{response-obj}':
     get:
-      summary: national-banks-card-number
+      summary: national-banks-card-number-x
+      description: national-banks-card-number
       operationId: national-banks-card-number
       parameters:
         - name: card-num
@@ -79,10 +83,11 @@ paths:
             type: ''
       responses:
         '200':
-          description: 
+          description: 'null'
   '/national-banks/acquiring/{code-acquiring}':
     get:
       summary: national-banks-acquiring
+      description: national-banks-acquiring
       operationId: national-banks-acquiring
       parameters:
         - name: code-acquiring
@@ -92,10 +97,11 @@ paths:
             type: ''
       responses:
         '200':
-          description: 
+          description: 'null'
   '/v1/national-banks/card-number/{card-num}':
     get:
       summary: national-banks-card-number-bin
+      description: national-banks-card-number-bin
       operationId: 648b4a45deb4e5c5cf4cc642
       parameters:
         - name: card-num
@@ -105,7 +111,7 @@ paths:
             type: ''
       responses:
         '200':
-          description: 
+          description: 'null'
 components:
   securitySchemes:
     apiKeyHeader:

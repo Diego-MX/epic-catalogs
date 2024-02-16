@@ -1,13 +1,12 @@
-
-from pydantic import BaseModel, Field
-from fastapi.responses import JSONResponse
 from typing import List, Any, Optional
-from orjson import dumps
-# from sqlalchemy import alias
+
+from fastapi.responses import JSONResponse
+from orjson import dumps                # pylint: disable=no-name-in-module
+from pydantic import BaseModel, Field   # pylint: disable=no-name-in-module
+
+# pylint: disable=too-few-public-methods
 
 
-
-# Fix some bugs. 
 class ORJSONResponse(JSONResponse): 
     media_type = "application/json"
 
@@ -15,7 +14,6 @@ class ORJSONResponse(JSONResponse):
         return dumps(content)
 
 
-# Request
 class NeighborhoodsRequest(BaseModel): 
     zipcode : str = Field(min_length=5, max_length=5)
 
@@ -24,7 +22,6 @@ class MetaRequestNbhd(BaseModel):
     neighborhoodsRequest : NeighborhoodsRequest
 
 
-# Response
 class Zipcode(BaseModel): 
     zipcode    : str
     state      : str
@@ -83,4 +80,3 @@ class CardsBin(BaseModel):
     banxicoId : str
     nature    : str
     brand     : str 
-
