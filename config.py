@@ -5,7 +5,7 @@ from src.tools import dict_get
 
 SITE = Path(__file__).parent if '__file__' in globals() else Path(getcwd())
 
-VERSION  = "1.0.68"  # build_deploy.yml 
+VERSION  = "1.0.69"  # build_deploy.yml 
 
 ENV      = dict_get(environ, ['ENV_TYPE', 'ENV'])
 SERVER   = environ.get('SERVER_TYPE', 'wap')
