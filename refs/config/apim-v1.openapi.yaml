@@ -1,0 +1,127 @@
+openapi: 3.0.1
+info:
+  title: prod-catalogs
+  description: Get information from catalogs
+  version: v1
+servers:
+  - url: https://api-qas.bineo.com/data/catalogs/v1
+  - url: https://webhook-sap-qas.bineo.com/data/catalogs/v1
+  - url: https://apis-qas.bineo.com/data/catalogs/v1
+paths:
+  /zipcode-neighborhoods:
+    post:
+      summary: get-zipcode-neighborhoods
+      description: Get the zipcodes from some specified neighborhoods
+      operationId: 617828401ce5f12c72360439
+      responses:
+        '200':
+          description: 'null'
+  /national-banks:
+    get:
+      summary: get-banks
+      description: Get the banks catalog
+      operationId: get-banks
+      responses:
+        '200':
+          description: 'null'
+  '/zipcode-neighborhoods/{zipcode}':
+    get:
+      summary: zipcode-neighborhoods
+      description: Neighborhood zipcodes
+      operationId: 61a6be4a333250df9d2d8962
+      parameters:
+        - name: zipcode
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'null'
+    post:
+      summary: zipcode-neighborhoods
+      description: Neighborhood zipcodes
+      operationId: 61a6beeed28e2da6e2c700b1
+      parameters:
+        - name: zipcode
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'null'
+  '/national-banks/parse-clabe/{clabe}':
+    get:
+      summary: national-banks-clabe
+      description: national-banks-clabe
+      operationId: national-banks-clabe
+      parameters:
+        - name: clabe
+          in: path
+          required: true
+          schema:
+            type: ''
+      responses:
+        '200':
+          description: 'null'
+  '/national-banks/card-number/{card-num}/{response-obj}':
+    get:
+      summary: national-banks-card-number-x
+      description: national-banks-card-number
+      operationId: national-banks-card-number
+      parameters:
+        - name: card-num
+          in: path
+          required: true
+          schema:
+            type: ''
+        - name: response-obj
+          in: path
+          required: true
+          schema:
+            type: ''
+      responses:
+        '200':
+          description: 'null'
+  '/national-banks/acquiring/{code-acquiring}':
+    get:
+      summary: national-banks-acquiring
+      description: national-banks-acquiring
+      operationId: national-banks-acquiring
+      parameters:
+        - name: code-acquiring
+          in: path
+          required: true
+          schema:
+            type: ''
+      responses:
+        '200':
+          description: 'null'
+  '/v1/national-banks/card-number/{card-num}':
+    get:
+      summary: national-banks-card-number-bin
+      description: national-banks-card-number-bin
+      operationId: 648b4a45deb4e5c5cf4cc642
+      parameters:
+        - name: card-num
+          in: path
+          required: true
+          schema:
+            type: ''
+      responses:
+        '200':
+          description: 'null'
+components:
+  securitySchemes:
+    apiKeyHeader:
+      type: apiKey
+      name: subscription-key
+      in: header
+    apiKeyQuery:
+      type: apiKey
+      name: subscription-key
+      in: query
+security:
+  - apiKeyHeader: [ ]
+  - apiKeyQuery: [ ]

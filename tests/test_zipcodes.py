@@ -34,9 +34,6 @@ def set_example(name=None):
 
 class TestZipcodes(TestCase): 
     
-    def pre_auth(self):
-        pass
-
     def test_base_request_with_tag(self): 
         response = requests.get(URL)
         self.assertEqual(response.status_code, 200)

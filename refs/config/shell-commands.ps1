@@ -1,7 +1,6 @@
 
 # Iniciar la app con FastAPI, antes Flask.
 python -m src.app.start
-python ./src/app/start.py
 
 
 $env:ENV_TYPE = 'dev'
@@ -18,7 +17,8 @@ docker stop {la_instancia}
 
 
 # Para el Testing 
-python -m tests.test_rfc
+python -m tests.test_banks
+
 
 # Para correr R en Radian
 radian --r-binary=$home/AppData/Local/R/R-4.1.2/bin/R.exe
