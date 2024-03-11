@@ -1,0 +1,16 @@
+name: epic-r
+
+channels: 
+  - conda-forge
+  - r
+
+dependencies: 
+  - python=3.9
+  - radian=0.6.12
+  - r-base=3.6.1
+  - r-feather=0.3.3
+  - r-fortunes=1.5
+  - r-magrittr=1.5
+  - r-tidyverse=1.2.1
+  - r-startup=0.12
+  - r-testit=0.9
