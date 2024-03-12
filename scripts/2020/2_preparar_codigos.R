@@ -85,6 +85,3 @@ codigos_light <- codigos_1 %>%
 write_feather(codigos_light, "../refs/catalogs/codigos_drive.feather")
 write_csv(codigos_light, "../refs/catalogs/codigos_drive.csv")
 
-
-# Agregar más checks si acaso. 
-
