@@ -1,12 +1,13 @@
+library(feather)
+library(testit)
+library(tidyverse)
+filter <- dplyr::filter
 
-library(lubridate)
-library(readr)
-library(stringr)
 
 the_year <- year(today())
 
 raw_zip <- "data/codigos-postales/raw/{the_year}_CPdescargatxt.zip" %>% glue()
-raw_unzip <-  "data/codigos-postales/raw/1-unzip/{the_year}" %>% glue() 
+raw_unzip <- "data/codigos-postales/raw/1-unzip/{the_year}" %>% glue() 
 raw_data <- "data/codigos-postales/raw/1-unzip/{the_year}/CPdescarga.txt" %>% glue()
 
 brz_template <- "refs/catalogs/codigos_drive{tabla}.{ext}"
@@ -48,15 +49,16 @@ validar_y_leer <- function (archivo) {
 
 validar_muns <- function (muns_0) {
     muns_1 <- muns_0 %>% 
+        ungroup() %>% 
         mutate_at(c("min_cp", "max_cp"), as.numeric) %>% 
         arrange(min_cp) %>% 
         mutate(rank = row_number(), 
             pos_min = lead(min_cp), 
-            pre_max = cummax(dplyr::lag(max_cp, default = 0)), 
+            pre_max = cummax(lag(max_cp, default = 0)), 
             separated = (pre_max < min_cp) & (max_cp < pos_min), 
             max_cp  = if_else(separated, lead(min_cp) - 1, max_cp)) %>% 
         mutate_at(c("min_cp", "max_cp"), 
-        .f = ~as.character(.) %>% str_pad(5, "left", "0")) %>% 
+            .f = ~as.character(.) %>% str_pad(5, "left", "0")) %>% 
         select(-c(rank, pos_min, pre_max))
 
     return (muns_1) }
@@ -67,23 +69,25 @@ extraer_grupos <- function (codigos, group_by) {
 
     estados = { codigos %>% 
         group_by(c_estado, d_estado) %>% 
-        summarize(.groups = "drop", 
-            min_cp = min(d_codigo), max_cp = max(d_codigo))},
+        summarize(min_cp = min(d_codigo), max_cp = max(d_codigo)) %>% 
+        ungroup()},
 
     ciudades = { codigos %>% 
         filter(d_ciudad %>% is.na() %>% not()) %>% 
-        select(c_estado, c_cve_ciudad, d_ciudad) %>% unique()}, 
+        select(c_estado, c_cve_ciudad, d_ciudad) %>% 
+        ungroup() %>% unique()}, 
 
     municipios = { codigos %>% 
         group_by(c_estado, c_mnpio, d_mnpio) %>% 
-        summarize(.groups = "drop", 
-            min_cp = min(d_codigo), max_cp = max(d_codigo)) }, 
+        summarize(min_cp = min(d_codigo), max_cp = max(d_codigo)) %>% 
+        ungroup() }, 
     
     asentamientos = { codigos %>% 
-            filter(d_ciudad %>% is.na() %>% not()) %>% 
-            group_by(c_tipo_asenta, d_tipo_asenta) %>% 
-            summarize(n_asenta = n(), .groups="keep") %>% 
-            arrange(desc(n_asenta)) } )
+        filter(d_ciudad %>% is.na() %>% not()) %>% 
+        group_by(c_tipo_asenta, d_tipo_asenta) %>% 
+        summarize(n_asenta = n()) %>% 
+        ungroup() %>% 
+        arrange(desc(n_asenta)) } )
 
     return (el_grupo)}
 
@@ -92,7 +96,6 @@ extraer_grupos <- function (codigos, group_by) {
 
 # 1. Descomprimir
 unzip(raw_zip, exdir=raw_unzip)
-
 
 # 2. Validar y Leer
 codigos <- validar_y_leer(raw_data)
