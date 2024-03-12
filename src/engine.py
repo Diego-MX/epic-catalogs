@@ -188,7 +188,7 @@ def zipcode_query(a_zipcode):
             .groupby(['d_codigo', 'c_estado', 'c_mnpio'])
             .size().to_frame('n_cols').reset_index())
 
-        mun_edo = (mun_edo_0.loc[mun_edo_0['n_cols'].idmax()]
+        mun_edo = (mun_edo_0.loc[mun_edo_0['n_cols'].idxmax()]
             .merge(municipios, how='left', on=['c_estado', 'c_mnpio'])
             .merge(estados, how='left', on='c_estado')
             .loc[:, ['d_codigo', 'd_mnpio', 'd_estado', 

@@ -56,7 +56,7 @@ validar_muns <- function (muns_0) {
             pos_min = lead(min_cp), 
             pre_max = cummax(lag(max_cp, default = 0)), 
             separated = (pre_max < min_cp) & (max_cp < pos_min), 
-            max_cp  = if_else(separated, lead(min_cp) - 1, max_cp)) %>% 
+            max_cp = if_else(separated, lead(min_cp) - 1, max_cp)) %>% 
         mutate_at(c("min_cp", "max_cp"), 
             .f = ~as.character(.) %>% str_pad(5, "left", "0")) %>% 
         select(-c(rank, pos_min, pre_max))
