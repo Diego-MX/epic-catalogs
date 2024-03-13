@@ -2,7 +2,6 @@
 # Iniciar la app con FastAPI, antes Flask.
 python -m src.app.start
 
-
 $env:ENV_TYPE = 'dev'
 $env:SERVER_TYPE = 'local'
 uvicorn start:app --port 80 --host 0.0.0.0
@@ -24,7 +23,7 @@ python -m tests.test_banks
 radian --r-binary=$home/AppData/Local/R/R-4.1.2/bin/R.exe
 
 &"$home\AppData\local\R\R-4.1.2\bin\RScript.exe" .\1b_download-censo.R
-
+C:\Program Files\R\R-4.3.2\bin\x64
 
 # Activar .venv
 ./.venv/Scripts/activate.ps1
