@@ -172,44 +172,40 @@ def bank_acquiring(acquiring_code):
 def zipcode_query(a_zipcode):
     try:
         tipo_asenta = pd.read_feather(ctlg_dir/'codigos_drive_tipo_asentamientos.feather')
-        ciudades    = pd.read_feather(ctlg_dir/'codigos_drive_ciudades.feather')
-        municipios  =(pd.read_feather(ctlg_dir/'codigos_drive_municipios.feather')
+        ciudades = pd.read_feather(ctlg_dir/'codigos_drive_ciudades.feather')
+        municipios =(pd.read_feather(ctlg_dir/'codigos_drive_municipios.feather')
             .assign(cve_mnpio=lambda df: df.c_estado.str.cat(df.c_mnpio)))
 
-        estados     =(pd.read_csv(    ctlg_dir/'estados_claves.csv')
+        estados = (pd.read_csv(ctlg_dir/'estados_claves.csv')
             .assign(c_estado = lambda df: df.clave.map(str).str.pad(2, fillchar='0'))
             .rename(columns={'nombre': 'd_estado', 'ISO_3166': 'c_estado_iso'})
             .loc[:, ['c_estado', 'd_estado', 'c_estado_iso']])
 
         las_colonias = (pd.read_feather(ctlg_dir/'codigos_drive.feather')
             .query(f'`d_codigo` == "{a_zipcode}"'))
-        hay_colonias = las_colonias.shape[0] > 1
 
-        if hay_colonias:
-            mun_estado = (las_colonias[['d_codigo', 'c_estado', 'c_mnpio']]
-                .drop_duplicates()
-                .merge(municipios, on=['c_estado', 'c_mnpio'], how='left')
-                .merge(estados, on='c_estado', how='left')
-                .loc[:, ['d_codigo', 'd_mnpio', 'd_estado',
-                    'c_estado', 'c_estado_iso', 'cve_mnpio']])
-        else:
-            mun_estado = (municipios
-                .loc[(municipios.min_cp <= a_zipcode) & (a_zipcode <= municipios.max_cp), :]
-                .assign(d_codigo=a_zipcode)
-                .merge(estados, on='c_estado', how='left')
-                .loc[:, ['d_codigo', 'd_mnpio', 'd_estado',
-                    'c_estado', 'c_estado_iso', 'cve_mnpio']])
+        mun_edo_0 = (las_colonias
+            .groupby(['d_codigo', 'c_estado', 'c_mnpio'])
+            .size().to_frame('n_cols').reset_index())
 
-        sub_colonias = (las_colonias
+        mun_edo = (mun_edo_0.loc[[mun_edo_0['n_cols'].idxmax()], :]
+            .merge(municipios, how='left', on=['c_estado', 'c_mnpio'])
+            .merge(estados, how='left', on='c_estado')
+            .loc[:, ['d_codigo', 'd_mnpio', 'd_estado', 
+                'c_estado', 'c_estado_iso', 'cve_mnpio']])
+
+        sub_cols = (las_colonias
             .merge(tipo_asenta, on='c_tipo_asenta', how='left')
             .merge(ciudades, on=['c_estado', 'c_cve_ciudad'], how='left')
             .sort_values('n_asenta', ascending=False)
             .assign(cve_ciudad = lambda df: df.c_estado.str.cat(df.c_cve_ciudad))
-            .loc[:, ['d_codigo', 'd_asenta', 'd_zona', 'd_tipo_asenta', 'd_ciudad',
-                    'cve_ciudad']] )
+            .loc[:, ['d_codigo', 'd_asenta', 'd_zona', 
+                'd_tipo_asenta', 'd_ciudad', 'cve_ciudad']])
+
         resp_elements = {
-            'zipcode_df'        : mun_estado,
-            'neighborhoods_df'  : sub_colonias}
+            'zipcode_df': mun_edo, 
+            'neighborhoods_df': sub_cols}
+        
         return resp_elements
 
     except Exception as frying_pan:
