@@ -10,7 +10,7 @@ on:
 env :
   GH_REPO    : Bineo2/data-prod-catalogs
   DKR_IMAGE  : prod-catalogs-webapp
-  DKR_TAG    : '1.0.76'   # Ajustar VALIDATE_DOCKERFILE también. 
+  DKR_TAG    : '1.0.77'   # Ajustar VALIDATE_DOCKERFILE también. 
 
 jobs :
   build-and-deploy :     
