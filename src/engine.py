@@ -1,6 +1,7 @@
 from collections import defaultdict
 from json import loads
 
+
 import clabe
 from fastapi.exceptions import HTTPException
 import pandas as pd
@@ -277,3 +278,5 @@ def zipcode_warnings(a_response, warnables):
         return b_response
     except Exception as frying_pan:
         raise HTTPException(status_code=500, detail=str(frying_pan)) from frying_pan
+
+
