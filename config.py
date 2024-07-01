@@ -1,34 +1,30 @@
-from os import getcwd, environ
-from pathlib import Path
-from src.tools import dict_get
+"""Set Azure Resources variables with Infra Team.
+May only use standar library python. 
+"""
 
-
-SITE = Path(__file__).parent if '__file__' in globals() else Path(getcwd())
-
-VERSION  = "1.0.79"  # build_deploy.yml 
-
-ENV      = dict_get(environ, ['ENV_TYPE', 'ENV'])
-SERVER   = environ.get('SERVER_TYPE', 'wap')
-TEST_ENV = 'local'
-
+VERSION  = "1.0.80"  # build_deploy.yml 
 
 URLS = {
     'local'     : 'http://localhost:80', 
     'staging'   : 'https://wap-prod-catalogs-dev.azurewebsites.net', 
-    'qa'        : 'https://apim-crosschannel-tech-dev.azure-api.net/data/catalogs/v1'
-}
-
+    'qa'        : 'https://apim-crosschannel-tech-dev.azure-api.net/data/catalogs/v1'}
 
 ENV_VARS = {
     'dev' : {
         'app_sp' : {
-            'tenant_id'       : 'AAD_TNT_ID',
-            'subscription_id' : 'AAD_SCTN_ID', 
-            'client_id'       : 'AAD_APP_ID', 
-            'client_secret'   : 'AAD_APP_SCT'}, 
-        'storage':  {'url': 'https://lakehylia.blob.core.windows.net/'}, 
-    }, 
-}
+            'tenant_id'       : 'AAD_TNT_ID_DEV',
+            'subscription_id' : 'AAD_SCTN_ID_DEV', 
+            'client_id'       : 'AAD_APP_ID_DEV', 
+            'client_secret'   : 'AAD_APP_SCT_DEV'}, 
+        'storage':  {'url': 'https://lakehylia.blob.core.windows.net/'} },
+    'qas' : {
+        'app_sp' : {
+            'tenant_id'       : 'AAD_TNT_ID_QAS',
+            'subscription_id' : 'AAD_SCTN_ID_QAS', 
+            'client_id'       : 'AAD_APP_ID_QAS', 
+            'client_secret'   : 'AAD_APP_SCT_QAS'}, 
+        'storage':  {'url': 'https://lakehylia.blob.core.windows.net/'} },
+} 
 
 
 AZURE_VARS = {

@@ -1,16 +1,19 @@
+"""Mid-tier module that executes the API functions. 
+"""
+# pylint: disable=no-else-raise
+# pylint: disable=too-many-locals
+
 from collections import defaultdict
 from json import loads
-
 
 import clabe
 from fastapi.exceptions import HTTPException
 import pandas as pd
 
-import config
-from . import tools
+from . import tools, SITE
 
 
-ctlg_dir = config.SITE/'refs/catalogs'
+ctlg_dir = SITE/'refs/catalogs'
 
 str_to_bool = lambda srs: srs == 'True'
 
@@ -18,7 +21,6 @@ banks_df = (pd.read_feather(ctlg_dir/'national-banks.feather')
     .rename(columns={'banxico_id': 'banxicoId'})
     .assign(spei = lambda df: str_to_bool(df['spei']), 
         portability = lambda df: str_to_bool(df['portability'])))
-
 
 def zipcode_request(a_request):
     try:

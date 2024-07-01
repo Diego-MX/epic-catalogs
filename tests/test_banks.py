@@ -31,6 +31,7 @@ if __name__ == '__main__':
     import sys
     import config
     
+    TEST_ENV = 'local'
     ENV = config.TEST_ENV if len(sys.argv) == 1 else sys.argv.pop()
     URL = config.URLS.get(ENV)
 

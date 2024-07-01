@@ -5,12 +5,18 @@ on:
       deploy_to:
         description:  Github environment contains secrets about its corresponding Azure counterpart.
         required: true
-        default:  dev
+        type: choice
+        options: 
+          - prd
+          - stg
+          - qas 
+          - dev
+          - drp
 
 env :
   GH_REPO    : Bineo2/data-prod-catalogs
   DKR_IMAGE  : prod-catalogs-webapp
-  DKR_TAG    : '1.0.79'   # Ajustar VALIDATE_DOCKERFILE también. 
+  DKR_TAG    : '1.0.80'   # Ajustar VALIDATE_DOCKERFILE también. 
 
 jobs :
   build-and-deploy :     
@@ -56,4 +62,10 @@ jobs :
           images :  ${{secrets.ACR_HOST}}/${{env.DKR_IMAGE}}:${{env.DKR_TAG}}-${{github.event.inputs.deploy_to}}
           app-name : ${{env.WAP_NAME}}
           publish-profile : ${{secrets.WAP_PUBLISH}}
-          
+      
+      - name: Trigger Disaster Recovery 
+        if: github.event.inputs.deploy_to == 'prd'
+        uses: ./.github/workflows/build_deploy.yml
+        with: 
+          deploy_to: drp
+        
