@@ -1,9 +1,9 @@
-.Rproj.user
-.Renviron
 
 .env
-.vscode
 .venv
+
+.pylintrc.toml
+.vscode
 
 .ipynb_checkpoints*
 __pycache__*

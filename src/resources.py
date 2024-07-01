@@ -1,19 +1,21 @@
+"""Manage Azure Resources via a centralized object.
+"""
+# pylint: disable=missing-class-docstring
+
 import os
 from azure.identity import ClientSecretCredential, DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient
 
-from config import ENV_VARS
-
+import config
 
 
 class AzureResourcer():
     def __init__(self, env: str, server=None): 
         self.env = env
         self.server = server
-        self.config = ENV_VARS[env]
+        self.config = config.ENV_VARS[env]
         self.set_credentials()
 
-    
     def set_credentials(self): 
         if self.server == 'local':
             params = self.config['app_sp']
@@ -21,7 +23,6 @@ class AzureResourcer():
                 for (k, v) in params.items()})
         else: 
             self.credentials = DefaultAzureCredential()
-
 
     def get_blob_service(self):
         if not hasattr(self, 'credentials'): 

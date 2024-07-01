@@ -1,3 +1,8 @@
+"""Low-level tools to be used inside the app. 
+"""
+# pylint: disable=missing-class-docstring
+# pylint: disable=too-few-public-methods
+
 
 from base64 import b64encode as enc64
 import re
@@ -117,7 +122,7 @@ def dataframe_response(a_df, cols_df=None, resp_keys=None, drop_nas=True):
         'recordSet'       : b_records,
         'pagination'      : {'hasPagination': False}}
 
-    df_response = {resp_keys.get(key, key): std_dict[key] for key in std_dict.keys()}
+    df_response = {resp_keys.get(kk, kk): vv for kk,vv in std_dict.items()}
     return df_response
 
 

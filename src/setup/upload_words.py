@@ -1,26 +1,21 @@
 # Diego Villamil, EPIC
 # CDMX, 1 de diciembre de 2021
-
-# From Excel to feather to Blob
-# Why Feather? just as CSV, with defined types 
-
+"""Reads local Excel file, store as Feather, and uploads it to Blob Storage. 
+"""
 import os
 import pandas as pd
 
 from azure.identity import ClientSecretCredential 
 from azure.storage.blob import BlobServiceClient
 
-from src import tools
-from config import SITE, ENV_VARS
-from dotenv import load_dotenv
-load_dotenv(override=True)
+from .. import tools
+from .. import SITE
+from ...config import ENV_VARS
 
 
-ruta_catalogo = "product/epic-catalogs/app-services/offensive-words.feather"
+RUTA_WORDS = "product/epic-catalogs/app-services/offensive-words.feather"
 mid_file = SITE/"refs/catalogs/offensive-words.feather"
 
-
-# Esta parte funciona para subir el catálogo de computadora local.
 
 words_lists = tools.read_excel_table(SITE/"refs/catalogs/api-catalogs.xlsx.lnk", 
     "offensive-words", "words_lists")
@@ -43,7 +38,7 @@ credential = ClientSecretCredential(**{k: os.getenv(v)
 
 blob_container = BlobServiceClient("https://lakehylia.blob.core.windows.net/", credential)
 
-the_blob = blob_container.get_blob_client(container="bronze", blob=ruta_catalogo)
+the_blob = blob_container.get_blob_client(container="bronze", blob=RUTA_WORDS)
 
 with open(mid_file, "rb") as _local: 
     the_blob.upload_blob(_local)

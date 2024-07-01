@@ -1,9 +1,12 @@
 # Diego Villamil, EPIC
 # CDMX, 1 de diciembre de 2021
+"""Read local Excel file, convert to Feather, and Upload to Blob.
+"""
+# pylint: disable=redefined-outer-name
+# pylint: disable=invalid-name 
 
 import pandas as pd
 from pandas import DataFrame as pd_DF
-# pylint: disable=redefined-outer-name
 
 
 # Read:  api-catalogs.xlsx!(tabla_297|plazas_w|anexo_1,anexo_1c)
@@ -74,16 +77,14 @@ def process_adquirentes(tbl_29:pd_DF, acq_cols:pd_DF):
 
 
 if __name__ == '__main__': 
-    from dotenv import load_dotenv
-    load_dotenv(override=True)
-
-    from src.resources import AzureResourcer
     from src.tools import read_excel_table
-    from config import SITE, ENV, SERVER
+    from src.resources import AzureResourcer
+
+    from src import SITE, ENV, SERVER
 
 
     local_path = SITE/'refs/catalogs'
-    storage_path = 'product/epic-catalogs/app-services'    # pylint: disable=invalid-name 
+    storage_path = 'product/epic-catalogs/app-services'    
 
     ctlg_files = {
         'banks'    : 'national-banks',
