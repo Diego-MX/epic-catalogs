@@ -13,21 +13,6 @@ jobs :
   build :     
     runs-on : ubuntu-latest
     steps : 
-    - name : Set Variables 
-      run : |
-        case ${{env.BRANCH_ENV}} in
-          "dev") 
-            echo "WAP_NAME=wap-prod-catalogs-dev" >> $GITHUB_ENV;;
-          "qas") 
-            echo "WAP_NAME=as-catalogs-data-qas"  >> $GITHUB_ENV;;
-          "stg") 
-            echo "WAP_NAME=as-catalogs-adm-stg"   >> $GITHUB_ENV;;
-          "drp")
-            echo "WAP_NAME=as-catalogs-data-drp"  >> $GITHUB_ENV;;
-          "prd") 
-            echo "WAP_NAME=as-catalogs-data-prd"  >> $GITHUB_ENV;;
-        esac
-    # https:/:/github.com/actions/checkout
     - name : Checkout GitHub Actions 
       uses : actions/checkout@v2
       with : 

@@ -34,7 +34,7 @@ jobs :
             "stg")
               echo "WAP_NAME=as-catalogs-adm-stg"   >> $GITHUB_ENV;;
             "qas")
-              echo "AP_NAME=as-catalogs-data-qas"  >> $GITHUB_ENV;;
+              echo "WAP_NAME=as-catalogs-data-qas"  >> $GITHUB_ENV;;
             "dev")
               echo "WAP_NAME=wap-prod-catalogs-dev" >> $GITHUB_ENV;;
           esac
