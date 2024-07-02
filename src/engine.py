@@ -10,7 +10,7 @@ import clabe
 from fastapi.exceptions import HTTPException
 import pandas as pd
 
-from . import tools, SITE
+from src import tools, SITE
 
 
 ctlg_dir = SITE/'refs/catalogs'
