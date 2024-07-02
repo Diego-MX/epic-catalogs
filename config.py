@@ -2,7 +2,7 @@
 May only use standar library python. 
 """
 
-VERSION  = "1.0.82"  # build_deploy.yml 
+VERSION  = "1.0.83"  # build_deploy.yml 
 
 URLS = {
     'local'     : 'http://localhost:80', 

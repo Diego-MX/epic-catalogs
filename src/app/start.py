@@ -5,7 +5,7 @@ from typing import Union
 from fastapi import FastAPI, Request
 import uvicorn
 
-from src.app import models, root_path 
+from src.app import models
 from src import engine
 from config import VERSION
 
