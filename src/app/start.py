@@ -1,13 +1,17 @@
 from json import loads
+import sys
 from typing import Union
 
 from fastapi import FastAPI, Request
+import uvicorn
 
-from . import models, root_path 
-from .. import engine
-from ...config import VERSION
+from src.app import models, root_path 
+from src import engine
+from config import VERSION
 
 
+debug_mode = 'debug' in sys.argv
+root_path = 'data/docs/v1/catalogs' if not debug_mode else None
 
 app = FastAPI(title='Centralized catalogs.', version=VERSION, 
     description='Setup and query all-purpose catalogs.',
@@ -73,4 +77,12 @@ def get_bank_details_from_card_number(card_number:str, request:Request):
 def get_acquiring_bank_details(acquire_code: str): 
     acquirer = engine.bank_acquiring(acquire_code)
     return acquirer
+
+
+if __name__ == '__main__':
+    
+    if debug_mode: 
+        uvicorn.run('__main__:app', port=80, host='0.0.0.0', reload=True)
+    else: 
+        uvicorn.run(app, port=80, host='0.0.0.0')
 
