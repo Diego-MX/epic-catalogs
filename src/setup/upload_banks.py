@@ -79,9 +79,7 @@ def process_adquirentes(tbl_29:pd_DF, acq_cols:pd_DF):
 if __name__ == '__main__': 
     from src.tools import read_excel_table
     from src.resources import AzureResourcer
-
     from src import SITE, ENV, SERVER
-
 
     local_path = SITE/'refs/catalogs'
     storage_path = 'product/epic-catalogs/app-services'    
