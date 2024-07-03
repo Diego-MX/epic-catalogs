@@ -4,10 +4,9 @@
 
 Este repositorio contiene código para hacer uso de algunos catálogos de datos. 
 
+- Población de manzanas. 
 - Asentamientos y códigos postales. 
 - Bancos, por CLABE y bines de números de cuenta. 
-- Población de manzanas. 
-
 
 # Población de manzanas
 
@@ -39,12 +38,44 @@ Para hacer la lectura de archivos en el Datalake (Storage Container) hay varios 
 
 
 
+# Runbook 
+
+Los recursos que se necesitan para esta webapp son:   
+- Excel (fuente oficial malamente, favor de migrar a SQL)     
+
+- Base de datos SQL (por definir)  
+
+- _Webapp_: `wap-prod-catalogs-{ENV}`  
+    - `zipcode-neighborhoods/{zipcode}` GET  
+    - `national-banks` GET  
+    - `national-banks/parse-clabe/{clabe}` GET  
+    - `national-banks/card-number/{number}` GET  
+    - `national-banks/acquiring/{acq_code}` GET   
+    Variables: 
+    - `ENV_TYPE = dev,qas,stg,prd,drp`
+    - `SERVER_TYPE = wap`
+    Especificaciones [aquí][docs]  
+
+
+- Contenedor: 
+    - _Registry_: `ProdCatalogsRegistry`  
+    - Instancia/Repositorio: `prod-catalogs-webapp`  
+
+- Ambiente de Github:  (`dev`, `qas`, `stg`, `prd`, `drp`)  
+    - `ACR_HOST`  
+    - `ACR_USER`  
+    - `ACR_PASS`  
+    - `WAP_PUBLISH`  
+
+
+
+
+
 ## _Links_ de referencia: 
 
 - [Autenticar en Azure SDK][azure-sdk]. 
 
-
-
 [azure-sdk]: https://docs.microsoft.com/en-us/azure/developer/python/azure-sdk-authenticate
 [local-env]: https://docs.microsoft.com/en-us/azure/developer/python/configure-local-development-environment?tabs=cmd
 [censo-inegi]: https://www.inegi.org.mx/programas/ccpv/2020/default.html#DatosAbiertos
+[docs]: https://apim-crosschannel-tech-dev.azure-api.net/data/docs/v1/catalogs
