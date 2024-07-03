@@ -53,7 +53,7 @@ Los recursos que se necesitan para esta webapp son:
     - `national-banks/acquiring/{acq_code}` GET   
     Variables: 
     - `ENV_TYPE = dev,qas,stg,prd,drp`
-    - `SERVER_TYPE = wap`
+    - `SERVER_TYPE = wap`  
     Especificaciones [aquí][docs]  
 
 
