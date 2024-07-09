@@ -8,8 +8,8 @@
 # MAGIC
 # MAGIC   - Creación de un scope llamado: **_sql-catallogs-feathers_**
 # MAGIC       - Dicho _scope_ contiene las siguientes llaves con sus respectivos secretos:
-# MAGIC           - _Key_=>**_dbcUsername_**, _Secret_=>**_admin-data_** 
-# MAGIC           - _Key_=>**_dbcPasword_**, _Secret_=>**_ACCESS_**  
+# MAGIC           - _Key_=>**_dbcUsername_**, _Secret_=>**_admin-data_**
+# MAGIC           - _Key_=>**_dbcPasword_**, _Secret_=>**_ACCESS_**
 # MAGIC
 
 # COMMAND ----------
@@ -46,7 +46,9 @@ db_hostname="sql-lakehylia-dev.database.windows.net"
 db_database="webapp_catalogs"
 db_port=1433  # Puerto predeterminado para SQL Server
 
-db_url = "jdbc:sqlserver://{0}:{1};database={2}".format(db_hostname, db_port, db_database)
+options=(db_hostname, db_port, db_database)
+
+db_url = "jdbc:sqlserver://{options[0]}:{[options1]};database={options[2]}"
 
 # COMMAND ----------
 
@@ -58,18 +60,16 @@ connectionProperties = {
 
 # COMMAND ----------
 
-def send_table_db(data_feather:pd, db_table: str, 
-                  db_url: str, db_username: str, db_password: str):
-    spark_df = spark.createDataFrame(data_feather)
+def send_table_db(feather, table, url, username, password):
+    """la función envia una tabal dataframe a SQL"""
+    spark_df = spark.createDataFrame(feather)
 
     spark_df.write.format('jdbc')\
-            .options(url=db_url, 
-                    dbtable= f"{db_table}", 
-                    user= db_username, 
-                    password = db_password)\
+            .options(url=url,
+                    dbtable= f"{table}",
+                    user= username,
+                    password = password)\
             .mode('overwrite').save()
-
-    return 
 
 # COMMAND ----------
 
@@ -96,7 +96,7 @@ jdbcDF.display()
 
 # COMMAND ----------
 
-databricks_user = "juan.v@bineo.com" 
+databricks_user = "juan.v@bineo.com"
 rt_feather = f"file:/Workspace/Repos/{databricks_user}/data-prod-catalogs/refs/catalogs/"
 rt_usr = dbutils.fs.ls(rt_feather)
 

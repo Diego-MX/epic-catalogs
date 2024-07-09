@@ -20,20 +20,20 @@ print("")
 
 c=dbutils.secrets.get(scope="sql-catallogs-feathers",key="dbcPassword")
 
-salva=""
+SALVA=""
 for i in c:
-    salva=salva+i+","
+    SALVA=SALVA+i+","
 
-print(salva)
+print(SALVA)
 
 print("")
 
 d=dbutils.secrets.get(scope="sql-catallogs-feathers",key="dbcUsername")
 
-salve=""
+SALVE=""
 for i in d:
-    salve=salve+i+","
+    SALVE=SALVE+i+","
 
-print(salve)
+print(SALVE)
 
 print("")
