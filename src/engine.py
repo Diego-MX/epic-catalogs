@@ -22,7 +22,7 @@ banks_df = (pd.read_feather(ctlg_dir/'national-banks.feather')
     .assign(spei = lambda df: str_to_bool(df['spei']), 
         portability = lambda df: str_to_bool(df['portability'])))
 
-def zipcode_request(a_request):
+def zipcode_request(a_request): 
     try:
         the_zipcode  = a_request['zipcode']
         response_dfs = zipcode_query(the_zipcode)
@@ -125,11 +125,11 @@ def card_number_parse(card_num, response_obj='bin'):
                 bin_int = int(card_num[:length])
                 the_bin = bins_df.loc[bin_int, :]
 
-                if response_obj == 'bin': 
+                if response_obj == 'bin':
                     pre_response = loads(the_bin.to_json())
                     pre_response['bin'] = str(the_bin.name)
                 
-                elif response_obj == 'bank': 
+                elif response_obj == 'bank':
                     its_bank = banks_df.set_index('banxicoId').loc[the_bin.banxicoId]
                     pre_response = loads(its_bank.to_json())
                     pre_response['banxicoId'] = the_bin.banxicoId
@@ -145,7 +145,7 @@ def card_number_parse(card_num, response_obj='bin'):
         raise HTTPException(status_code=500) from frying_pan
 
 
-def bank_acquiring(acquiring_code): 
+def bank_acquiring(acquiring_code):
     try: 
         acq_cols = {
             'Institución' : 'name', 
@@ -157,8 +157,8 @@ def bank_acquiring(acquiring_code):
         find_any = (acquiring_banks['codeAcquiring'] == acquiring_code)
         
         if find_any.sum() != 1: 
-            raise HTTPException(status_code=404, 
-                detail='Acquiring Bank is not registered or unique.')            
+            raise HTTPException(status_code=404,
+                detail='Acquiring Bank is not registered or unique.')
         else: 
             return acquiring_banks[find_any].to_dict(orient='records')[0]
 
