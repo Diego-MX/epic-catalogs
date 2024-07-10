@@ -10,12 +10,12 @@ import clabe
 from fastapi.exceptions import HTTPException
 import pandas as pd
 
-from src import tools, SITE
+from . import tools, SITE
 
 
 ctlg_dir = SITE/'refs/catalogs'
 
-str_to_bool = lambda srs: srs == 'True'
+str_to_bool = lambda srs: (srs == 'True')
 
 banks_df = (pd.read_feather(ctlg_dir/'national-banks.feather')
     .rename(columns={'banxico_id': 'banxicoId'})

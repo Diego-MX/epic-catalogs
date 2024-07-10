@@ -8,9 +8,9 @@ import pandas as pd
 from azure.identity import ClientSecretCredential 
 from azure.storage.blob import BlobServiceClient
 
-from .. import tools
-from .. import SITE
-from ...config import ENV_VARS
+from src import tools, SITE
+
+from config import ENV_VARS
 
 
 RUTA_WORDS = "product/epic-catalogs/app-services/offensive-words.feather"
