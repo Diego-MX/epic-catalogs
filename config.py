@@ -1,5 +1,5 @@
 """Set Azure Resources variables with Infra Team.
-May only use standar library python. 
+The purpose is to only define variables but don't run any code.
 """
 
 VERSION  = "1.0.83"  # build_deploy.yml 
@@ -30,7 +30,7 @@ ENV_VARS = {
 AZURE_VARS = {
     'dev': {
         'blob-storage': 'lakehylia'},
-    'qas' : {  # url: 'https://{}.blob.core.windows.net/'
+    'qas' : {  
         'blob-storage': 'stalakehyliaqas'}, 
     'stg' : {
         'blob-storage': 'stlakehyliastg'}, 
