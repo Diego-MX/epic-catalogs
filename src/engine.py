@@ -32,10 +32,10 @@ def zipcode_request(a_request):
             (the_response['warnings']['zipcode'][0] == 3)):
             the_detail = the_response['warnings']['zipcode'][1]
             raise HTTPException(404, detail=the_detail)
-    except HTTPException as frying_pan:
-        raise frying_pan
-    except Exception as frying_pan:
-        raise HTTPException(500) from frying_pan
+    except HTTPException as ee:
+        raise ee
+    except Exception as ee:
+        raise HTTPException(500) from ee
     return the_response
 
 
@@ -50,8 +50,8 @@ def banks_request(include_non_spei):
         banks_resp.pop('pagination')
         return banks_resp
 
-    except Exception as frying_pan:
-        raise HTTPException(status_code=500) from frying_pan
+    except Exception as ee:
+        raise HTTPException(status_code=500) from ee
 
 
 def clabe_parse(clabe_key):
@@ -80,11 +80,11 @@ def clabe_parse(clabe_key):
         
         return el_banco.to_dict(orient='records')[0]
 
-    except HTTPException as frying_pan: 
-        raise frying_pan
+    except HTTPException as ee: 
+        raise ee
 
-    except Exception as frying_pan:
-        raise HTTPException(status_code=500) from frying_pan
+    except Exception as ee:
+        raise HTTPException(status_code=500) from ee
     
 
 
@@ -138,11 +138,11 @@ def card_number_parse(card_num, response_obj='bin'):
                 return pre_response
         raise HTTPException(status_code=404, detail='Card Bin Not Found.')
 
-    except HTTPException as frying_pan:
-        raise frying_pan
+    except HTTPException as ee:
+        raise ee
 
-    except Exception as frying_pan:
-        raise HTTPException(status_code=500) from frying_pan
+    except Exception as ee:
+        raise HTTPException(status_code=500) from ee
 
 
 def bank_acquiring(acquiring_code): 
@@ -162,11 +162,11 @@ def bank_acquiring(acquiring_code):
         else: 
             return acquiring_banks[find_any].to_dict(orient='records')[0]
 
-    except HTTPException as frying_pan: 
-        raise frying_pan
+    except HTTPException as ee: 
+        raise ee
 
-    except Exception as frying_pan: 
-        raise HTTPException(status_code=500) from frying_pan
+    except Exception as ee: 
+        raise HTTPException(status_code=500) from ee
         
         
 
@@ -211,9 +211,9 @@ def zipcode_query(a_zipcode):
         
         return resp_elements
 
-    except Exception as frying_pan:
-        into_the_fire = HTTPException(500, str(frying_pan))
-        raise into_the_fire from frying_pan
+    except Exception as ee:
+        into_the_fire = HTTPException(500, str(ee))
+        raise into_the_fire from ee
 
 
 def zipcode_response(nbhd_elems):
@@ -259,26 +259,26 @@ def zipcode_response(nbhd_elems):
         the_response = zipcode_warnings(pre_response, warnables)
         return the_response
 
-    except Exception as frying_pan:
-        raise HTTPException(status_code=500, detail=str(frying_pan)) from frying_pan
+    except Exception as ee:
+        raise HTTPException(status_code=500, detail=str(ee)) from ee
 
 
 def zipcode_warnings(a_response, warnables):
     try:
         warnings = {}
-        if   warnables[0]:
+        if warnables[0]:
             warnings['borough'] = (1, 'No se encontró municipio para CP')
         elif warnables[1]:
             warnings['borough'] = (2, 'Los municipios asociados no son únicos.')
 
-        if   warnables[2]:
+        if warnables[2]:
             warnings['zipcode'] = (3, 'No se encontraron asentamientos con el CP.')
 
         b_response = a_response.copy()
         if len(warnings) > 0:
             b_response['warnings'] = warnings
         return b_response
-    except Exception as frying_pan:
-        raise HTTPException(status_code=500, detail=str(frying_pan)) from frying_pan
+    except Exception as ee:
+        raise HTTPException(status_code=500, detail=str(ee)) from ee
 
 

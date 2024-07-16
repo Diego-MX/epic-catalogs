@@ -32,14 +32,14 @@ async def verify_base_endpoint():
 @app.post('/zipcode-neighborhoods', tags=['Legacy'], 
         response_model=models.NeighborhoodsResponse)
 async def post_zipcode_object(a_request: models.MetaRequestNbhd):
-    an_input = loads(a_request.json())['neighborhoodsRequest']
+    an_input = a_request.neighborhoodsRequest
     return engine.zipcode_request(an_input)
 
 
 @app.get('/zipcode-neighborhoods', tags=['Legacy'], 
         response_model=models.NeighborhoodsResponse)
 async def get_zipcode_object(a_request: models.MetaRequestNbhd):
-    an_input = loads(a_request.json())['neighborhoodsRequest']
+    an_input = a_request.neighborhoodsRequest
     b_response = engine.zipcode_request(an_input)
     return b_response
 
