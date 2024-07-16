@@ -53,7 +53,7 @@ if False:
     response = requests.get(f'{URL}/national-banks/card-number/{card_num}')
     institucion = response.json()['name']        
 
-    clabe_key = '002180700845282896'  #invalida
+    clabe_key = '002180700845282896'  
     clabe_key = '002180700845152894'
     clabe_key = '012180029770826063'
     clabe_key = '012180029770826064'
