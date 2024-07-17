@@ -1,6 +1,6 @@
 
 from typing import Union
-from fastapi import APIRouter, Header
+from fastapi import APIRouter, Request
 from . import engine, models
 
 
@@ -18,8 +18,8 @@ def get_bank_details_from_clabe(clabe_key: str):
 
 @router.get('/card-number/{card_number}', 
         response_model=Union[models.CardsBin, models.Bank])
-def get_bank_details_from_card_number(card_number:str, header:Header()): 
-    bank_header = "application/bankobject+json" in header.get('Accept', '')
+def get_bank_details_from_card_number(card_number:str, request:Request): 
+    bank_header = "application/bankobject+json" in request.headers.get('Accept', '')
     call_by = ('bank' if bank_header else 'bin')
     return engine.card_number_parse(card_number, call_by)
 

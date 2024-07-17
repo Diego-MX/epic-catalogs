@@ -1,6 +1,7 @@
 from typing import Optional, List
 from pydantic import BaseModel
 
+
 class Bank(BaseModel): 
     name        : str
     code        : Optional[str]
