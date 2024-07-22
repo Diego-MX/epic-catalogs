@@ -14,8 +14,10 @@ from .banks.app import router as banks_router
 
 app = FastAPI(title='Centralized catalogs.', version=VERSION, 
     description='Setup and query all-purpose catalogs.',
-    openapi_tags=[{'name': 'Base', 'description': 'Verify base call and version.'}],
-        #{'name': 'Zipcodes'},{'name': 'Banks'},{'name': 'Legacy'}],
+    openapi_tags=[
+        {'name': 'Zipcodes'},
+        {'name': 'Banks'}, 
+        {'name': 'Base', 'description': 'Verify base call and version.'}],
     root_path=root_path,
     default_response_class=main_models.ORJSONResponse)
 
@@ -32,8 +34,13 @@ async def catalogs_exception_handler(_:Request, exc:CatalogsError):
 async def verify_base_endpoint():
     return {'App Running Version': VERSION}
 
-app.include_router(zipcodes_router, prefix='/zipcode-neighborhoods')
-app.include_router(banks_router, prefix='/national-banks')
+app.include_router(zipcodes_router, 
+    prefix='/zipcode-neighborhoods', 
+    tags=['Zipcodes'])
+
+app.include_router(banks_router, 
+    prefix='/national-banks', 
+    tags=['Banks'])
 
 
 if __name__ == '__main__': 

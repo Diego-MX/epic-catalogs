@@ -1,5 +1,4 @@
 
-from collections import defaultdict
 from inspect import currentframe
 from pathlib import Path
 
@@ -14,7 +13,7 @@ ctlg_dir = Path('refs/catalogs')
 str_to_bool = lambda srs: (srs == 'True')
 
 
-def queryrow_to_dict(a_df: pd.DataFrame, q: str): 
+def queryrow_to_dict(a_df: pd.DataFrame, q: str) -> dict: 
     caller_locals = currentframe().f_back.f_locals    
     q_df = a_df.query(q, local_dict=caller_locals)
     assert q_df.shape[0] == 1, f"Query '{q}' doesn't return one row"
@@ -27,11 +26,11 @@ banks_df = (pd.read_feather(ctlg_dir/'national-banks.feather')
         portability = lambda df: str_to_bool(df['portability'])))
 
 
-def all_banks(include_non_spei):
+def all_banks(include_non_spei:bool) -> pd.DataFrame:
     return banks_df.loc[banks_df['spei'], :] if include_non_spei else banks_df
 
 
-def clabe_parse(clabe_key):
+def clabe_parse(clabe_key:str) -> models.Bank:
     verificator = clabe.compute_control_digit(clabe_key[:-1])
     if (clabe_key[-1] != verificator):
         raise ValidationError('Invalid CLABE', 
@@ -46,7 +45,8 @@ def clabe_parse(clabe_key):
 
     is_bineo = (bank_code == gfb_code) and es_indirecto and gfb_a_bineo  
     q_code = bineo_code if is_bineo else bank_code
-    return queryrow_to_dict(banks_df, f"`code` == '{q_code}'")
+    bank_row = queryrow_to_dict(banks_df, f"`code` == '{q_code}'")
+    return models.Bank(**bank_row)
 
 
 def card_number_bin(card_num:str) -> models.CardsBin:
@@ -68,35 +68,33 @@ def card_number_bin(card_num:str) -> models.CardsBin:
         'Institución'   : 'bank',
         'Naturaleza'    : 'nature',
         'Marca'         : 'brand'}
+
     bins_df = (pd.read_feather(ctlg_dir/'national-banks-bins.feather')
         .rename(columns=bin_cols)
-        .loc[:, bin_cols.values()]
-        .set_index('bin'))
-    
-    # algún group_by sería más apropiado. 
-    bin_lengths = defaultdict(list)
-    for a_bin, length in bins_df['length'].items():
-        bin_lengths[length].append(a_bin)
+        .loc[:, bin_cols.values()])
 
-    for length in sorted(bin_lengths.keys(), reverse=True):
-        bin_int = int(card_num[:length])
-        if (bin_int in bin_lengths[length]):
-            w_bins = bins_df.reset_index()
-            return queryrow_to_dict(w_bins, f"`bin` == {bin_int}")
+    length_bins = bins_df.set_index('bin').groupby('length') 
+    for b_len, len_bins in length_bins.groups.items(): 
+        bin_int = int(card_num[:b_len])
+        if bin_int in len_bins: 
+            bin_row = queryrow_to_dict(bins_df, f"`bin` == {bin_int}")
+            return models.CardsBin(**bin_row)
+            # Sin comillas porque INT. 
 
     raise NotFoundError('Card bin not found', 
         'Card bins correspond to the first [6,7,8] digits of the card number.')
 
 
-def bin_bank(bank_key) -> models.Bank: 
-    return queryrow_to_dict(banks_df, f"`banxicoId` == '{bank_key}'")
+def bin_bank(bank_key: str) -> models.Bank: 
+    bank_row = queryrow_to_dict(banks_df, f"`banxicoId` == '{bank_key}'")
+    return models.Bank(**bank_row)
 
 
-def bank_acquiring(acq_code): 
+def bank_acquiring(acq_code: str) -> models.BankAcquiring: 
     acq_cols = {
         'Institución' : 'name', 
         'ID Adquirente' : 'codeAcquiring'}
     acq_banks = (pd.read_feather(ctlg_dir/'national-banks-acquiring.feather')
         .rename(columns=acq_cols))    
-    return queryrow_to_dict(acq_banks, f"`codeAquiring` == {acq_code}")
-    
+    acq_row =queryrow_to_dict(acq_banks, f"`codeAquiring` == '{acq_code}'")
+    return models.BankAcquiring(**acq_row)    

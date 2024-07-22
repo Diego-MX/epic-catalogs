@@ -3,8 +3,8 @@ from fastapi import APIRouter
 
 from . import engine, models
 
-router = APIRouter(tags=['ZipCodes'])
 
+router = APIRouter()
 
 ## Ya no jala... 🤷 
 @router.post('', tags=['Legacy'], 

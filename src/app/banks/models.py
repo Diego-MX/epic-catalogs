@@ -1,5 +1,4 @@
-from enum import Enum
-from typing import List, Optional, Type
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -30,14 +29,3 @@ class CardsBin(BaseModel):
     nature    : str
     brand     : str 
 
-
-class CardNumberCall(Enum): 
-    BANK = 'bank'
-    BIN = 'bin'
-
-    @property
-    def model_class(self) -> Type[BaseModel]:
-        model_map = {
-            "bank": Bank,
-            "bin": CardsBin}
-        return model_map[self.value]
