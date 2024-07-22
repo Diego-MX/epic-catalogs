@@ -14,4 +14,3 @@ ENV SERVER_TYPE ${SERVER_TYPE}
 ENV ENV_TYPE ${ENV_TYPE}
 EXPOSE 80 
 CMD ["python", "-m", "src.app.start"]
-
