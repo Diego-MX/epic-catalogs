@@ -1,2 +1,3 @@
 *.xml
 set-workflows.yml
+*.PublishSettings

@@ -2,9 +2,6 @@
 
 FROM --platform=linux/amd64 python:3.8-slim-buster as build
 
-WORKDIR /code
-COPY ./reqs_base.txt .
-
 RUN apt-get update && \
     apt-get install -y --no-install-recommends curl gnupg2 unixodbc unixodbc-dev build-essential && \
     curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
@@ -15,10 +12,13 @@ RUN apt-get update && \
     apt-get purge -y --auto-remove build-essential && \
     rm -rf /var/lib/apt/lists/*
 
-COPY . . 
-
 ENV ODBCINI=/etc/odbc.ini
 ENV LD_LIBRARY_PATH=/opt/microsoft/msodbcsql18/lib64:/usr/lib/x86_64-linux-gnu
+
+WORKDIR /code
+COPY ./reqs_base.txt .
+
+COPY . . 
 
 ARG SERVER_TYPE
 ARG ENV_TYPE
