@@ -1,11 +1,18 @@
+# Engine es el back office de la aplicación.  
+# test_engine prueba las funciones correspondientes. 
 
-
+from src.app.main import app as main_app
 from src.app.banks import engine as bank_engine
 from src.app.zipcodes import engine as zipcode_engine
 
 
 
-class TestBanks: 
+class SkipTestBanks:
+    # banks_request (spei/no-spei)
+    # clabe_parse
+    # card_number_parse
+    # acquiring   
+
     def test_all_banks_response_200(self): 
         response = client.get('/national-banks')
         assert response.status_code == 200, "All banks not available."
@@ -24,7 +31,9 @@ class TestBanks:
         assert institucion == 'CITIBANAMEX', "Banamex card doesn't return Banamex."
 
 
-class TestZipcodes: 
+class SkipTestZipcodes: 
+    # zipcode_(request|query|response|warnings)
+
     def test_no_city_response_empty_str(self, no_city_zipcode): 
         the_data = self.as_request(no_city_zipcode)
         response = client.post('/zipcode-nighborhoods', data=the_data)

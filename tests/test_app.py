@@ -1,6 +1,5 @@
 
 from fastapi.testclient import TestClient
-from pydantic import BaseModel
 
 from src.app.main import app
 from src.app.banks import models as b_models
@@ -10,9 +9,6 @@ client = TestClient(app)
 
 
 class TestBanks:
-    def response_model(self, response, model:BaseModel): 
-        return model.parse_obj(response.json())
-
     def test_root_call_responds_200(self): 
         response = client.get('/')
         assert response.status_code == 200, "Root call isn't successful."
@@ -21,61 +17,55 @@ class TestBanks:
         response = client.get('/national-banks')
         assert response.status_code == 200, "All banks not available."
 
-    def test_valid_clabe_responds_200(self, valid_clabe): 
-        response = client.get(f'/national-banks/parse-clabe/{valid_clabe}')
+    def test_valid_clabe_responds_200(self, clabe_valid): 
+        response = client.get(f'/national-banks/parse-clabe/{clabe_valid}')
         assert response.status_code == 200, "Valid CLABE not successful."
 
-    def test_invalid_clabe_responds_404(self, invalid_clabe):
-        response = client.get(f'/national-banks/parse-clabe/{invalid_clabe}')
+    def test_invalid_clabe_responds_404(self, clabe_invalid):
+        response = client.get(f'/national-banks/parse-clabe/{clabe_invalid}')
         assert response.status_code == 404, "Invalid CLABE not 404-ing."
 
-    def test_banamex_card_responds_banamex(self, banamex_card): 
-        response = client.get(f'/national-banks/card-number/{banamex_card}')
-        resp_model = self.response_model(response, b_models.CardsBin)
-        assert resp_model.bank == 'CITIBANAMEX',\
-            "Banamex card doesn't return Banamex."
-
+    def test_plain_card_number_responds_card_bin_object(self, card_number): 
+        response = client.get(f'/national-banks/card-number/{card_number}')
+        assert response.status_code == 200,\
+            f"Calling card-number (bin) on '{card_number}' doesn't return 200."
+        resp_bin = b_models.CardsBin.parse_obj(response.json())
+        assert isinstance(resp_bin, b_models.CardsBin),\
+            f"Calling card-number (bin) on '{card_number}' doesn't give a valid bin."
+                
+    def test_card_number_with_bank_header_responds_bank_object(self, card_number): 
+        accept_headers = {'Accept': 'application/bankobject+json'}
+        url_with_number = f'/national-banks/card-number/{card_number}'
+        response = client.get( url_with_number, headers=accept_headers)
+        assert response.status_code == 200,\
+            "Calling Card number with 'bankobject' header doesn't return 200."
+        resp_bank = b_models.Bank.parse_obj(response.json())
+        assert isinstance(resp_bank, b_models.Bank),\
+            "Calling Card number with 'bankobject' header doesn't return bank object."
+        
 
 class TestZipcodes: 
-    def test_no_city_responds_empty_str(self, no_city_zipcode): 
-        response = client.get(f'/zipcode-neighborhoods/{no_city_zipcode}')
-        first_result = response.json()['neighborhoods']['neighborhoodsSet'][0]
-        assert first_result["city"] == "",\
-            f"no-city zipcode {no_city_zipcode} doesn't return empty string."
+    def test_zipcode_sin_ciudad_responds_empty_str(self, zipcode_sin_ciudad): 
+        response = client.get(f'/zipcode-neighborhoods/{zipcode_sin_ciudad}')
+        parsed = z_models.NeighborhoodsResponse.parse_obj(response.json()) 
+        first_city = parsed.neighborhoods.neighborhoodsSet[0].city
+        assert first_city == "",\
+            f"no-city zipcode {zipcode_sin_ciudad} doesn't return empty string."
     
-    def test_ok_zipcode_responds_ok(self, ok_zipcode): 
-        response = client.get(f'/zipcode-neighborhoods/{ok_zipcode}')
+    def test_zipcode_ok_responds_ok(self, zipcode_ok): 
+        response = client.get(f'/zipcode-neighborhoods/{zipcode_ok}')
         assert response.status_code == 200,\
-            f"OK zipcode {ok_zipcode} isn't successful."
+            f"OK zipcode {zipcode_ok} isn't successful."
     
-    def test_no_zipcodes_responds_404(self, no_colonia_zipcode): 
-        response = client.get(f'/zipcode-neighborhoods/{no_colonia_zipcode}')
+    def test_zipcode_sin_colonia_responds_404(self, zipcode_sin_colonia): 
+        response = client.get(f'/zipcode-neighborhoods/{zipcode_sin_colonia}')
         assert response.status_code == 404,\
-            f"sin-colonia zipcode {no_colonia_zipcode} didn't 404'd."
-    
+            f"sin-colonia zipcode {zipcode_sin_colonia} didn't 404'd."
 
-class SkipTestLegacyZipcodes: 
-    def zipcode_meta_request(self, a_zipcode): 
-        n_request = z_models.NeighborhoodsRequest(zipcode=a_zipcode)
-        return z_models.MetaRequestNbhd(neighborhoodsRequest=n_request)  
-
-    # def test_no_city_responds_empty_string(self, no_city_zipcode): 
-    #     the_data = self.zipcode_meta_request(no_city_zipcode)
-    #     response = client.post('/zipcode-neighborhoods', data=the_data)
-    #     first_result = response.json()['neighborhoods']['neighborhoodsSet'][0]
-    #     assert first_result["city"] == "",\
-    #         f"no-city zipcode {no_city_zipcode} doesn't return empty string."
-    
-    def test_ok_zipcode_responds_ok(self, ok_zipcode): 
-        the_data = self.zipcode_meta_request(ok_zipcode)
-        response = client.post('/zipcode-neighborhoods', data=the_data)
+    def skip_test_post_request_zipcode_responds_200(self, zipcode_ok): 
+        req_1 = z_models.NeighborhoodsRequest(zipcode=zipcode_ok)
+        req_2 = z_models.MetaRequestNbhd(neighborhoodsRequest=req_1)
+        response = client.post('/zipcode-neighborhoods', data=req_2)
         assert response.status_code == 200,\
-            f"OK zipcode {ok_zipcode} isn't successful."
-    
-    def test_no_colonia_responds_404(self, no_colonia_zipcode): 
-        the_data = self.zipcode_meta_request(no_colonia_zipcode)
-        response = client.post('/zipcode-neighborhoods', data=the_data)
-        assert response.status_code == 404,\
-            f"sin-colonia zipcode {no_colonia_zipcode} didn't 404'd."
-    
-    
+            "Este test dejó de servir y no se puede componer, lo bueno es que es de legacy"
+

@@ -3,12 +3,14 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 
 
+# No está padre.
 class NeighborhoodsRequest(BaseModel): 
     zipcode : str = Field(min_length=5, max_length=5)
 
-
+# No está padre.
 class MetaRequestNbhd(BaseModel): 
     neighborhoodsRequest : NeighborhoodsRequest
+
 
 
 class Zipcode(BaseModel): 
@@ -29,12 +31,14 @@ class Neighborhood(BaseModel):
     city_id : Optional[str]
 
 
+# No está padre
 class Neighborhoods(BaseModel): 
     numberOfNeighborhoods   : int
     neighborhoodAttributes  : List[str]
     neighborhoodsSet        : List[Neighborhood]
 
 
+# No está padre
 class NeighborhoodsResponse(BaseModel): 
     zipcode       : Zipcode
     neighborhoods : Neighborhoods

@@ -1,4 +1,6 @@
-from typing import Optional, List
+from enum import Enum
+from typing import List, Optional, Type
+
 from pydantic import BaseModel
 
 
@@ -10,18 +12,14 @@ class Bank(BaseModel):
     spei        : bool
     portability : bool
 
-
 class BanksResponse(BaseModel): 
     numberOfBanks   : int
     bankAttributes  : List[str]
     banksSet        : List[Bank]
 
-
 class BankAcquiring(BaseModel): 
     name  : str
     codeAcquiring : Optional[str]
-
-
 
 class CardsBin(BaseModel): 
     bin       : str
@@ -31,3 +29,15 @@ class CardsBin(BaseModel):
     banxicoId : str
     nature    : str
     brand     : str 
+
+
+class CardNumberCall(Enum): 
+    BANK = 'bank'
+    BIN = 'bin'
+
+    @property
+    def model_class(self) -> Type[BaseModel]:
+        model_map = {
+            "bank": Bank,
+            "bin": CardsBin}
+        return model_map[self.value]

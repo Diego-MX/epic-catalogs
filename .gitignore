@@ -2,6 +2,7 @@
 .env
 .venv
 
+.start_project.ps1
 .pylintrc.toml
 .vscode
 

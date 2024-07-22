@@ -8,9 +8,8 @@ catalogs_path = SITE/"refs/catalogs"
 banks_df = pd.read_feather(catalogs_path/"national-banks.feather")
 
 
-def zipcode_request(a_request):
-    the_zipcode  = a_request['zipcode']
-    response_dfs = zipcode_query(the_zipcode)
+def zipcode_request(a_zipcode):
+    response_dfs = zipcode_query(a_zipcode)
     the_response = zipcode_response(response_dfs)
     if (('warnings' in the_response) and
         ('zipcode'  in the_response['warnings']) and

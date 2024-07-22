@@ -8,8 +8,8 @@ from config import VERSION
 from . import debug_mode, root_path
 from . import models as main_models
 from .exceptions import CatalogsError
-from .zipcodes.main import router as zipcodes_router
-from .banks.main import router as banks_router
+from .zipcodes.app import router as zipcodes_router
+from .banks.app import router as banks_router
 
 
 app = FastAPI(title='Centralized catalogs.', version=VERSION, 
@@ -32,8 +32,8 @@ async def catalogs_exception_handler(_:Request, exc:CatalogsError):
 async def verify_base_endpoint():
     return {'App Running Version': VERSION}
 
-app.include_router(zipcodes_router)
-app.include_router(banks_router)
+app.include_router(zipcodes_router, prefix='/zipcode-neighborhoods')
+app.include_router(banks_router, prefix='/national-banks')
 
 
 if __name__ == '__main__': 
