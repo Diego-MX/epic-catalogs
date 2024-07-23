@@ -7,6 +7,7 @@ import pandas as pd
 import clabe
 from src.app.exceptions import ValidationError, NotFoundError
 from . import models
+from src import tools
 
 ctlg_dir = Path('refs/catalogs')
 
@@ -19,12 +20,13 @@ def queryrow_to_dict(a_df: pd.DataFrame, q: str) -> dict:
     assert q_df.shape[0] == 1, f"Query '{q}' doesn't return one row"
     return q_df.to_dict(orient='records')[0]
 
-
-banks_df = (pd.read_feather(ctlg_dir/'national-banks.feather')
-    .rename(columns={'banxico_id': 'banxicoId'})
-    .assign(spei = lambda df: str_to_bool(df['spei']), 
-        portability = lambda df: str_to_bool(df['portability'])))
-
+engine = tools.get_connection()
+banks_df = (pd.read_sql_table("national_banks",engine)
+            .rename(columns={'banxico_id': 'banxicoId'})
+            .assign(spei = lambda df: str_to_bool(df['spei']),
+                    portability = lambda df: str_to_bool(df['portability']))
+            .sort_values(by = "tabla_id"))
+engine.dispose()
 
 def all_banks(include_non_spei:bool) -> pd.DataFrame:
     return banks_df.loc[banks_df['spei'], :] if include_non_spei else banks_df
@@ -60,18 +62,21 @@ def card_number_bin(card_num:str) -> models.CardsBin:
     # 'Ac 3D Secure', 'NFC', 'MST', 'Wallet', 'PAN Din', 'CVV/CVC Din',
     # 'NIP', 'Tokenización', 'Vale', 'Fecha de Alta', 'Procesador']
     # ... ID calculada.
-    bin_cols = {
-        'BIN'           : 'bin',
-        'Rango'         : 'length',
-        'ID'            : 'bankId',
-        'banxico_id'    : 'banxicoId',
-        'Institución'   : 'bank',
-        'Naturaleza'    : 'nature',
-        'Marca'         : 'brand'}
 
-    bins_df = (pd.read_feather(ctlg_dir/'national-banks-bins.feather')
-        .rename(columns=bin_cols)
-        .loc[:, bin_cols.values()])
+    query_bins = """
+            SELECT BIN AS bin,
+                Rango AS "length",
+                ID AS bankId,
+                banxico_id AS banxicoId,
+                Institución AS bank,
+                Naturaleza AS nature,
+                Marca AS brand
+            FROM national_banks_bins;
+                """
+    
+    engine_card = tools.get_connection()
+    bins_df = pd.read_sql_query(query_bins,engine_card)
+    engine_card.dispose()
 
     length_bins = bins_df.set_index('bin').groupby('length') 
     for b_len, len_bins in length_bins.groups.items(): 
@@ -91,10 +96,17 @@ def bin_bank(bank_key: str) -> models.Bank:
 
 
 def bank_acquiring(acq_code: str) -> models.BankAcquiring: 
-    acq_cols = {
-        'Institución' : 'name', 
-        'ID Adquirente' : 'codeAcquiring'}
-    acq_banks = (pd.read_feather(ctlg_dir/'national-banks-acquiring.feather')
-        .rename(columns=acq_cols))    
-    acq_row =queryrow_to_dict(acq_banks, f"`codeAquiring` == '{acq_code}'")
+    query_acquiring = """
+                    SELECT tabla_id,
+                        "Institución" AS "name", 
+                        "ID Adquirente" AS "codeAcquiring", 
+                        Cámara, [Fecha de Alta]
+                    FROM national_banks_acquiring;
+                    """
+
+    engine_acquiring = tools.get_connection()
+    acq_banks = pd.read_sql_query(query_acquiring,engine_acquiring)
+    engine_acquiring.dispose()
+
+    acq_row =queryrow_to_dict(acq_banks, f"`codeAcquiring` == '{acq_code}'")
     return models.BankAcquiring(**acq_row)    

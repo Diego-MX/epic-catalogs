@@ -6,6 +6,8 @@
 
 from base64 import b64encode as enc64
 import re
+import os
+from sqlalchemy import create_engine 
 
 from openpyxl import load_workbook, utils as xl_utils
 import pandas as pd
@@ -146,3 +148,36 @@ class BearerAuth(auth.AuthBase):
         req.headers['authorization'] = f'Bearer {self.token}'
         return req
 
+def type_environment():
+    """
+        Función que muestra sí el programa se encuentra en el ambiente Docker o en Local.
+    """
+    environment = (os.path.exists('/.dockerenv') or
+                   os.path.isfile('/proc/1/cgroup') and
+                   'docker' in open('/proc/1/cgroup', encoding="utf-8").read())
+
+    return environment
+
+def get_connection():
+    """
+        Conexión con la DB en Azure, se crea una bifurcasión dado que 
+        se trabaja en docker y de forma local 
+    """
+
+    username = "USUARIO_BATALLA"
+    password = "18.07.2024.JUIK.juik"
+    server_name = "sql-lakehylia-dev.database.windows.net"
+    database_name  = "webapp_catalogs"
+
+    if type_environment():
+        connection_string = f'mssql+pyodbc://{username}:{password}@{server_name}/{database_name}?driver=/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.3.so.3.1'
+
+    else:
+        connection_string = f'mssql+pyodbc://{username}:{password}@{server_name}/{database_name}?driver=ODBC+Driver+18+for+SQL+Server'
+
+    if connection_string is None:
+        raise ValueError("La variable de entorno CONNECTION_STRING no está configurada.")
+
+    connection = create_engine(connection_string)
+
+    return connection

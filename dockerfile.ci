@@ -1,10 +1,22 @@
  
 
-FROM python:3.8-slim
+FROM --platform=linux/amd64 python:3.8-slim-buster as build
 
 WORKDIR /code
 COPY ./reqs_base.txt .
-RUN pip install --trusted-host pypi.python.org -r ./reqs_base.txt
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl gnupg2 unixodbc unixodbc-dev build-essential && \
+    curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
+    curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
+    apt-get update && \
+    ACCEPT_EULA=Y apt-get install -y msodbcsql18 && \
+    pip install --no-cache-dir --trusted-host pypi.python.org -r ./reqs_base.txt && \
+    apt-get purge -y --auto-remove build-essential && \
+    rm -rf /var/lib/apt/lists/*
+
+ENV ODBCINI=/etc/odbc.ini
+ENV LD_LIBRARY_PATH=/opt/microsoft/msodbcsql18/lib64:/usr/lib/x86_64-linux-gnu
 
 COPY . . 
 
@@ -13,5 +25,5 @@ ARG ENV_TYPE
 ENV SERVER_TYPE ${SERVER_TYPE}
 ENV ENV_TYPE ${ENV_TYPE}
 EXPOSE 80 
-CMD ["python", "-m", "src.app.start"]
+CMD ["python", "-m", "src.app.main"]
 

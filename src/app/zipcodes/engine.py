@@ -5,8 +5,6 @@ from src import SITE, tools
 from src.app.exceptions import NotFoundError
 
 catalogs_path = SITE/"refs/catalogs"
-banks_df = pd.read_feather(catalogs_path/"national-banks.feather")
-
 
 def zipcode_request(a_zipcode):
     response_dfs = zipcode_query(a_zipcode)
@@ -20,39 +18,59 @@ def zipcode_request(a_zipcode):
 
 
 def zipcode_query(a_zipcode):
-    tipo_asenta = pd.read_feather(catalogs_path/'codigos_drive_tipo_asentamientos.feather')
-    ciudades = pd.read_feather(catalogs_path/'codigos_drive_ciudades.feather')
-    municipios =(pd.read_feather(catalogs_path/'codigos_drive_municipios.feather')
-        .assign(cve_mnpio=lambda df: df.c_estado.str.cat(df.c_mnpio)))
 
-    estados = (pd.read_csv(catalogs_path/'estados_claves.csv')
-        .assign(c_estado = lambda df: df.clave.map(str).str.pad(2, fillchar='0'))
-        .rename(columns={'nombre': 'd_estado', 'ISO_3166': 'c_estado_iso'})
-        .loc[:, ['c_estado', 'd_estado', 'c_estado_iso']])
+    query_mnpio_estado = f"""
+            SELECT d_codigo, d_mnpio, d_estado,
+                estados.c_estado,c_estado_iso,cve_mnpio
+            FROM ( 
+                SELECT mun_edo_0.d_codigo, mun_edo_0.c_estado, 
+                    mun_edo_0.c_mnpio, mun_edo_0.n_cols
+                FROM (
+                    SELECT d_codigo, c_estado, c_mnpio, COUNT(*) AS n_cols
+                    FROM codigos_drive
+                    WHERE d_codigo = {str(a_zipcode)}
+                    GROUP BY d_codigo, c_estado, c_mnpio) AS mun_edo_0 
+                WHERE mun_edo_0.n_cols = (
+                    SELECT MAX(n_cols)
+                    FROM ( SELECT COUNT(*) AS n_cols
+                        FROM codigos_drive
+                        WHERE d_codigo = {str(a_zipcode)}
+                        GROUP BY d_codigo, c_estado, c_mnpio) AS SubConsulta)) AS colonias
+            LEFT JOIN (
+                SELECT *, CONCAT(c_estado,c_mnpio) AS cve_mnpio 
+                FROM codigos_drive_municipios) AS municipio 
+                    ON colonias.c_estado = municipio.c_estado 
+                    AND colonias.c_mnpio = municipio.c_mnpio  
+            LEFT JOIN (
+                SELECT RIGHT('0'+CAST(clave AS VARCHAR(2)),2) AS c_estado,
+                        nombre AS d_estado,
+                        ISO_3166 AS c_estado_iso
+                FROM estados_claves) AS estados 
+                    ON colonias.c_estado = estados.c_estado;
+            """
 
-    las_colonias = (pd.read_feather(catalogs_path/'codigos_drive.feather')
-        .query(f'`d_codigo` == "{a_zipcode}"'))
+    engine_zipcode = tools.get_connection()
+    mun_edo = pd.read_sql_query(query_mnpio_estado,engine_zipcode)
+    engine_zipcode.dispose()
 
-    if las_colonias.shape[0] == 0: 
-        raise NotFoundError('Colonias Not Found', f"Empty list of neighborhoods at '{a_zipcode}'")
-    
-    mun_edo_0 = (las_colonias
-        .groupby(['d_codigo', 'c_estado', 'c_mnpio'])
-        .size().to_frame('n_cols').reset_index())
+    query_colonias = f"""
+                SELECT d_codigo, d_asenta, 
+                        d_zona, d_tipo_asenta, 
+                        d_ciudad, CONCAT(ciudades.c_estado, ciudades.c_cve_ciudad) AS cve_ciudad
+                FROM (SELECT * 
+                    FROM codigos_drive 
+                    WHERE d_codigo = {str(a_zipcode)}) AS colonias
+                LEFT JOIN codigos_drive_tipo_asentamientos AS asentamiento
+                ON colonias.c_tipo_asenta = asentamiento.c_tipo_asenta
+                LEFT JOIN codigos_drive_ciudades AS ciudades 
+                ON colonias.c_estado = ciudades.c_estado 
+                AND colonias.c_cve_ciudad = ciudades.c_cve_ciudad
+                ORDER BY n_asenta DESC;
+                """
 
-    mun_edo = (mun_edo_0.loc[[mun_edo_0['n_cols'].idxmax()], :]
-        .merge(municipios, how='left', on=['c_estado', 'c_mnpio'])
-        .merge(estados, how='left', on='c_estado')
-        .loc[:, ['d_codigo', 'd_mnpio', 'd_estado', 
-            'c_estado', 'c_estado_iso', 'cve_mnpio']])
-
-    sub_cols = (las_colonias
-        .merge(tipo_asenta, on='c_tipo_asenta', how='left')
-        .merge(ciudades, on=['c_estado', 'c_cve_ciudad'], how='left')
-        .sort_values('n_asenta', ascending=False)
-        .assign(cve_ciudad = lambda df: df.c_estado.str.cat(df.c_cve_ciudad))
-        .loc[:, ['d_codigo', 'd_asenta', 'd_zona', 
-            'd_tipo_asenta', 'd_ciudad', 'cve_ciudad']])
+    engine_zipcode = tools.get_connection()
+    sub_cols= pd.read_sql_query(query_colonias,engine_zipcode)
+    engine_zipcode.dispose()
 
     resp_elements = {
         'zipcode_df': mun_edo, 
@@ -111,5 +129,4 @@ def zipcode_warnings(a_response, warnables):
     if len(warnings) > 0:
         b_response['warnings'] = warnings
     return b_response
-    
-
+# End-of-file (EOF)
