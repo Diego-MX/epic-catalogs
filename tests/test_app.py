@@ -39,7 +39,7 @@ class TestBanks:
     def test_card_number_with_bank_header_responds_bank_object(self, card_number): 
         accept_headers = {'Accept': 'application/bankobject+json'}
         url_with_number = f'/national-banks/card-number/{card_number}'
-        response = client.get( url_with_number, headers=accept_headers)
+        response = client.get(url_with_number, headers=accept_headers)
         assert response.status_code == 200,\
             "Calling Card number with 'bankobject' header doesn't return 200."
         resp_bank = models.Bank.parse_obj(response.json())
