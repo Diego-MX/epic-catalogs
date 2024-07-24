@@ -2,7 +2,7 @@
 """
 # pylint: disable=missing-class-docstring
 # pylint: disable=too-few-public-methods
-
+# pylint: disable=raising-bad-type
 
 from base64 import b64encode as enc64
 import re
@@ -62,7 +62,7 @@ def shortcut_target(filename, file_ext=None):
         a_path = a_path = re.findall(file_regex, _f.read(), flags=re.DOTALL)
 
     if len(a_path) != 1: 
-        raise 'Not unique or No shortcut targets found in link.'    # pylint: disable=raising-bad-type
+        raise 'Not unique or No shortcut targets found in link.'    
     return a_path[0]
 
 
