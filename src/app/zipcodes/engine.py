@@ -1,5 +1,7 @@
 
 import pandas as pd
+from sqlalchemy import text
+import time
 
 from src import SITE, tools 
 from src.app.exceptions import NotFoundError
@@ -21,7 +23,9 @@ def zipcode_query(a_zipcode):
     """
     Obtención de los datos de zipcode desde la db
     """
-    query_mnpio_estado = f"""
+    inicio = time.time()
+
+    query_mnpio_estado = text(f"""
             SELECT d_codigo, d_mnpio, d_estado,
                 estados.c_estado,c_estado_iso,cve_mnpio
             FROM ( 
@@ -49,13 +53,8 @@ def zipcode_query(a_zipcode):
                         ISO_3166 AS c_estado_iso
                 FROM estados_claves) AS estados 
                     ON colonias.c_estado = estados.c_estado;
-            """
-
-    engine_zipcode = tools.get_connection()
-    mun_edo = pd.read_sql_query(query_mnpio_estado,engine_zipcode)
-    engine_zipcode.dispose()
-
-    query_colonias = f"""
+            """)
+    query_colonias = text(f"""
                 SELECT d_codigo, d_asenta, 
                         d_zona, d_tipo_asenta, 
                         d_ciudad, CONCAT(ciudades.c_estado, ciudades.c_cve_ciudad) AS cve_ciudad
@@ -68,15 +67,29 @@ def zipcode_query(a_zipcode):
                 ON colonias.c_estado = ciudades.c_estado 
                 AND colonias.c_cve_ciudad = ciudades.c_cve_ciudad
                 ORDER BY n_asenta DESC;
-                """
+                """)
 
-    engine_zipcode = tools.get_connection()
-    sub_cols= pd.read_sql_query(query_colonias,engine_zipcode)
+    engine_zipcode=tools.get_connection()
+    connection = engine_zipcode.connect()
+
+    extraccion_mnpio=connection.execute(query_mnpio_estado)
+    todos_mnpios=extraccion_mnpio.fetchall()
+    mun_edo=pd.DataFrame(todos_mnpios,columns=extraccion_mnpio.keys())
+
+    extraccion_colonia=connection.execute(query_colonias)
+    todas_colonias = extraccion_colonia.fetchall()
+    sub_cols = pd.DataFrame(todas_colonias,columns=extraccion_colonia.keys())
+
+    connection.close()
     engine_zipcode.dispose()
 
     resp_elements = {
         'zipcode_df': mun_edo, 
         'neighborhoods_df': sub_cols}
+
+    fin=time.time()
+    print("tiempo de ejecución",fin-inicio)
+
     return resp_elements
 
 

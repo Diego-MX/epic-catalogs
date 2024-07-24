@@ -8,7 +8,7 @@ from base64 import b64encode as enc64
 import re
 import os
 import pyodbc
-from sqlalchemy import create_engine 
+from sqlalchemy import create_engine
 
 import pandas as pd
 from requests import auth
