@@ -18,7 +18,9 @@ def zipcode_request(a_zipcode):
 
 
 def zipcode_query(a_zipcode):
-
+    """
+    Obtención de los datos de zipcode desde la db
+    """
     query_mnpio_estado = f"""
             SELECT d_codigo, d_mnpio, d_estado,
                 estados.c_estado,c_estado_iso,cve_mnpio

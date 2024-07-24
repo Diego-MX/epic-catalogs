@@ -27,4 +27,4 @@ ENV ENV_TYPE ${ENV_TYPE}
 
 EXPOSE 80 
 
-CMD ["python", "-m", "src.app.start"]
+CMD ["python", "-m", "src.app.main"]
