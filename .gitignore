@@ -2,9 +2,10 @@
 .env
 .venv
 
+.start_project.ps1
 .pylintrc.toml
 .vscode
 
 .ipynb_checkpoints*
 __pycache__*
-.DS_Store
+*.DS_Store
