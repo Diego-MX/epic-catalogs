@@ -16,9 +16,11 @@ ctlg_dir = Path('refs/catalogs')
 str_to_bool = lambda srs: (srs == 'True')
 
 
-def queryrow_to_dict(a_df: pd.DataFrame, q: str) -> dict: 
-    caller_locals = currentframe().f_back.f_locals    
-    q_df = a_df.query(q, local_dict=caller_locals)
+def queryrow_to_dict(a_df: pd.DataFrame, q: str) -> dict:
+    query_str = "`code` == @q_code"
+    # caller_locals = currentframe().f_back.f_locals # D
+    q_df = a_df.query(query_str, local_dict={'q_code':q})
+    # q_df = a_df.query(q, local_dict=caller_locals) # D
     assert q_df.shape[0] == 1, f"Query '{q}' doesn't return one row"
     return q_df.to_dict(orient='records')[0]
 
@@ -52,7 +54,7 @@ def clabe_parse(clabe_key:str) -> models.Bank:
 
     is_bineo = (bank_code == gfb_code) and es_indirecto and gfb_a_bineo  
     q_code = bineo_code if is_bineo else bank_code
-    bank_row = queryrow_to_dict(banks_df, f"`code` == '{q_code}'")
+    bank_row = queryrow_to_dict(banks_df,q_code)
     return models.Bank(**bank_row)
 
 

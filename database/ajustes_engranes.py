@@ -19,21 +19,6 @@ for i in b:
 print("")
 
 c=dbutils.secrets.get(scope="sql-catallogs-feathers",key="dbcPassword")
-
-SALVA=""
-for i in c:
-    SALVA=SALVA+i+","
-
-print(SALVA)
-
-print("")
-
+# aplica un for para sacar la información
 d=dbutils.secrets.get(scope="sql-catallogs-feathers",key="dbcUsername")
 
-SALVE=""
-for i in d:
-    SALVE=SALVE+i+","
-
-print(SALVE)
-
-print("")
