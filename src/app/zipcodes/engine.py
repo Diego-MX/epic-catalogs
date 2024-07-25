@@ -25,7 +25,7 @@ def zipcode_query(a_zipcode):
     """
     inicio=time.time()
 
-    query_mnpio_estado=text(f"""
+    query_mnpio_estado=text("""
             SELECT d_codigo, d_mnpio, d_estado,
                 estados.c_estado,c_estado_iso,cve_mnpio
             FROM ( 
@@ -34,13 +34,13 @@ def zipcode_query(a_zipcode):
                 FROM (
                     SELECT d_codigo, c_estado, c_mnpio, COUNT(*) AS n_cols
                     FROM codigos_drive
-                    WHERE d_codigo = {str(a_zipcode)}
+                    WHERE d_codigo = :codigo_postal
                     GROUP BY d_codigo, c_estado, c_mnpio) AS mun_edo_0 
                 WHERE mun_edo_0.n_cols = (
                     SELECT MAX(n_cols)
                     FROM ( SELECT COUNT(*) AS n_cols
                         FROM codigos_drive
-                        WHERE d_codigo = {str(a_zipcode)}
+                        WHERE d_codigo = :codigo_postal
                         GROUP BY d_codigo, c_estado, c_mnpio) AS SubConsulta)) AS colonias
             LEFT JOIN (
                 SELECT *, CONCAT(c_estado,c_mnpio) AS cve_mnpio 
@@ -54,13 +54,13 @@ def zipcode_query(a_zipcode):
                 FROM estados_claves) AS estados 
                     ON colonias.c_estado = estados.c_estado;
             """)
-    query_colonias=text(f"""
+    query_colonias=text("""
                 SELECT d_codigo, d_asenta, 
                         d_zona, d_tipo_asenta, 
                         d_ciudad, CONCAT(ciudades.c_estado, ciudades.c_cve_ciudad) AS cve_ciudad
                 FROM (SELECT * 
                     FROM codigos_drive 
-                    WHERE d_codigo = {str(a_zipcode)}) AS colonias
+                    WHERE d_codigo = :codigo_postal) AS colonias
                 LEFT JOIN codigos_drive_tipo_asentamientos AS asentamiento
                 ON colonias.c_tipo_asenta = asentamiento.c_tipo_asenta
                 LEFT JOIN codigos_drive_ciudades AS ciudades 
@@ -72,11 +72,11 @@ def zipcode_query(a_zipcode):
     engine_zipcode=tools.get_connection()
     connection_zipcode=engine_zipcode.connect()
 
-    extraccion_mnpio=connection_zipcode.execute(query_mnpio_estado)
+    extraccion_mnpio=connection_zipcode.execute(query_mnpio_estado, {"codigo_postal":a_zipcode})
     todos_mnpios=extraccion_mnpio.fetchall()
     mun_edo=pd.DataFrame(todos_mnpios,columns=extraccion_mnpio.keys())
 
-    extraccion_colonia=connection_zipcode.execute(query_colonias)
+    extraccion_colonia=connection_zipcode.execute(query_colonias,{"codigo_postal":a_zipcode})
     todas_colonias=extraccion_colonia.fetchall()
     sub_cols=pd.DataFrame(todas_colonias,columns=extraccion_colonia.keys())
 
