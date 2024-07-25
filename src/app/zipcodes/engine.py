@@ -23,9 +23,9 @@ def zipcode_query(a_zipcode):
     """
     Obtención de los datos de zipcode desde la db
     """
-    inicio = time.time()
+    inicio=time.time()
 
-    query_mnpio_estado = text(f"""
+    query_mnpio_estado=text(f"""
             SELECT d_codigo, d_mnpio, d_estado,
                 estados.c_estado,c_estado_iso,cve_mnpio
             FROM ( 
@@ -54,7 +54,7 @@ def zipcode_query(a_zipcode):
                 FROM estados_claves) AS estados 
                     ON colonias.c_estado = estados.c_estado;
             """)
-    query_colonias = text(f"""
+    query_colonias=text(f"""
                 SELECT d_codigo, d_asenta, 
                         d_zona, d_tipo_asenta, 
                         d_ciudad, CONCAT(ciudades.c_estado, ciudades.c_cve_ciudad) AS cve_ciudad
@@ -70,25 +70,25 @@ def zipcode_query(a_zipcode):
                 """)
 
     engine_zipcode=tools.get_connection()
-    connection = engine_zipcode.connect()
+    connection_zipcode=engine_zipcode.connect()
 
-    extraccion_mnpio=connection.execute(query_mnpio_estado)
+    extraccion_mnpio=connection_zipcode.execute(query_mnpio_estado)
     todos_mnpios=extraccion_mnpio.fetchall()
     mun_edo=pd.DataFrame(todos_mnpios,columns=extraccion_mnpio.keys())
 
-    extraccion_colonia=connection.execute(query_colonias)
-    todas_colonias = extraccion_colonia.fetchall()
-    sub_cols = pd.DataFrame(todas_colonias,columns=extraccion_colonia.keys())
+    extraccion_colonia=connection_zipcode.execute(query_colonias)
+    todas_colonias=extraccion_colonia.fetchall()
+    sub_cols=pd.DataFrame(todas_colonias,columns=extraccion_colonia.keys())
 
-    connection.close()
+    connection_zipcode.close()
     engine_zipcode.dispose()
 
-    resp_elements = {
+    resp_elements={
         'zipcode_df': mun_edo, 
         'neighborhoods_df': sub_cols}
 
     fin=time.time()
-    print("tiempo de ejecución",fin-inicio)
+    print(f"TE: {round(fin-inicio,2)} seg")
 
     return resp_elements
 
