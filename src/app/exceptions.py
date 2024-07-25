@@ -6,12 +6,13 @@ class CatalogsError(Exception):
         self.name = name
         self.detail = detail
 
+# 404-NotFoundError se refiere al servidor, no al resultado.  
+# Revisar con los proveedores el uso de NotFoundError. 
 class NotFoundError(CatalogsError):
     pass
 
 class ValidationError(CatalogsError):
     pass
-
 
 CatalogsError.mapping ={
     NotFoundError: 404, 

@@ -4,11 +4,13 @@ import pandas as pd
 from src import SITE, tools 
 from src.app.exceptions import NotFoundError
 
+from . import models
+
 catalogs_path = SITE/"refs/catalogs"
-banks_df = pd.read_feather(catalogs_path/"national-banks.feather")
 
 
-def zipcode_request(a_zipcode):
+def zipcode_request(a_zipcode:str) -> dict: # NeighborhoodsResponse
+    """Wrapper de lo demás."""
     response_dfs = zipcode_query(a_zipcode)
     the_response = zipcode_response(response_dfs)
     if (('warnings' in the_response) and
@@ -19,28 +21,28 @@ def zipcode_request(a_zipcode):
     return the_response
 
 
-def zipcode_query(a_zipcode):
+def zipcode_query(a_zipcode:str) -> dict:
+    """Returns Dict with keys: 'zipcodes_df', 'nieghborhoods_df'"""
     tipo_asenta = pd.read_feather(catalogs_path/'codigos_drive_tipo_asentamientos.feather')
     ciudades = pd.read_feather(catalogs_path/'codigos_drive_ciudades.feather')
     municipios =(pd.read_feather(catalogs_path/'codigos_drive_municipios.feather')
         .assign(cve_mnpio=lambda df: df.c_estado.str.cat(df.c_mnpio)))
-
     estados = (pd.read_csv(catalogs_path/'estados_claves.csv')
         .assign(c_estado = lambda df: df.clave.map(str).str.pad(2, fillchar='0'))
         .rename(columns={'nombre': 'd_estado', 'ISO_3166': 'c_estado_iso'})
         .loc[:, ['c_estado', 'd_estado', 'c_estado_iso']])
-
     las_colonias = (pd.read_feather(catalogs_path/'codigos_drive.feather')
         .query(f'`d_codigo` == "{a_zipcode}"'))
 
     if las_colonias.shape[0] == 0: 
-        raise NotFoundError('Colonias Not Found', f"Empty list of neighborhoods at '{a_zipcode}'")
+        cols_msg = f"Empty list of neighborhoods at '{a_zipcode}'"
+        raise NotFoundError('Colonias Not Found', cols_msg)
     
-    mun_edo_0 = (las_colonias
+    mun_edo = (las_colonias
         .groupby(['d_codigo', 'c_estado', 'c_mnpio'])
-        .size().to_frame('n_cols').reset_index())
-
-    mun_edo = (mun_edo_0.loc[[mun_edo_0['n_cols'].idxmax()], :]
+        .size().to_frame('n_cols').reset_index()    
+        # .loc[[mun_edo_0['n_cols'].idxmax()], :]
+        .sort_values('n_cols', ascending=False).loc[[0], :]
         .merge(municipios, how='left', on=['c_estado', 'c_mnpio'])
         .merge(estados, how='left', on='c_estado')
         .loc[:, ['d_codigo', 'd_mnpio', 'd_estado', 
@@ -60,7 +62,11 @@ def zipcode_query(a_zipcode):
     return resp_elements
 
 
-def zipcode_response(nbhd_elems):
+def zipcode_response(nbhd_elems:dict) -> dict:
+    """
+    In:  [zipcode_df, neighborhoods_df]-keyed dict.  
+    Out: Explore warnings and add if necessary.
+    """
     translator = {
         'd_codigo'      : 'zipcode',    'd_asenta'      : 'name',
         'd_tipo_asenta' : 'type',       'd_zona'        : 'zone',
@@ -99,7 +105,8 @@ def zipcode_response(nbhd_elems):
     return zipcode_warnings(pre_response, warnables)
 
 
-def zipcode_warnings(a_response, warnables):
+def zipcode_warnings(a_response:dict, warnables:list) -> dict:
+    """Add 'warnings' key to Dict if warnings."""
     warnings = {}
     if warnables[0]:
         warnings['borough'] = (1, 'No se encontró municipio para CP')
@@ -111,5 +118,38 @@ def zipcode_warnings(a_response, warnables):
     if len(warnings) > 0:
         b_response['warnings'] = warnings
     return b_response
-    
 
+
+def one_sql_query(a_zipcode:str) -> models.NeighborhoodsResponse: 
+    # estados:  ['clave', 'd_estado', 'ABR', 'Abr_1', 'ABR_2', 'renapo', 'c_estado_iso',
+    #           'drive', 'gobmx', 'marco_geo', 'min_cp', 'max_cp', 'clave_2']
+    # muns:     ['c_estado', 'c_mnpio', 'd_mnpio', 'min_cp', 'max_cp']
+    # ciudades: ['c_estado', 'c_cve_ciudad', 'd_ciudad']
+    # tipos_a:  ['c_tipo_asenta', 'd_tipo_asenta', 'n_asenta']
+    # colonias: ['d_codigo', 'd_asenta', 'd_zona', 'c_estado', 'c_mnpio', 'c_cve_ciudad',
+    #           'c_tipo_asenta']
+    estados = (pd.read_csv(catalogs_path/'estados_claves.csv')
+        .rename(columns={'nombre': 'd_estado', 'ISO_3166': 'c_estado_iso'})
+        .assign(c_estado=lambda df: df.clave.map('{:02f}.format')))
+    municipios = pd.read_feather(catalogs_path/'codigos_drive_municipios.feather')
+    ciudades = pd.read_feather(catalogs_path/'codigos_drive_ciudades.feather')
+    tipo_asenta = pd.read_feather(catalogs_path/'codigos_drive_tipo_asentamientos.feather')
+    colonias = pd.read_feather(catalogs_path/'codigos_drive.feather')
+
+    # En caso de múltiples municipios, se toma el que tenga más asentamientos. 
+    one_query = (colonias.query(f'`d_codigo` == "{a_zipcode}"')
+        .merge(municipios, how='left', on=['c_estado', 'c_mnpio'])
+        .merge(estados, how='left', on='c_estado')
+        .merge(ciudades, how='left', on=['c_estado', 'c_cve_ciudad'])
+        .merge(tipo_asenta, how='left', on='c_tipo_asenta')
+        .assign(cve_ciudad = lambda df: df.c_estado.str.cat(df.c_cve_ciudad), 
+            cve_mun = lambda df: df.c_estado.str.cat(df.c_mnpio)))
+
+    if one_query.shape[0] == 0: 
+        raise NotFoundError('Colonias Not Found', "Empty list of neighborhoods")
+    
+    ok_muns = ~one_query['d_mnpio'].isna()
+    if ~one_query.any(ok_muns): 
+        raise NotFoundError('Boroughs Not Found', "Cannot assign municipality")
+
+    return models.NeighborhoodsResponse.from_df(one_query)

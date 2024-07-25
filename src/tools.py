@@ -9,7 +9,6 @@ import re
 
 from openpyxl import load_workbook, utils as xl_utils
 import pandas as pd
-from requests import auth
 from unidecode import unidecode
 
 
@@ -136,13 +135,4 @@ def set_dataframe_types(a_df, cols_df):
 
     df_typed = a_df.astype(dtyped)
     return df_typed
-
-
-class BearerAuth(auth.AuthBase):
-    def __init__(self, token):
-        self.token = token
-
-    def __call__(self, req):
-        req.headers['authorization'] = f'Bearer {self.token}'
-        return req
 

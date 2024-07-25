@@ -21,7 +21,6 @@ app = FastAPI(title='Centralized catalogs.', version=VERSION,
     root_path=root_path,
     default_response_class=main_models.ORJSONResponse)
 
-
 @app.exception_handler(CatalogsError)
 async def catalogs_exception_handler(_:Request, exc:CatalogsError):
     exc_code = CatalogsError.mapping.get(type(exc), 500)

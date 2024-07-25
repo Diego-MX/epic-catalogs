@@ -12,9 +12,9 @@ ctlg_dir = Path('refs/catalogs')
 
 str_to_bool = lambda srs: (srs == 'True')
 
-
 def queryrow_to_dict(a_df: pd.DataFrame, q: str) -> dict: 
-    caller_locals = currentframe().f_back.f_locals    
+    caller_locals = currentframe().f_back.f_locals
+    ## fortificar query 'q', para tranquilizar al CodeValidation. 
     q_df = a_df.query(q, local_dict=caller_locals)
     assert q_df.shape[0] == 1, f"Query '{q}' doesn't return one row"
     return q_df.to_dict(orient='records')[0]
@@ -26,7 +26,7 @@ banks_df = (pd.read_feather(ctlg_dir/'national-banks.feather')
         portability = lambda df: str_to_bool(df['portability'])))
 
 
-def all_banks(include_non_spei:bool) -> pd.DataFrame:
+def all_banks(include_non_spei:bool=False) -> pd.DataFrame:
     return banks_df.loc[banks_df['spei'], :] if include_non_spei else banks_df
 
 
@@ -68,7 +68,6 @@ def card_number_bin(card_num:str) -> models.CardsBin:
         'Institución'   : 'bank',
         'Naturaleza'    : 'nature',
         'Marca'         : 'brand'}
-
     bins_df = (pd.read_feather(ctlg_dir/'national-banks-bins.feather')
         .rename(columns=bin_cols)
         .loc[:, bin_cols.values()])
@@ -79,10 +78,9 @@ def card_number_bin(card_num:str) -> models.CardsBin:
         if bin_int in len_bins: 
             bin_row = queryrow_to_dict(bins_df, f"`bin` == {bin_int}")
             return models.CardsBin(**bin_row)
-            # Sin comillas porque INT. 
 
     raise NotFoundError('Card bin not found', 
-        'Card bins correspond to the first [6,7,8] digits of the card number.')
+        'Card bins correspond to the first [6,8,9] digits of the card number.')
 
 
 def bin_bank(bank_key: str) -> models.Bank: 
