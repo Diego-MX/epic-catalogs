@@ -16,10 +16,10 @@ ctlg_dir = Path('refs/catalogs')
 str_to_bool = lambda srs: (srs == 'True')
 
 
-def queryrow_to_dict(a_df: pd.DataFrame, q: str) -> dict:
-    query_str = "`code` == @q_code"
+def queryrow_to_dict(a_df: pd.DataFrame, q: str, sword: str) -> dict:
     # caller_locals = currentframe().f_back.f_locals # D
-    q_df = a_df.query(query_str, local_dict={'q_code':q})
+    query_str = "`"+sword+"` == @change"
+    q_df = a_df.query(query_str, local_dict={'change':q})
     # q_df = a_df.query(q, local_dict=caller_locals) # D
     assert q_df.shape[0] == 1, f"Query '{q}' doesn't return one row"
     return q_df.to_dict(orient='records')[0]
@@ -54,7 +54,7 @@ def clabe_parse(clabe_key:str) -> models.Bank:
 
     is_bineo = (bank_code == gfb_code) and es_indirecto and gfb_a_bineo  
     q_code = bineo_code if is_bineo else bank_code
-    bank_row = queryrow_to_dict(banks_df,q_code)
+    bank_row = queryrow_to_dict(banks_df,q_code,"code")
     return models.Bank(**bank_row)
 
 
@@ -99,7 +99,8 @@ def card_number_bin(card_num:str) -> models.CardsBin:
     for b_len, len_bins in length_bins.groups.items():
         bin_int = int(card_num[:b_len])
         if bin_int in len_bins:
-            bin_row = queryrow_to_dict(bins_df, f"`bin` == {bin_int}")
+            # bin_row = queryrow_to_dict(bins_df, f"`bin` == {bin_int}") # D
+            bin_row = queryrow_to_dict(bins_df, bin_int,"bin")
             fin_bi = time.time()
             print(f"TE: {round(fin_bi-inicio_bi,2)} seg")
             return models.CardsBin(**bin_row)
@@ -138,7 +139,8 @@ def bank_acquiring(acq_code: str) -> models.BankAcquiring:
     connection_acquiring.close()
     engine_acquiring.dispose()
 
-    acq_row =queryrow_to_dict(acq_banks, f"`codeAcquiring` == '{acq_code}'")
+    # acq_row =queryrow_to_dict(acq_banks, f"`codeAcquiring` == '{acq_code}'") # D
+    acq_row=queryrow_to_dict(acq_banks,acq_code,"codeAcquiring")
     fin_ac=time.time()
     print(f"TE: {round(fin_ac-inicio_ac,2)} seg")
     return models.BankAcquiring(**acq_row)
