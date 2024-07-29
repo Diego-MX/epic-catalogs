@@ -1,10 +1,10 @@
 
 import pandas as pd
-from sqlalchemy import text
-import time
 
 from src import SITE, tools 
 from src.app.exceptions import NotFoundError
+
+from . import models
 
 catalogs_path = SITE/"refs/catalogs"
 
