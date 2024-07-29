@@ -44,7 +44,7 @@ class TestBanks:
 
 class SkipTestZipcodes: 
 
-    def test_no_city_zipcode_to_emtpy_city(self, no_city_zipcode): 
+    def test_no_city_zipcode_to_empty_city(self, no_city_zipcode): 
         the_data = self.as_request(no_city_zipcode)
         response = client.post('/zipcode-nighborhoods', data=the_data)
         first_result = response.json()['neighborhoods']['neighborhoodsSet'][0]

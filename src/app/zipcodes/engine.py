@@ -147,13 +147,12 @@ def one_sql_query(a_zipcode:str) -> pd.DataFrame:
     return one_query
 
 
-def process_query(a_df:pd.DataFrame)
-
-    if one_query.shape[0] == 0: 
+def process_query(a_df:pd.DataFrame): 
+    if a_df.shape[0] == 0: 
         raise NotFoundError('Colonias Not Found', "Empty list of neighborhoods")
     
-    ok_muns = ~one_query['d_mnpio'].isna()
-    if ~one_query.any(ok_muns): 
+    ok_muns = ~a_df['d_mnpio'].isna()
+    if ~a_df.any(ok_muns): 
         raise NotFoundError('Boroughs Not Found', "Cannot assign municipality")
 
-    return models.NeighborhoodsResponse.from_df(one_query)
+    return models.NeighborhoodsResponse.from_df(a_df)
