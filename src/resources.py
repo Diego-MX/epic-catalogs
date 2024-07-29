@@ -10,7 +10,7 @@ import config
 
 
 class AzureResourcer():
-    def __init__(self, env: str, server=None): 
+    def __init__(self, env:str, server=None): 
         self.env = env
         self.server = server
         self.config = config.ENV_VARS[env]

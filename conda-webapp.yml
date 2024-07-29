@@ -5,24 +5,24 @@ channels:
 
 dependencies: 
   - python=3.8
-  - azure-identity=1.15.0
-  - azure-keyvault-secrets=4.7.0
-  - azure-storage-blob=12.19.0
-  - fastapi=0.104.1
-  - jsonschema=4.19.2
-  - openpyxl=3.1.2
-  - orjson=3.8.8
-  - pandas=1.5.3
-  - pyarrow=6.0.0
-  - pydantic=1.10.12
-  - pyodbc==5.1.0
-  - python-dotenv=1.0.0
-  - requests=2.31.0
-  - sqlalchemy=1.4.50
-  - toolz=0.12.0
-  - unidecode=1.2.0
+  - azure-identity=1.15
+  - azure-keyvault-secrets=4.7
+  - azure-storage-blob=12.19
+  - fastapi=0.104
+  - httpx=0.26
+  - jsonschema=4.19
+  - openpyxl=3.1
+  - orjson=3.8
+  - pandas=1.5
+  - pyarrow=6.0
+  - pydantic=1.10
+  - python-dotenv=1.0
+  - requests=2.31
+  - sqlalchemy=1.4
+  - toolz=0.12
+  - unidecode=1.2
   - uvicorn=0.24
   - pip
   - pip: 
-    - clabe==1.2.8 
-    - databricks-sql-connector==2.5.1
+    - clabe==1.2
+    - databricks-sql-connector==2.5
