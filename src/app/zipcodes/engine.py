@@ -21,7 +21,7 @@ def zipcode_request(a_zipcode:str) -> dict: # NeighborhoodsResponse
     return the_response
 
 
-def zipcode_query(a_zipcode:str) -> dict:
+def zipcode_query(a_zipcode:str) -> dict:  # Two Dataframes.
     """Returns Dict with keys: 'zipcodes_df', 'nieghborhoods_df'"""
     tipo_asenta = pd.read_feather(catalogs_path/'codigos_drive_tipo_asentamientos.feather')
     ciudades = pd.read_feather(catalogs_path/'codigos_drive_ciudades.feather')
@@ -120,7 +120,7 @@ def zipcode_warnings(a_response:dict, warnables:list) -> dict:
     return b_response
 
 
-def one_sql_query(a_zipcode:str) -> models.NeighborhoodsResponse: 
+def one_sql_query(a_zipcode:str) -> pd.DataFrame: 
     # estados:  ['clave', 'd_estado', 'ABR', 'Abr_1', 'ABR_2', 'renapo', 'c_estado_iso',
     #           'drive', 'gobmx', 'marco_geo', 'min_cp', 'max_cp', 'clave_2']
     # muns:     ['c_estado', 'c_mnpio', 'd_mnpio', 'min_cp', 'max_cp']
@@ -144,6 +144,10 @@ def one_sql_query(a_zipcode:str) -> models.NeighborhoodsResponse:
         .merge(tipo_asenta, how='left', on='c_tipo_asenta')
         .assign(cve_ciudad = lambda df: df.c_estado.str.cat(df.c_cve_ciudad), 
             cve_mun = lambda df: df.c_estado.str.cat(df.c_mnpio)))
+    return one_query
+
+
+def process_query(a_df:pd.DataFrame)
 
     if one_query.shape[0] == 0: 
         raise NotFoundError('Colonias Not Found', "Empty list of neighborhoods")

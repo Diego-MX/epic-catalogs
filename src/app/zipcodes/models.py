@@ -1,10 +1,13 @@
 
 # pylint: disable=too-few-public-methods
+from operator import attrgetter as α
 from typing import List
 
 import numpy as np
 import pandas as pd
 from pydantic import BaseModel, Field
+from pytoolz import pipe, compose_left, valmap
+from pytoolz.curried import valmap as valmap_z
 
 from src.app.exceptions import ValidationError
 
@@ -19,11 +22,11 @@ class CustomModel(BaseModel):
     def to_dict(self):
         def to_original(data):
             if isinstance(data, BaseModel):
-                original_dict = {ff.name: to_original(getattr(data, field.alias))
+                original_dict = {ff.name: to_original(getattr(data, ff.alias))
                     for ff in data.__fields__.values()}
                 return original_dict
             if isinstance(data, dict):
-                return {kk: to_original(vv) for kk, vv in data.items()}
+                return valmap(to_original, data)
             if isinstance(data, list):
                 return [to_original(ll) for ll in data]
             return data

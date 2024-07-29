@@ -43,7 +43,6 @@ class TestBanks:
 
 
 class SkipTestZipcodes: 
-    # zipcode_(request|query|response|warnings)
 
     def test_no_city_zipcode_to_emtpy_city(self, no_city_zipcode): 
         the_data = self.as_request(no_city_zipcode)
