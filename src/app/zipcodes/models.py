@@ -3,6 +3,7 @@
 from typing import List
 
 import numpy as np
+import pandas as pd
 from pydantic import BaseModel, Field
 
 from src.app.exceptions import ValidationError
@@ -16,19 +17,25 @@ class CustomModel(BaseModel):
     sí me gustó dejar el CustomModel para centralizar algunos comportamientos. 
     """
     def to_dict(self):
-        def convert_to_original(data):
+        def to_original(data):
             if isinstance(data, BaseModel):
-                return {field.name: convert_to_original(getattr(data, field.alias))
-                        for field in data.__fields__.values()}
+                original_dict = {ff.name: to_original(getattr(data, field.alias))
+                    for ff in data.__fields__.values()}
+                return original_dict
             if isinstance(data, dict):
-                return {key: convert_to_original(value) for key, value in data.items()}
+                return {kk: to_original(vv) for kk, vv in data.items()}
             if isinstance(data, list):
-                return [convert_to_original(item) for item in data]
+                return [to_original(ll) for ll in data]
             return data
-        return convert_to_original(self)
+        return to_original(self)
+
     class Config:
         allow_population_by_field_name = True
         json_encoders = {BaseModel: lambda v: v.to_dict()}
+
+    @classmethod
+    def from_row(cls, row:pd.Series):
+        return cls(**row.to_dict())
 
 
 class Zipcode(CustomModel):     # alias viene del dataframe de lectura.  
@@ -39,9 +46,6 @@ class Zipcode(CustomModel):     # alias viene del dataframe de lectura.
     borough    : str = Field(alias='d_mnpio')
     borough_id : str = Field(alias='cve_mnpio')
 
-    @classmethod
-    def from_row(cls, row): 
-        return cls(**row.to_dict())
 
 class Neighborhood(CustomModel): 
     zipcode : str = Field(alias='d_codigo', min_length=5, max_length=5)
@@ -51,18 +55,16 @@ class Neighborhood(CustomModel):
     city    : str = Field(alias='d_ciudad', default='')
     city_id : str = Field(alias='cve_ciudad')
 
-    @classmethod
-    def from_row(cls, row):
-        return cls(**row.to_dict())
-
 
 # No está padre.
-class NeighborhoodsRequest(BaseModel): 
+class NeighborhoodsRequest(CustomModel): 
     zipcode : str = Field(min_length=5, max_length=5)
 
+
 # No está padre.
-class MetaRequestNbhd(BaseModel): 
+class MetaRequestNbhd(CustomModel): 
     neighborhoodsRequest : NeighborhoodsRequest
+
 
 # No está padre
 class Neighborhoods(CustomModel): 
@@ -71,12 +73,12 @@ class Neighborhoods(CustomModel):
     neighborhoodsSet       : List[Neighborhood]
 
     @classmethod
-    def from_df(cls, df):
-        pre_neighborhoods = [Neighborhood(**nbhr_row) 
-            for _, nbhr_row in df.iterrows()]
+    def from_df(cls, df:pd.DataFrame):
+        pre_neighborhoods = [Neighborhood.from_row(nbhr) 
+            for _, nbhr in df.iterrows()]
         new_obj = cls(
             numberOfNeighborhoods = len(pre_neighborhoods), 
-            neighborhoodAttributes = list(Neighborhood.__fields__),
+            neighborhoodAttributes = list(cls.__fields__),
             neighborhoodsSet = pre_neighborhoods)
         return new_obj
 
@@ -87,7 +89,7 @@ class NeighborhoodsResponse(CustomModel):
     neighborhoods : Neighborhoods
 
     @classmethod
-    def from_df(cls, df, first_zipcode=False):
+    def from_df(cls, df:pd.DataFrame, first_zipcode=False):
         zip_cols = set(ff.alias for ff in Zipcode.__fields__.values())
         zip_equal = np.all(df.loc[:, zip_cols] == df.loc[0, zip_cols])
         if not (zip_equal or first_zipcode): 
@@ -100,3 +102,20 @@ class NeighborhoodsResponse(CustomModel):
             zipcode = Zipcode.from_row(df.loc[0, zip_cols]), 
             neighborhoods = Neighborhoods.from_df(df))
         return the_object
+
+
+class ZipcodeProcessor: 
+    def __init__(self, engine:str=None): 
+        self.engine = engine
+        self.zipcode = None 
+        self.warnings = []
+
+    def query_zipcode(self, zipcode:str) -> pd.DataFrame: 
+        pass
+
+    def process_result(self, dataframe:pd.DataFrame): 
+        pass
+
+    def to_json(self, model:CustomModel): 
+        pass
+
