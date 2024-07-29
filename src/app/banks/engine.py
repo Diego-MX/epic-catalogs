@@ -1,5 +1,5 @@
 
-from inspect import currentframe
+# from inspect import currentframe
 from pathlib import Path
 
 import time
@@ -18,9 +18,9 @@ str_to_bool = lambda srs: (srs == 'True')
 
 def queryrow_to_dict(a_df: pd.DataFrame, q: str, sword: str) -> dict:
     # caller_locals = currentframe().f_back.f_locals # D
+    # q_df = a_df.query(q, local_dict=caller_locals) # D
     query_str = "`"+sword+"` == @change"
     q_df = a_df.query(query_str, local_dict={'change':q})
-    # q_df = a_df.query(q, local_dict=caller_locals) # D
     assert q_df.shape[0] == 1, f"Query '{q}' doesn't return one row"
     return q_df.to_dict(orient='records')[0]
 
