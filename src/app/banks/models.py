@@ -1,9 +1,11 @@
+
+# pylint: disable=too-few-public-methods
 from typing import List, Optional
 
-from pydantic import BaseModel
+from src.app.models import CustomModel
 
 
-class Bank(BaseModel): 
+class Bank(CustomModel): 
     name        : str
     code        : Optional[str]
     banxicoId   : str
@@ -11,16 +13,16 @@ class Bank(BaseModel):
     spei        : bool
     portability : bool
 
-class BanksResponse(BaseModel): 
+class BanksResponse(CustomModel): 
     numberOfBanks   : int
     bankAttributes  : List[str]
     banksSet        : List[Bank]
 
-class BankAcquiring(BaseModel): 
+class BankAcquiring(CustomModel): 
     name  : str
     codeAcquiring : Optional[str]
 
-class CardsBin(BaseModel): 
+class CardsBin(CustomModel): 
     bin       : str
     length    : int
     bankId    : str

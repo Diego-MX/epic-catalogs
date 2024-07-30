@@ -1,23 +1,21 @@
 
 # pylint: disable=too-few-public-methods
-from operator import attrgetter as α
 from typing import List
 
 import numpy as np
 import pandas as pd
 from pydantic import BaseModel, Field
-from pytoolz import pipe, compose_left, valmap
-from pytoolz.curried import valmap as valmap_z
+from toolz import valmap
 
 from src.app.exceptions import ValidationError
 
 
-class CustomModel(BaseModel):
+class EpicModel(BaseModel):
     """Esta clase surgió complicadamente.  
     Al utilizar 'alias' para leer la data, FastAPI convierte los campos en sus alias
     y entonces marcaba error.  
     Últimadamente no he podido deshacerme de los errores ResponseValidation, pero 
-    sí me gustó dejar el CustomModel para centralizar algunos comportamientos. 
+    sí me gustó dejar el EpicModel para centralizar algunos comportamientos. 
     """
     def to_dict(self):
         def to_original(data):
@@ -34,14 +32,11 @@ class CustomModel(BaseModel):
 
     class Config:
         allow_population_by_field_name = True
+        orm_mode = True
         json_encoders = {BaseModel: lambda v: v.to_dict()}
 
-    @classmethod
-    def from_row(cls, row:pd.Series):
-        return cls(**row.to_dict())
 
-
-class Zipcode(CustomModel):     # alias viene del dataframe de lectura.  
+class Zipcode(EpicModel):     # alias viene del dataframe de lectura.  
     zipcode    : str = Field(alias='d_codigo')
     state      : str = Field(alias='d_estado')
     state_id   : str = Field(alias='c_estado')
@@ -49,8 +44,12 @@ class Zipcode(CustomModel):     # alias viene del dataframe de lectura.
     borough    : str = Field(alias='d_mnpio')
     borough_id : str = Field(alias='cve_mnpio')
 
+    @classmethod
+    def from_row(cls, row:pd.Series):
+        return cls(**row.to_dict())
 
-class Neighborhood(CustomModel): 
+
+class Neighborhood(EpicModel): 
     zipcode : str = Field(alias='d_codigo', min_length=5, max_length=5)
     name    : str = Field(alias='d_asenta')
     zone    : str = Field(alias='d_zona')
@@ -58,19 +57,23 @@ class Neighborhood(CustomModel):
     city    : str = Field(alias='d_ciudad', default='')
     city_id : str = Field(alias='cve_ciudad')
 
+    @classmethod
+    def from_row(cls, row:pd.Series):
+        return cls(**row.to_dict())
+
 
 # No está padre.
-class NeighborhoodsRequest(CustomModel): 
+class NeighborhoodsRequest(EpicModel): 
     zipcode : str = Field(min_length=5, max_length=5)
 
 
 # No está padre.
-class MetaRequestNbhd(CustomModel): 
+class MetaRequestNbhd(EpicModel): 
     neighborhoodsRequest : NeighborhoodsRequest
 
 
 # No está padre
-class Neighborhoods(CustomModel): 
+class Neighborhoods(EpicModel): 
     numberOfNeighborhoods  : int
     neighborhoodAttributes : List[str]
     neighborhoodsSet       : List[Neighborhood]
@@ -87,7 +90,7 @@ class Neighborhoods(CustomModel):
 
 
 # No está padre
-class NeighborhoodsResponse(CustomModel): 
+class NeighborhoodsResponse(EpicModel): 
     zipcode       : Zipcode
     neighborhoods : Neighborhoods
 
@@ -119,6 +122,6 @@ class ZipcodeProcessor:
     def process_result(self, dataframe:pd.DataFrame): 
         pass
 
-    def to_json(self, model:CustomModel): 
+    def to_json(self, model:EpicModel): 
         pass
 
