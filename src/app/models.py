@@ -5,7 +5,6 @@ from typing import Any
 
 from fastapi.responses import JSONResponse
 from orjson import dumps
-import pandas as pd
 from pydantic import BaseModel
 from toolz import compose, pipe
 from toolz.curried import valmap as valmap_z
@@ -23,10 +22,6 @@ class CustomModel(BaseModel):
     Últimadamente no he podido deshacerme de los errores ResponseValidation, pero 
     sí me gustó dejar el EpicModel para centralizar algunos comportamientos. 
     """
-    @classmethod
-    def from_row(cls, row:pd.Series) -> 'CustomModel': 
-        return cls.parse_obj(row.to_dict())
-
     def to_dict(self):
         def to_original(data):
             if isinstance(data, BaseModel):

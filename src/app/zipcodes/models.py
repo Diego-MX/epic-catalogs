@@ -1,6 +1,6 @@
 
 # pylint: disable=too-few-public-methods
-from typing import List
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -46,8 +46,7 @@ class Neighborhoods(CustomModel):
 
     @classmethod
     def from_df(cls, df:pd.DataFrame):
-        pre_neighborhoods = [Neighborhood.from_row(nbhr) 
-            for _, nbhr in df.iterrows()]
+        pre_neighborhoods = list(map(Neighborhood.from_orm, df.iteruples()))
         new_obj = cls(
             numberOfNeighborhoods = len(pre_neighborhoods), 
             neighborhoodAttributes = list(cls.__fields__),
@@ -59,6 +58,7 @@ class Neighborhoods(CustomModel):
 class NeighborhoodsResponse(CustomModel): 
     zipcode       : Zipcode
     neighborhoods : Neighborhoods
+    warnings      : Optional[Dict[str, Tuple[int, str]]]
 
     @classmethod
     def from_df(cls, df:pd.DataFrame, first_zipcode=False):
@@ -70,24 +70,26 @@ class NeighborhoodsResponse(CustomModel):
                 detail="Not all zipcodes are equal.")
             raise ValidationError(**error_call)
         
+        one_tuple = next(df.itertuples())
         the_object = cls(
-            zipcode = Zipcode.from_row(df.loc[0, zip_cols]), 
+            zipcode = Zipcode.from_orm(one_tuple), 
             neighborhoods = Neighborhoods.from_df(df))
         return the_object
 
 
+
 class ZipcodeProcessor: 
-    def __init__(self, engine:str=None): 
+    def __init__(self, zipcode:str, engine:str=None): 
+        self.zipcode = zipcode
         self.engine = engine
-        self.zipcode = None 
         self.warnings = []
 
-    def query_zipcode(self, zipcode:str) -> pd.DataFrame: 
+    def query_zipcode(self) -> pd.DataFrame: 
+        if self.engine == 'feather': 
+            pass 
+
+    def process_result(self, a_df:pd.DataFrame): 
         pass
 
-    def process_result(self, dataframe:pd.DataFrame): 
+    def to_model(self, a_df) -> NeighborhoodsResponse: 
         pass
-
-    def to_json(self, model:CustomModel): 
-        pass
-
