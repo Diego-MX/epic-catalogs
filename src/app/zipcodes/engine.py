@@ -1,10 +1,12 @@
 
-import pandas as pd
-from sqlalchemy import text
 import time
+import pandas as pd
+from sqlalchemy import text, select, func, and_
+from sqlalchemy.orm import sessionmaker, aliased
 
-from src import SITE, tools 
+from src import SITE, tools
 from src.app.exceptions import NotFoundError
+from . import models
 
 catalogs_path = SITE/"refs/catalogs"
 
@@ -24,64 +26,77 @@ def zipcode_query(a_zipcode):
     Obtención de los datos de zipcode desde la db
     """
     inicio=time.time()
+    engine = tools.get_connection()
+    sesion = sessionmaker(bind=engine) # ORM
+    session = sesion()
 
-    query_mnpio_estado=text("""
-            SELECT d_codigo, d_mnpio, d_estado,
-                estados.c_estado,c_estado_iso,cve_mnpio
-            FROM ( 
-                SELECT mun_edo_0.d_codigo, mun_edo_0.c_estado, 
-                    mun_edo_0.c_mnpio, mun_edo_0.n_cols
-                FROM (
-                    SELECT d_codigo, c_estado, c_mnpio, COUNT(*) AS n_cols
-                    FROM codigos_drive
-                    WHERE d_codigo = :codigo_postal
-                    GROUP BY d_codigo, c_estado, c_mnpio) AS mun_edo_0 
-                WHERE mun_edo_0.n_cols = (
-                    SELECT MAX(n_cols)
-                    FROM ( SELECT COUNT(*) AS n_cols
-                        FROM codigos_drive
-                        WHERE d_codigo = :codigo_postal
-                        GROUP BY d_codigo, c_estado, c_mnpio) AS SubConsulta)) AS colonias
-            LEFT JOIN (
-                SELECT *, CONCAT(c_estado,c_mnpio) AS cve_mnpio 
-                FROM codigos_drive_municipios) AS municipio 
-                    ON colonias.c_estado = municipio.c_estado 
-                    AND colonias.c_mnpio = municipio.c_mnpio  
-            LEFT JOIN (
-                SELECT RIGHT('0'+CAST(clave AS VARCHAR(2)),2) AS c_estado,
-                        nombre AS d_estado,
-                        ISO_3166 AS c_estado_iso
-                FROM estados_claves) AS estados 
-                    ON colonias.c_estado = estados.c_estado;
-            """)
-    query_colonias=text("""
-                SELECT d_codigo, d_asenta, 
-                        d_zona, d_tipo_asenta, 
-                        d_ciudad, CONCAT(ciudades.c_estado, ciudades.c_cve_ciudad) AS cve_ciudad
-                FROM (SELECT * 
-                    FROM codigos_drive 
-                    WHERE d_codigo = :codigo_postal) AS colonias
-                LEFT JOIN codigos_drive_tipo_asentamientos AS asentamiento
-                ON colonias.c_tipo_asenta = asentamiento.c_tipo_asenta
-                LEFT JOIN codigos_drive_ciudades AS ciudades 
-                ON colonias.c_estado = ciudades.c_estado 
-                AND colonias.c_cve_ciudad = ciudades.c_cve_ciudad
-                ORDER BY n_asenta DESC;
-                """)
+    codigos_drive = aliased(models.CodigosDrive, name="colonias")
+    municipio = aliased(models.CodigosDriveMunicipios, name="municipios")
+    estados = aliased(models.EstadosClaves, name="estados")
 
-    engine_zipcode=tools.get_connection()
-    connection_zipcode=engine_zipcode.connect()
+    mun_edo_0 = (select(codigos_drive.d_codigo,
+                        codigos_drive.c_estado,
+                        codigos_drive.c_mnpio,
+                        func.count().label("n_cols"))
+                .where(codigos_drive.d_codigo == a_zipcode)
+                .group_by(codigos_drive.d_codigo,
+                        codigos_drive.c_estado,
+                        codigos_drive.c_mnpio)
+                .subquery())
 
-    extraccion_mnpio=connection_zipcode.execute(query_mnpio_estado, {"codigo_postal":a_zipcode})
-    todos_mnpios=extraccion_mnpio.fetchall()
-    mun_edo=pd.DataFrame(todos_mnpios,columns=extraccion_mnpio.keys())
+    subconsulta = (select(func.max(mun_edo_0.c.n_cols).label("n_cols"))
+                    .scalar_subquery())
 
-    extraccion_colonia=connection_zipcode.execute(query_colonias,{"codigo_postal":a_zipcode})
-    todas_colonias=extraccion_colonia.fetchall()
-    sub_cols=pd.DataFrame(todas_colonias,columns=extraccion_colonia.keys())
+    colonias=(select(mun_edo_0)
+                        .where(mun_edo_0.c.n_cols == subconsulta)
+                        .subquery())
 
-    connection_zipcode.close()
-    engine_zipcode.dispose()
+    consulta = (select(colonias.c.d_codigo,
+                    municipio.d_mnpio,
+                    estados.nombre.label("d_estado"),
+                    colonias.c.c_estado,
+                    estados.ISO_3166.label("c_estado_iso"),
+                    func.concat(colonias.c.c_estado,
+                    colonias.c.c_mnpio).label("cve_mnpio"))
+                .select_from(colonias
+                    .outerjoin(municipio,
+                        and_(colonias.c.c_estado == municipio.c_estado,
+                            colonias.c.c_mnpio == municipio.c_mnpio))
+                    .outerjoin(estados,colonias.c.c_estado == estados.clave)
+                            )
+                )
+
+    pre_resultado = session.execute(consulta)
+    resultado = pre_resultado.fetchall()
+    mun_edo=pd.DataFrame(resultado,columns=pre_resultado.keys())
+
+    asentamiento = aliased(models.CodigosDriveTipoAsentamientos, name="asentamiento")
+    ciudades = aliased(models.CodigosDriveCiudades, name="ciudades")
+
+    colonias = (select(codigos_drive)
+                .where(codigos_drive.d_codigo == a_zipcode)
+                .subquery())
+
+    consulta = (select(colonias.c.d_codigo,
+                    colonias.c.d_asenta,
+                    colonias.c.d_zona,
+                    asentamiento.d_tipo_asenta,
+                    ciudades.d_ciudad,
+                    func.concat(ciudades.c_estado, ciudades.c_cve_ciudad).label('cve_ciudad')
+                    )
+                .select_from(colonias
+                            .join(asentamiento,
+                                        colonias.c.c_tipo_asenta == asentamiento.c_tipo_asenta)
+                            .join(ciudades, and_(colonias.c.c_estado == ciudades.c_estado,
+                                                colonias.c.c_cve_ciudad == ciudades.c_cve_ciudad)))
+                .order_by(asentamiento.n_asenta.desc()))
+
+    pre_resultado = session.execute(consulta)
+    resultado = pre_resultado.fetchall()
+    sub_cols=pd.DataFrame(resultado,columns=pre_resultado.keys())
+
+    engine.dispose()
+    session.close()
 
     resp_elements={
         'zipcode_df': mun_edo, 
@@ -144,4 +159,5 @@ def zipcode_warnings(a_response, warnables):
     if len(warnings) > 0:
         b_response['warnings'] = warnings
     return b_response
+
 # End-of-file (EOF)
