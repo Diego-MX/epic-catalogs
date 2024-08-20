@@ -2,7 +2,7 @@
 The purpose is to only define variables but don't run any code.
 """
 
-VERSION  = "1.0.87"  # build_deploy.yml 
+VERSION  = "1.0.88"  # build_deploy.yml 
 
 URLS = {
     'local'     : 'http://localhost:80', 
