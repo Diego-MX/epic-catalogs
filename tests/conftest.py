@@ -14,7 +14,6 @@ def card_number():
     return '5499490544796915'
 
 
-
 ## ZipCodes 
 @fixture()
 def zipcode_ok():

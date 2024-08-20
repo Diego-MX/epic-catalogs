@@ -1,4 +1,5 @@
 
+
 import time
 import pandas as pd
 from sqlalchemy import text, select, func, and_
@@ -6,6 +7,8 @@ from sqlalchemy.orm import sessionmaker, aliased
 
 from src import SITE, tools
 from src.app.exceptions import NotFoundError
+from . import models
+
 from . import models
 
 catalogs_path = SITE/"refs/catalogs"

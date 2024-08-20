@@ -6,6 +6,9 @@
 .pylintrc.toml
 .vscode
 
+.databricks
+.pytest_cache
 .ipynb_checkpoints*
 __pycache__*
-*.DS_Store
+.DS_Store
+

@@ -14,7 +14,6 @@ class MetaRequestNbhd(BaseModel):
     neighborhoodsRequest : NeighborhoodsRequest
 
 
-
 class Zipcode(BaseModel):
     zipcode    : str
     state      : str
