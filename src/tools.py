@@ -149,6 +149,7 @@ class BearerAuth(auth.AuthBase):
         req.headers['authorization'] = f'Bearer {self.token}'
         return req
 
+
 def type_environment():
     """
         Función que muestra sí el programa se encuentra en el ambiente Docker o en Local.
@@ -156,8 +157,8 @@ def type_environment():
     environment = (os.path.exists('/.dockerenv') or
                    os.path.isfile('/proc/1/cgroup') and
                    'docker' in open('/proc/1/cgroup', encoding="utf-8").read())
-
     return environment
+
 
 def get_connection():
     """
