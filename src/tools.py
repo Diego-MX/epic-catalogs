@@ -171,7 +171,7 @@ def get_connection():
     database_name  = "webapp_catalogs"
 
     if type_environment():
-        connection_string = f'mssql+pyodbc://{username}:{password}@{server_name}/{database_name}?driver=/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.3.so.3.1'
+        connection_string = f'mssql+pyodbc://{username}:{password}@{server_name}/{database_name}?driver=/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.4.so.1.1'
 
     else:
         connection_string = f'mssql+pyodbc://{username}:{password}@{server_name}/{database_name}?driver=ODBC+Driver+18+for+SQL+Server'
