@@ -12,8 +12,10 @@ RUN apt-get update && \
     apt-get update && \
     ACCEPT_EULA=Y apt-get install -y msodbcsql18 && \
     pip install --no-cache-dir --trusted-host pypi.python.org -r ./reqs_base.txt && \
+    pip show python-dotenv && \
     apt-get purge -y --auto-remove build-essential && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* &&\
+    ls -l /opt/microsoft/msodbcsql18/lib64/ || true
 
 COPY . . 
 
@@ -28,3 +30,5 @@ ENV ENV_TYPE ${ENV_TYPE}
 EXPOSE 80 
 
 CMD ["python", "-m", "src.app.main"]
+
+

@@ -6,7 +6,7 @@ on:
 env:
   GH_REPO   : Bineo2/data-prod-catalogs
   DKR_IMAGE : prod-catalogs-webapp
-  DKR_TAG   : '1.0.88'
+  DKR_TAG   : '1.0.89'
   BRANCH_ENV : ${{github.base_ref || github.ref_name}}
 
 jobs :
