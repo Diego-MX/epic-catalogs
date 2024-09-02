@@ -43,23 +43,19 @@ def process_plazas(tbl_plz:pd_DF):
     return ctlg_df
 
 
-def process_bins(bins_df:pd_DF, bins_1c:pd_DF, bins_cols:pd_DF):
-    the_types = {'integer': int, 'character': str, 'date': 'datetime64[ns]'}
+def process_bins(bins_df:pd_DF, bins_cols:pd_DF):
+    the_types = {'integer': int, 'character': str, 
+        'date': 'datetime64[ns]', 'bool': bool}
     bins_rename = { row['Ref Nombre']: the_types[row['Tipo']]
             for _, row in bins_cols.iterrows() if row['Tipo'] }
 
-    bins_2c = (bins_1c[bins_rename.keys()]
-        .astype(bins_rename))
-    
     bins_1 = (bins_df
         .loc[:, bins_rename.keys()]
         .astype(bins_rename)
         .set_index('BIN'))
 
-    bins_1.update(bins_2c)
-
     bins = (bins_1
-        .assign(ID=lambda df: df['Id Institución'].astype(str).str[3:]))
+        .assign(ID=lambda df: df['ID INSTITUCIÓN'].astype(str).str[3:]))
     return bins
 
 
@@ -77,10 +73,14 @@ def process_adquirentes(tbl_29:pd_DF, acq_cols:pd_DF):
 
 
 if __name__ == '__main__': 
+    from sys import argv
+    from time import time
+
     from src.tools import read_excel_table
     from src.resources import AzureResourcer
     from src import SITE, ENV, SERVER
 
+    no_blob = "no-blob" in argv
     local_path = SITE/'refs/catalogs'
     storage_path = 'product/epic-catalogs/app-services'    
 
@@ -92,33 +92,41 @@ if __name__ == '__main__':
     
     base_excel = local_path/'api-catalogs.xlsx.lnk'
 
+    #start = time()
     banks_pre = read_excel_table(base_excel, 'banks', 'tabla_297')
     banks_df  = process_banks(banks_pre).reset_index().astype(str)
     banks_df.to_feather(local_path/f"{ctlg_files['banks']}.feather")
-    
+    #print(f"Elapsed time: {time() - start}")
+
+    # start = time()
     plaza_pre = read_excel_table(base_excel, 'banks', 'plazas_w')
     plaza_df  = process_plazas(plaza_pre).reset_index()
     plaza_df.to_feather(local_path/f"{ctlg_files['plazas']}.feather")
+    # print(f"Elapsed time: {time() - start}")
 
+    # start = time()
     bins_cols = read_excel_table(base_excel, 'banks-bins', 'cols_anexo1')
-    bins_pre  = read_excel_table(base_excel, 'banks-bins', 'anexo_1')
-    bins_1c   = read_excel_table(base_excel, 'banks-bins', 'anexo_1c')
-    bins_df   = process_bins(bins_pre, bins_1c, bins_cols).reset_index()
+    bins_df   = read_excel_table(base_excel, 'banks-bins', 'anexo_1')
+    bins_df   = process_bins(bins_df, bins_cols).reset_index()
     bins_df.to_feather(local_path/f'{ctlg_files["bins"]}.feather')
+    # print(f"Elapsed time: {time() - start}")
 
+    start = time()
     acq_cols = read_excel_table(base_excel, 'banks-acquiring', 'cols_anexo_29')
     acq_pre  = read_excel_table(base_excel, 'banks-acquiring', 'anexo_29')
     acq_df   = process_adquirentes(acq_pre, acq_cols).reset_index()
     acq_df.to_feather(local_path/f"{ctlg_files['acquiring']}.feather")
+    print(f"Elapsed time: {time() - start}")
 
 
-    resourcer = AzureResourcer(ENV, SERVER)
-    blob_container = resourcer.get_blob_service()
+    if not no_blob: 
+        resourcer = AzureResourcer(ENV, SERVER)
+        blob_container = resourcer.get_blob_service()
 
-    for each_file in ctlg_files.values(): 
-        local_p  = local_path/f'{each_file}.feather'
-        stg_path = f'{storage_path}/{each_file}.feather'
+        for each_file in ctlg_files.values(): 
+            local_p  = local_path/f'{each_file}.feather'
+            stg_path = f'{storage_path}/{each_file}.feather'
 
-        the_blob = blob_container.get_blob_client(container='bronze', blob=stg_path)
-        with open(local_p, 'rb') as _f: 
-            the_blob.upload_blob(_f, overwrite=True)
+            the_blob = blob_container.get_blob_client(container='bronze', blob=stg_path)
+            with open(local_p, 'rb') as _f: 
+                the_blob.upload_blob(_f, overwrite=True)
