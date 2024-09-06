@@ -1,10 +1,14 @@
 
+
+import time
 import pandas as pd
+from sqlalchemy import select, func, and_
+from sqlalchemy.orm import sessionmaker, aliased
 
-from src import SITE, tools 
+from src import SITE, tools
 from src.app.exceptions import NotFoundError
-
 from . import models
+
 
 catalogs_path = SITE/"refs/catalogs"
 
@@ -21,44 +25,128 @@ def zipcode_request(a_zipcode:str) -> dict: # NeighborhoodsResponse
     return the_response
 
 
-def zipcode_query(a_zipcode:str) -> dict:  # Two Dataframes.
-    """Returns Dict with keys: 'zipcodes_df', 'nieghborhoods_df'"""
-    tipo_asenta = pd.read_feather(catalogs_path/'codigos_drive_tipo_asentamientos.feather')
-    ciudades = pd.read_feather(catalogs_path/'codigos_drive_ciudades.feather')
-    municipios =(pd.read_feather(catalogs_path/'codigos_drive_municipios.feather')
-        .assign(cve_mnpio=lambda df: df.c_estado.str.cat(df.c_mnpio)))
-    estados = (pd.read_csv(catalogs_path/'estados_claves.csv')
-        .assign(c_estado = lambda df: df.clave.map(str).str.pad(2, fillchar='0'))
-        .rename(columns={'nombre': 'd_estado', 'ISO_3166': 'c_estado_iso'})
-        .loc[:, ['c_estado', 'd_estado', 'c_estado_iso']])
-    las_colonias = (pd.read_feather(catalogs_path/'codigos_drive.feather')
-        .query(f'`d_codigo` == "{a_zipcode}"'))
+def zipcode_query(a_zipcode, method='feather'):
+    """
+    Obtención de los datos de zipcode desde la db
+    """
+    inicio=time.time()
+    if method == 'orm': 
+        engine = tools.get_connection()
+        sesion = sessionmaker(bind=engine) # ORM
+        session = sesion()
 
-    if las_colonias.shape[0] == 0: 
-        cols_msg = f"Empty list of neighborhoods at '{a_zipcode}'"
-        raise NotFoundError('Colonias Not Found', cols_msg)
-    
-    mun_edo = (las_colonias
-        .groupby(['d_codigo', 'c_estado', 'c_mnpio'])
-        .size().to_frame('n_cols').reset_index()    
-        # .loc[[mun_edo_0['n_cols'].idxmax()], :]
-        .sort_values('n_cols', ascending=False).loc[[0], :]
-        .merge(municipios, how='left', on=['c_estado', 'c_mnpio'])
-        .merge(estados, how='left', on='c_estado')
-        .loc[:, ['d_codigo', 'd_mnpio', 'd_estado', 
-            'c_estado', 'c_estado_iso', 'cve_mnpio']])
+        codigos_drive = aliased(models.CodigosDrive, name="colonias")
+        municipio = aliased(models.CodigosDriveMunicipios, name="municipios")
+        estados = aliased(models.EstadosClaves, name="estados")
 
-    sub_cols = (las_colonias
-        .merge(tipo_asenta, on='c_tipo_asenta', how='left')
-        .merge(ciudades, on=['c_estado', 'c_cve_ciudad'], how='left')
-        .sort_values('n_asenta', ascending=False)
-        .assign(cve_ciudad = lambda df: df.c_estado.str.cat(df.c_cve_ciudad))
-        .loc[:, ['d_codigo', 'd_asenta', 'd_zona', 
-            'd_tipo_asenta', 'd_ciudad', 'cve_ciudad']])
+        mun_edo_0 = (select(codigos_drive.d_codigo,
+                            codigos_drive.c_estado,
+                            codigos_drive.c_mnpio,
+                            func.count().label("n_cols"))
+                    .where(codigos_drive.d_codigo == a_zipcode)
+                    .group_by(codigos_drive.d_codigo,
+                            codigos_drive.c_estado,
+                            codigos_drive.c_mnpio)
+                    .subquery())
 
-    resp_elements = {
+        subconsulta = (select(func.max(mun_edo_0.c.n_cols).label("n_cols"))
+                        .scalar_subquery())
+
+        colonias=(select(mun_edo_0)
+                            .where(mun_edo_0.c.n_cols == subconsulta)
+                            .subquery())
+
+        consulta = (select(
+                colonias.c.d_codigo,
+                municipio.d_mnpio,
+                estados.nombre.label("d_estado"),
+                colonias.c.c_estado,
+                estados.ISO_3166.label("c_estado_iso"),
+                func.concat(colonias.c.c_estado,
+                colonias.c.c_mnpio).label("cve_mnpio"))
+            .select_from(colonias
+                .outerjoin(municipio,
+                    and_(colonias.c.c_estado == municipio.c_estado,
+                        colonias.c.c_mnpio == municipio.c_mnpio))
+                .outerjoin(estados,colonias.c.c_estado == estados.clave)))
+
+        pre_resultado = session.execute(consulta)
+        resultado = pre_resultado.fetchall()
+        mun_edo=pd.DataFrame(resultado,columns=pre_resultado.keys())
+
+        asentamiento = aliased(models.CodigosDriveTipoAsentamientos, name="asentamiento")
+        ciudades = aliased(models.CodigosDriveCiudades, name="ciudades")
+
+        colonias = (select(codigos_drive)
+                    .where(codigos_drive.d_codigo == a_zipcode)
+                    .subquery())
+
+        consulta = (select(
+            colonias.c.d_codigo,
+            colonias.c.d_asenta,
+            colonias.c.d_zona,
+            asentamiento.d_tipo_asenta,
+            ciudades.d_ciudad,
+            func.concat(ciudades.c_estado, ciudades.c_cve_ciudad).label('cve_ciudad'))
+                    .select_from(colonias
+                                .join(asentamiento,
+                                            colonias.c.c_tipo_asenta == asentamiento.c_tipo_asenta)
+                                .join(ciudades, and_(colonias.c.c_estado == ciudades.c_estado,
+                                                    colonias.c.c_cve_ciudad == ciudades.c_cve_ciudad)))
+                    .order_by(asentamiento.n_asenta.desc()))
+
+        pre_resultado = session.execute(consulta)
+        resultado = pre_resultado.fetchall()
+        sub_cols=pd.DataFrame(resultado,columns=pre_resultado.keys())
+        engine.dispose()
+        session.close()
+    elif method == 'feather': 
+        municipios =(pd.read_feather(catalogs_path/'codigos_drive_municipios.feather')
+            .assign(cve_mnpio=lambda df: df.c_estado.str.cat(df.c_mnpio)))
+
+        estados = (pd.read_csv(catalogs_path/'estados_claves.csv')
+            .assign(c_estado = lambda df: df.clave.map(str).str.pad(2, fillchar='0'))
+            .rename(columns={'nombre': 'd_estado', 'ISO_3166': 'c_estado_iso'})
+            .loc[:, ['c_estado', 'd_estado', 'c_estado_iso']])
+
+        las_colonias = (pd.read_feather(catalogs_path/'codigos_drive.feather')
+            .query(f'`d_codigo` == "{a_zipcode}"'))
+
+        mun_edo_0 = (las_colonias
+            .groupby(['d_codigo', 'c_estado', 'c_mnpio'])
+            .size().to_frame('n_cols').reset_index())
+
+        mun_edo = (mun_edo_0.loc[[mun_edo_0['n_cols'].idxmax()], :]
+                .merge(municipios, how='left', on=['c_estado', 'c_mnpio'])
+                .merge(estados, how='left', on='c_estado')
+                .loc[:, ['d_codigo', 'd_mnpio', 'd_estado', 
+                    'c_estado', 'c_estado_iso', 'cve_mnpio']]
+                    )
+        tipo_asenta = pd.read_feather(catalogs_path/'codigos_drive_tipo_asentamientos.feather')
+
+        ciudades = pd.read_feather(catalogs_path/'codigos_drive_ciudades.feather')
+
+        las_colonias = (pd.read_feather(catalogs_path/'codigos_drive.feather')
+            .query(f'`d_codigo` == "{a_zipcode}"'))
+
+        sub_cols = (las_colonias
+            .merge(tipo_asenta, on='c_tipo_asenta', how='left')
+            .merge(ciudades, on=['c_estado', 'c_cve_ciudad'], how='left')
+            .sort_values('n_asenta', ascending=False)
+            .assign(cve_ciudad = lambda df: df.c_estado.str.cat(df.c_cve_ciudad))
+            .loc[:, ['d_codigo', 'd_asenta', 'd_zona', 
+                'd_tipo_asenta', 'd_ciudad', 'cve_ciudad']])
+
+    else: 
+        raise ValueError("Query method must be one of [feather, orm]")
+
+    resp_elements={
         'zipcode_df': mun_edo, 
         'neighborhoods_df': sub_cols}
+
+    fin=time.time()
+    print(f"TE: {round(fin-inicio,2)} seg")
+
     return resp_elements
 
 
@@ -131,6 +219,7 @@ def one_sql_query(a_zipcode:str) -> pd.DataFrame:
     estados = (pd.read_csv(catalogs_path/'estados_claves.csv')
         .rename(columns={'nombre': 'd_estado', 'ISO_3166': 'c_estado_iso'})
         .assign(c_estado=lambda df: df.clave.map('{:02f}.format')))
+
     municipios = pd.read_feather(catalogs_path/'codigos_drive_municipios.feather')
     ciudades = pd.read_feather(catalogs_path/'codigos_drive_ciudades.feather')
     tipo_asenta = pd.read_feather(catalogs_path/'codigos_drive_tipo_asentamientos.feather')

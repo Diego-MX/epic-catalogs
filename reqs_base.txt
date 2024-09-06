@@ -1,4 +1,4 @@
-#python3.8
+# python3.8
 azure-identity~=1.15
 azure-keyvault-secrets~=4.7
 azure-storage-blob~=12.19
@@ -12,11 +12,10 @@ orjson~=3.8
 pandas~=1.5
 pyarrow~=6.0
 pydantic~=1.10
+pyodbc~=5.1
 python-dotenv~=1.0
 requests~=2.31
 sqlalchemy~=1.4
 toolz~=0.12
 unidecode~=1.2
 uvicorn~=0.24
-
-epic-py @ git+https://${GH_ACCESS_TOKEN}@github.com/Bineo2/data-python-tools@gh-2.1

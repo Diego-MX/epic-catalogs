@@ -16,8 +16,7 @@ on:
 env :
   GH_REPO    : Bineo2/data-prod-catalogs
   DKR_IMAGE  : prod-catalogs-webapp
-  DKR_TAG    : '1.0.83'   # Ajustar VALIDATE_DOCKERFILE también. 
-  # WAP_NAME : "as-catalogs-data-${github...deploy_to}}"
+  DKR_TAG    : '1.0.90'   # Ajustar VALIDATE_DOCKERFILE también. 
 
 jobs :
   build-and-deploy :     

@@ -6,9 +6,12 @@
 
 from base64 import b64encode as enc64
 import re
+import os
+from sqlalchemy import create_engine
 
-from openpyxl import load_workbook, utils as xl_utils
 import pandas as pd
+from requests import auth
+from openpyxl import load_workbook, utils as xl_utils 
 from unidecode import unidecode
 
 
@@ -136,3 +139,47 @@ def set_dataframe_types(a_df, cols_df):
     df_typed = a_df.astype(dtyped)
     return df_typed
 
+
+class BearerAuth(auth.AuthBase):
+    def __init__(self, token):
+        self.token = token
+
+    def __call__(self, req):
+        req.headers['authorization'] = f'Bearer {self.token}'
+        return req
+
+
+def type_environment():
+    """
+        Función que muestra sí el programa se encuentra en el ambiente Docker o en Local.
+    """
+    environment = (os.path.exists('/.dockerenv') or
+                   os.path.isfile('/proc/1/cgroup') and
+                   'docker' in open('/proc/1/cgroup', encoding="utf-8").read())
+    return environment
+
+
+def get_connection():
+    """
+        Conexión con la DB en Azure, se crea una bifurcasión dado que 
+        se trabaja en docker y de forma local 
+    """
+
+    params = {
+        'username' : "USUARIO_BATALLA",
+        'password' : "18.07.2024.JUIK.juik", 
+        'server' : "sql-lakehylia-dev.database.windows.net", 
+        'database' : "webapp_catalogs"}
+
+    if type_environment():
+        params['el_driver'] = "/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.4.so.1.1"
+    else:
+        params['el_driver'] = "ODBC+Driver+18+for+SQL+Server"
+    connection_string = 'mssql+pyodbc://{username}:{password}@{server}/{database}?driver={el_driver}'.format(**params)
+
+    if connection_string is None:
+        raise ValueError("La variable de entorno CONNECTION_STRING no está configurada.")
+
+    connection = create_engine(connection_string)
+
+    return connection

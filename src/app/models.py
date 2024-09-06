@@ -20,7 +20,7 @@ class CustomModel(BaseModel):
     Al utilizar 'alias' para leer la data, FastAPI convierte los campos en sus alias
     y entonces marcaba error.  
     Últimadamente no he podido deshacerme de los errores ResponseValidation, pero 
-    sí me gustó dejar el EpicModel para centralizar algunos comportamientos. 
+    sí me gustó dejar el CustomModel para centralizar algunos comportamientos. 
     """
     def to_dict(self):
         def to_original(data):

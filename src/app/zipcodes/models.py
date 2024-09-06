@@ -4,39 +4,17 @@ from typing import List
 
 import numpy as np
 import pandas as pd
-from pydantic import BaseModel, Field
-from toolz import valmap
+from pydantic import Field
 
+from sqlalchemy import Column, Table, NVARCHAR, BIGINT,INT
+from sqlalchemy.ext.declarative import declarative_base
+
+
+from src.app.models import CustomModel
 from src.app.exceptions import ValidationError
 
 
-class EpicModel(BaseModel):
-    """Esta clase surgió complicadamente.  
-    Al utilizar 'alias' para leer la data, FastAPI convierte los campos en sus alias
-    y entonces marcaba error.  
-    Últimadamente no he podido deshacerme de los errores ResponseValidation, pero 
-    sí me gustó dejar el EpicModel para centralizar algunos comportamientos. 
-    """
-    def to_dict(self):
-        def to_original(data):
-            if isinstance(data, BaseModel):
-                original_dict = {ff.name: to_original(getattr(data, ff.alias))
-                    for ff in data.__fields__.values()}
-                return original_dict
-            if isinstance(data, dict):
-                return valmap(to_original, data)
-            if isinstance(data, list):
-                return [to_original(ll) for ll in data]
-            return data
-        return to_original(self)
-
-    class Config:
-        allow_population_by_field_name = True
-        orm_mode = True
-        json_encoders = {BaseModel: lambda v: v.to_dict()}
-
-
-class Zipcode(EpicModel):     # alias viene del dataframe de lectura.  
+class Zipcode(CustomModel):     # alias viene del dataframe de lectura.  
     zipcode    : str = Field(alias='d_codigo')
     state      : str = Field(alias='d_estado')
     state_id   : str = Field(alias='c_estado')
@@ -49,7 +27,7 @@ class Zipcode(EpicModel):     # alias viene del dataframe de lectura.
         return cls(**row.to_dict())
 
 
-class Neighborhood(EpicModel): 
+class Neighborhood(CustomModel): 
     zipcode : str = Field(alias='d_codigo', min_length=5, max_length=5)
     name    : str = Field(alias='d_asenta')
     zone    : str = Field(alias='d_zona')
@@ -63,17 +41,17 @@ class Neighborhood(EpicModel):
 
 
 # No está padre.
-class NeighborhoodsRequest(EpicModel): 
+class NeighborhoodsRequest(CustomModel): 
     zipcode : str = Field(min_length=5, max_length=5)
 
 
 # No está padre.
-class MetaRequestNbhd(EpicModel): 
+class MetaRequestNbhd(CustomModel): 
     neighborhoodsRequest : NeighborhoodsRequest
 
 
 # No está padre
-class Neighborhoods(EpicModel): 
+class Neighborhoods(CustomModel): 
     numberOfNeighborhoods  : int
     neighborhoodAttributes : List[str]
     neighborhoodsSet       : List[Neighborhood]
@@ -90,7 +68,7 @@ class Neighborhoods(EpicModel):
 
 
 # No está padre
-class NeighborhoodsResponse(EpicModel): 
+class NeighborhoodsResponse(CustomModel): 
     zipcode       : Zipcode
     neighborhoods : Neighborhoods
 
@@ -122,6 +100,77 @@ class ZipcodeProcessor:
     def process_result(self, dataframe:pd.DataFrame): 
         pass
 
-    def to_json(self, model:EpicModel): 
+    def to_json(self, model:CustomModel): 
         pass
+
+
+Base = declarative_base()
+
+class CodigosDrive(Base):
+    """Modelo ORM Codigos Drive"""
+
+    __tablename__ = "codigos_drive"
+    __table__ = Table('codigos_drive', Base.metadata,
+                      Column("d_codigo",NVARCHAR),
+                      Column("d_asenta",NVARCHAR),
+                      Column("d_zona",NVARCHAR),
+                      Column("c_estado",NVARCHAR),
+                      Column("c_mnpio",NVARCHAR),
+                      Column("c_cve_ciudad",NVARCHAR),
+                      Column("c_tipo_asenta",NVARCHAR),
+                      Column("id_tabla",BIGINT, primary_key=True))
+
+
+class EstadosClaves(Base):
+    """Modelo ORM estados_claves"""
+
+    __tablename__ = "estados_claves"
+    __table__ = Table("estados_claves", Base.metadata,
+                    Column("clave",BIGINT,primary_key=True),
+                    Column("nombre",NVARCHAR),
+                    Column("ABR",NVARCHAR),
+                    Column("Abr_1",NVARCHAR),
+                    Column("ABR_2",NVARCHAR),
+                    Column("renapo",NVARCHAR),
+                    Column("ISO_3166",NVARCHAR),
+                    Column("drive",NVARCHAR),
+                    Column("gobmx",NVARCHAR),
+                    Column("marco_geo",NVARCHAR),
+                    Column("min_cp",BIGINT),
+                    Column("max_cp",BIGINT),
+                    Column("clave_2",BIGINT))
+
+
+class CodigosDriveTipoAsentamientos(Base):
+    """Modelo ORM codigos_drive_tipo_asentamientos"""
+
+    __tablename__ = "codigos_drive_tipo_asentamientos"
+    __table__ = Table("codigos_drive_tipo_asentamientos", Base.metadata,
+                      Column("c_tipo_asenta",NVARCHAR, primary_key=True),
+                      Column("d_tipo_asenta",NVARCHAR),
+                      Column("n_asenta" ,INT))
+
+
+class CodigosDriveMunicipios(Base):
+    """Modelo ORM codigos_drive_municipios"""
+
+    __tablename__ = "codigos_drive_municipios"
+    __table__ = Table("codigos_drive_municipios", Base.metadata,
+                      Column("c_estado",NVARCHAR),
+                      Column("c_mnpio",NVARCHAR),
+                      Column("d_mnpio",NVARCHAR),
+                      Column("min_cp",NVARCHAR),
+                      Column("max_cp",NVARCHAR),
+                      Column("id_tabla",BIGINT,primary_key=True))
+
+
+class CodigosDriveCiudades(Base):
+    """Modelo ORM codigos_drive_ciudades"""
+
+    __tablename__ = "codigos_drive_ciudades"
+    __table__ = Table("codigos_drive_ciudades", Base.metadata,
+                      Column("c_estado",NVARCHAR),
+                      Column("c_cve_ciudad",NVARCHAR),
+                      Column("d_ciudad",NVARCHAR),
+                      Column("id_tabla",BIGINT,primary_key=True))
 

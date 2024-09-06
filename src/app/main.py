@@ -16,7 +16,7 @@ app = FastAPI(title='Centralized catalogs.', version=VERSION,
     description='Setup and query all-purpose catalogs.',
     openapi_tags=[
         {'name': 'Zipcodes'},
-        {'name': 'Banks'}, 
+        {'name': 'Banks'},
         {'name': 'Base', 'description': 'Verify base call and version.'}],
     root_path=root_path,
     default_response_class=main_models.ORJSONResponse)
@@ -45,6 +45,5 @@ app.include_router(banks_router,
 if __name__ == '__main__': 
     if debug_mode: 
         uvicorn.run('__main__:app', port=80, host='0.0.0.0', reload=True)
-    else: 
+    else:
         uvicorn.run(app, port=80, host='0.0.0.0')
-
