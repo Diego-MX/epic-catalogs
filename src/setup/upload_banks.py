@@ -4,9 +4,6 @@
 """
 # pylint: disable=redefined-outer-name
 # pylint: disable=invalid-name 
-# pylint: disable=too-few-public-methods
-from time import time
-
 import pandas as pd
 from pandas import DataFrame as pd_DF
 
@@ -67,20 +64,11 @@ def process_adquirentes(tbl_29:pd_DF, acq_cols:pd_DF):
     return acq_tbl
 
 
-class Timer:
-    """Simple class to print timed processes."""
-    def __init__(self): 
-        self.timer = time()
-    
-    def print_time(self, desc): 
-        print(f"{desc}:\t{time()-self.timer:.2f} seconds")
-        self.timer = time()
-
 
 if __name__ == '__main__': 
     from sys import argv
 
-    from src.tools import read_excel_table
+    from src.tools import read_excel_table, Timer
     from src.resources import AzureResourcer
     from src import SITE, ENV, SERVER
 
@@ -91,7 +79,6 @@ if __name__ == '__main__':
 
     ctlg_files = {
         'banks'    : 'national-banks',
-        'plazas'   : 'national-banks-plazas',
         'bins'     : 'national-banks-bins', 
         'acquiring': 'national-banks-acquiring'}
     
@@ -105,12 +92,6 @@ if __name__ == '__main__':
     banks_df.to_feather(local_path/f"{ctlg_files['banks']}.feather")
     if time_it: 
         my_timer.print_time("Banks time")
-
-    plaza_pre = read_excel_table(base_excel, 'banks', 'plazas_w')
-    plaza_df  = process_plazas(plaza_pre).reset_index()
-    plaza_df.to_feather(local_path/f"{ctlg_files['plazas']}.feather")   
-    if time_it: 
-        my_timer.print_time("Plaza time")
 
     bins_cols = read_excel_table(base_excel, 'banks-bins', 'cols_anexo1')
     bins_df   = read_excel_table(base_excel, 'banks-bins', 'anexo_1')

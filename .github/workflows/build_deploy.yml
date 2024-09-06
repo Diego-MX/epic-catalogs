@@ -6,12 +6,7 @@ on:
         description:  Github environment contains secrets about its corresponding Azure counterpart.
         required: true
         type: choice
-        options: 
-          - prd
-          - stg
-          - qas 
-          - dev
-          - drp
+        options: [prd, stg, qas, dev, drp]
 
 env :
   GH_REPO    : Bineo2/data-prod-catalogs

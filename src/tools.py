@@ -7,11 +7,11 @@
 from base64 import b64encode as enc64
 import re
 import os
-from sqlalchemy import create_engine
+from time import time
 
-import pandas as pd
-from requests import auth
 from openpyxl import load_workbook, utils as xl_utils 
+import pandas as pd
+from sqlalchemy import create_engine
 from unidecode import unidecode
 
 
@@ -140,15 +140,6 @@ def set_dataframe_types(a_df, cols_df):
     return df_typed
 
 
-class BearerAuth(auth.AuthBase):
-    def __init__(self, token):
-        self.token = token
-
-    def __call__(self, req):
-        req.headers['authorization'] = f'Bearer {self.token}'
-        return req
-
-
 def type_environment():
     """
         Función que muestra sí el programa se encuentra en el ambiente Docker o en Local.
@@ -183,3 +174,13 @@ def get_connection():
     connection = create_engine(connection_string)
 
     return connection
+
+
+class Timer:
+    """Simple class to print timed processes."""
+    def __init__(self): 
+        self.timer = time()
+    
+    def print_time(self, desc): 
+        print(f"{desc}:\t{time()-self.timer:.2f} seconds")
+        self.timer = time()

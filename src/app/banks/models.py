@@ -2,7 +2,7 @@
 # pylint: disable=too-few-public-methods
 from typing import List, Optional
 
-from sqlalchemy import Column, BIGINT, NVARCHAR, INT, Table, DATETIME
+from sqlalchemy import Column, Table, BIGINT, DATETIME, INT, NVARCHAR
 from sqlalchemy.ext.declarative import declarative_base
 
 from src.app.models import CustomModel

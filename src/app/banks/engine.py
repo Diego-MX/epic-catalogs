@@ -3,7 +3,6 @@
 engine banks, contiene toda la información respecto a las 
 peticiones a la base de datos.
 """
-from inspect import currentframe
 from pathlib import Path
 
 import time
@@ -11,6 +10,7 @@ from sqlalchemy.orm import sessionmaker
 import pandas as pd
 
 import clabe
+
 from src.app.exceptions import ValidationError, NotFoundError
 from src import tools
 from . import models
@@ -18,6 +18,18 @@ from . import models
 ctlg_dir = Path('refs/catalogs')
 
 str_to_bool = lambda srs: (srs == 'True')
+
+inicio = time.time()
+engine = tools.get_connection()
+banks_df = (pd.read_sql_table("national_banks", engine)
+    .rename(columns={'banxico_id': 'banxicoId'})
+    .assign(spei = lambda df: str_to_bool(df['spei']),
+        portability = lambda df: str_to_bool(df['portability']))
+    .sort_values(by = "index"))
+    
+engine.dispose()
+fin = time.time()
+print(f"TE: {round(fin-inicio,2)} seg")
 
 
 def queryrow_to_dict(a_df: pd.DataFrame, q: str, sword: str) -> dict:
@@ -28,19 +40,8 @@ def queryrow_to_dict(a_df: pd.DataFrame, q: str, sword: str) -> dict:
     # q_df = a_df.query(q, local_dict=caller_locals) # D
     query_str = "`"+sword+"` == @change"
     q_df = a_df.query(query_str, local_dict={'change':q})
-    assert q_df.shape[0] == 1, f"Query '{q}' doesn't return one row"
+    assert q_df.shape[0] == 1, f"Query '{q}' doesn't have one row"
     return q_df.to_dict(orient='records')[0]
-
-inicio=time.time()
-engine = tools.get_connection()
-banks_df = (pd.read_sql_table("national_banks",engine)
-            .rename(columns={'banxico_id': 'banxicoId'})
-            .assign(spei = lambda df: str_to_bool(df['spei']),
-                    portability = lambda df: str_to_bool(df['portability']))
-            .sort_values(by = "index"))
-engine.dispose()
-fin=time.time()
-print(f"TE: {round(fin-inicio,2)} seg")
 
 def all_banks(include_non_spei:bool) -> pd.DataFrame:
     """
