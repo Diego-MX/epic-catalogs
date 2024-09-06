@@ -1,0 +1,5 @@
+{
+  "user" : "el.usuario@bineo.com",
+  "dbks_scope" : "user-nombre-apellido", 
+  "dbks_token" : "github-access-token"
+}

@@ -3,6 +3,9 @@ The purpose is to only define variables but don't run any code.
 """
 
 VERSION  = "1.0.83"  # build_deploy.yml 
+EPIC_REF = "2.1"
+REQS_FILE = "reqs_base.txt"
+USER_FILE = "user_databricks.json"
 
 URLS = {
     'local'     : 'http://localhost:80', 

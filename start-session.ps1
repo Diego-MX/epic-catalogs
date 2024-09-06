@@ -4,7 +4,7 @@
 # Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 conda deactivate
-conda activate webapp
+epic38/Scripts/activate
 
 $env:ENV_TYPE='dev'
 $env:SERVER_TYPE='local'

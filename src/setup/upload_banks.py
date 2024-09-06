@@ -4,13 +4,12 @@
 """
 # pylint: disable=redefined-outer-name
 # pylint: disable=invalid-name 
+# pylint: disable=too-few-public-methods
+from time import time
 
 import pandas as pd
 from pandas import DataFrame as pd_DF
 
-
-# Read:  api-catalogs.xlsx!(tabla_297|plazas_w|anexo_1,anexo_1c)
-# Write: national-banks(-plazas|-bins)?
 
 def process_banks(tbl_297:pd_DF): 
     dict_colnames = {
@@ -21,9 +20,6 @@ def process_banks(tbl_297:pd_DF):
         'SPEI'        : 'spei', 
         'portabilidad': 'portability', 
         }    
-        # 'PARAMETRO Activo / Desactivo': 'is_active', 
-        #  'ordenante'   : 'ordenante'
-        # 'Tipo banco' : 'type'}
     bank_df = (tbl_297 
         .rename(columns=dict_colnames)
         .loc[:, dict_colnames.values()]
@@ -71,16 +67,25 @@ def process_adquirentes(tbl_29:pd_DF, acq_cols:pd_DF):
     return acq_tbl
 
 
+class Timer:
+    """Simple class to print timed processes."""
+    def __init__(self): 
+        self.timer = time()
+    
+    def print_time(self, desc): 
+        print(f"{desc}:\t{time()-self.timer:.2f} seconds")
+        self.timer = time()
+
 
 if __name__ == '__main__': 
     from sys import argv
-    from time import time
 
     from src.tools import read_excel_table
     from src.resources import AzureResourcer
     from src import SITE, ENV, SERVER
 
     no_blob = "no-blob" in argv
+    time_it = "time-it" in argv
     local_path = SITE/'refs/catalogs'
     storage_path = 'product/epic-catalogs/app-services'    
 
@@ -91,33 +96,35 @@ if __name__ == '__main__':
         'acquiring': 'national-banks-acquiring'}
     
     base_excel = local_path/'api-catalogs.xlsx.lnk'
+    
+    if time_it: 
+        my_timer = Timer()
 
-    #start = time()
     banks_pre = read_excel_table(base_excel, 'banks', 'tabla_297')
     banks_df  = process_banks(banks_pre).reset_index().astype(str)
     banks_df.to_feather(local_path/f"{ctlg_files['banks']}.feather")
-    #print(f"Elapsed time: {time() - start}")
+    if time_it: 
+        my_timer.print_time("Banks time")
 
-    # start = time()
     plaza_pre = read_excel_table(base_excel, 'banks', 'plazas_w')
     plaza_df  = process_plazas(plaza_pre).reset_index()
-    plaza_df.to_feather(local_path/f"{ctlg_files['plazas']}.feather")
-    # print(f"Elapsed time: {time() - start}")
+    plaza_df.to_feather(local_path/f"{ctlg_files['plazas']}.feather")   
+    if time_it: 
+        my_timer.print_time("Plaza time")
 
-    # start = time()
     bins_cols = read_excel_table(base_excel, 'banks-bins', 'cols_anexo1')
     bins_df   = read_excel_table(base_excel, 'banks-bins', 'anexo_1')
     bins_df   = process_bins(bins_df, bins_cols).reset_index()
     bins_df.to_feather(local_path/f'{ctlg_files["bins"]}.feather')
-    # print(f"Elapsed time: {time() - start}")
+    if time_it: 
+        my_timer.print_time("Bins time")
 
-    start = time()
     acq_cols = read_excel_table(base_excel, 'banks-acquiring', 'cols_anexo_29')
     acq_pre  = read_excel_table(base_excel, 'banks-acquiring', 'anexo_29')
     acq_df   = process_adquirentes(acq_pre, acq_cols).reset_index()
     acq_df.to_feather(local_path/f"{ctlg_files['acquiring']}.feather")
-    print(f"Elapsed time: {time() - start}")
-
+    if time_it: 
+        my_timer.print_time("Acquiring time")
 
     if not no_blob: 
         resourcer = AzureResourcer(ENV, SERVER)
