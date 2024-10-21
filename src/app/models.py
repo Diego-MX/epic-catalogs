@@ -1,13 +1,10 @@
 
 # pylint: disable=too-few-public-methods
-from operator import attrgetter as α
 from typing import Any
 
 from fastapi.responses import JSONResponse
 from orjson import dumps                
 from pydantic import BaseModel
-from toolz import compose, pipe
-from toolz.curried import valmap as valmap_z
 
 class ORJSONResponse(JSONResponse): 
     media_type = "application/json"
@@ -22,16 +19,16 @@ class CustomModel(BaseModel):
     Últimadamente no he podido deshacerme de los errores ResponseValidation, pero 
     sí me gustó dejar el CustomModel para centralizar algunos comportamientos. 
     """
-    def to_dict(self):
+    def to_dict(self) -> dict:
         def to_original(data):
             if isinstance(data, BaseModel):
-                original_dict = pipe(data.__fields__, 
-                    valmap_z(compose(to_original, data.__getattr__, α('alias'))))
-                return original_dict
+                aliased = {nn: to_original(getattr(data, ff.alias))
+                    for nn, ff in data.__fields__.items()}
+                return aliased
             if isinstance(data, dict):
-                return valmap_z(to_original)(data)
+                return {kk: to_original(vv) for kk, vv in data.items()}
             if isinstance(data, list):
-                return list(map(to_original, data))
+                return [to_original(ll) for ll in data]
             return data
         return to_original(self)
 

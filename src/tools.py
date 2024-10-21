@@ -128,33 +128,19 @@ def dataframe_response(a_df, cols_df=None, resp_keys=None, drop_nas=True):
     return df_response
 
 
-def set_dataframe_types(a_df, cols_df): 
-    # ['char', 'numeric', 'date', 'datetime', 'object']
-    dtypes = {'char': str, 'numeric': float, 'object': str, 
-        'datetime': 'datetime64[ns]', 'date': 'datetime64[ns]'}
-
-    dtyped = {row.database: dtypes[row.dtipo] for row in cols_df.itertuples()
-            if row.database in a_df.columns and row.dtipo in dtypes}
-
-    df_typed = a_df.astype(dtyped)
-    return df_typed
-
-
 def type_environment():
     """
-        Función que muestra sí el programa se encuentra en el ambiente Docker o en Local.
+    Función que muestra sí el programa se encuentra en el ambiente Docker o en Local.
     """
-    environment = (os.path.exists('/.dockerenv') or
-                   os.path.isfile('/proc/1/cgroup') and
+    environment = (os.path.exists('/.dockerenv') or os.path.isfile('/proc/1/cgroup') and
                    'docker' in open('/proc/1/cgroup', encoding="utf-8").read())
     return environment
 
 
 def get_connection():
     """
-        Conexión con la DB en Azure, se crea una bifurcasión dado que 
-        se trabaja en docker y de forma local 
-    """
+    Conexión con la DB en Azure, se crea una bifurcasión dado que 
+    se trabaja en docker y de forma local"""
 
     params = {
         'username' : "USUARIO_BATALLA",
@@ -178,9 +164,26 @@ def get_connection():
 
 class Timer:
     """Simple class to print timed processes."""
-    def __init__(self): 
-        self.timer = time()
+    def __init__(self, print_mode=0): 
+        """print_mode: 
+            0 : Dont print
+            1 : since last call
+            -1: since beginning
+        """
+        self.timers = [time()]
+        self.print_mode = print_mode
     
-    def print_time(self, desc): 
-        print(f"{desc}:\t{time()-self.timer:.2f} seconds")
-        self.timer = time()
+    def set_mark(self, desc, and_print=0): 
+        self.timers.append(time())
+
+        and_print = and_print or self.print_mode
+        if and_print == 0: 
+            return
+        
+        if and_print == 1:  # Doesnt reference indices, but timeframe. 
+            ellapsed = self.timers[-1] - self.timers[-2]    
+        elif and_print == -1:
+            ellapsed = self.timers[-1] - self.timers[0]
+        else: 
+            raise ValueError("'and_print/print_mode' can be one of [0, 1, -1]")
+        print(f"{desc}:\t{ellapsed:.2f} seconds")

@@ -2,32 +2,44 @@
 # pylint: disable=too-few-public-methods
 from typing import List, Optional
 
+import pandas as pd
+from pydantic import Field
 from sqlalchemy import Column, Table, BIGINT, DATETIME, INT, NVARCHAR
 from sqlalchemy.ext.declarative import declarative_base
 
 from src.app.models import CustomModel
 
 
+## CustomModel's
 
 class Bank(CustomModel): 
-    """
-    Modelos de bancos provenientes de FASTAPI y SQLALCHEMY
-    """
-    name        : str
+    """Modelos de bancos provenientes de FASTAPI y SQLALCHEMY"""
+    name        : str 
     code        : Optional[str]
     banxicoId   : str
     alias       : str
     spei        : bool
     portability : bool
 
+
 class BanksResponse(CustomModel): 
     numberOfBanks   : int
     bankAttributes  : List[str]
     banksSet        : List[Bank]
 
+    @classmethod
+    def from_df(cls, banks_df:pd.DataFrame) -> 'BanksResponse': 
+        the_object = cls(
+            numberOfBanks = banks_df.shape[0],
+            bankAttributes = list(Bank.__fields__),
+            banksSet = [Bank.from_orm(bb) for bb in banks_df.itertuples()])
+        return the_object
+
+
 class BankAcquiring(CustomModel): 
-    name  : str
-    codeAcquiring : Optional[str]
+    name : str = Field(alias='Institución')
+    codeAcquiring : Optional[str] = Field(alias='ID Adquirente')
+
 
 class CardsBin(CustomModel): 
     bin       : str
@@ -38,6 +50,8 @@ class CardsBin(CustomModel):
     nature    : str
     brand     : str
 
+
+## ORM Models
 
 Base = declarative_base()
 
@@ -72,7 +86,6 @@ class NationalBanksBins(Base):
 
 class NationalBanks(Base):
     """Modelo ORM NationalBanks"""
-
     __tablename__ = "national_banks"
     __table__ = Table("national_banks", Base.metadata,
                     Column("index",NVARCHAR, primary_key=True),

@@ -4,56 +4,58 @@ engine banks, contiene toda la información respecto a las
 peticiones a la base de datos.
 """
 from pathlib import Path
+from typing import Any
 
-import time
 from sqlalchemy.orm import sessionmaker
 import pandas as pd
 
 import clabe
 
+import src
 from src.app.exceptions import ValidationError, NotFoundError
 from src import tools
+
 from . import models
 
+WITH_SQL = (src.DATA_CONN != 'repo')
+
 ctlg_dir = Path('refs/catalogs')
-
 str_to_bool = lambda srs: (srs == 'True')
+timer = tools.Timer(print_mode=WITH_SQL*-1)
 
-inicio = time.time()
-engine = tools.get_connection()
-banks_df = (pd.read_sql_table("national_banks", engine)
+if WITH_SQL:
+    engine = src.tools.get_connection()
+    pre_banks = pd.read_sql_table("national_banks", engine)
+    engine.dispose()
+    timer.set_mark("Load Base Banks")
+else:
+    pre_banks = pd.read_feather(ctlg_dir/"national-banks.feather")
+
+banks_df = (pre_banks
     .rename(columns={'banxico_id': 'banxicoId'})
     .assign(spei = lambda df: str_to_bool(df['spei']),
         portability = lambda df: str_to_bool(df['portability']))
     .sort_values(by = "index"))
-    
-engine.dispose()
-fin = time.time()
-print(f"TE: {round(fin-inicio,2)} seg")
 
 
-def queryrow_to_dict(a_df: pd.DataFrame, q: str, sword: str) -> dict:
-    """
-    Realiza un query en los datos de requeridos 
-    """
+def _queryrow_to_dict(a_df: pd.DataFrame, column: str, value: Any) -> dict:
+    """Realiza un query en los datos de requeridos"""
     # caller_locals = currentframe().f_back.f_locals # D
     # q_df = a_df.query(q, local_dict=caller_locals) # D
-    query_str = "`"+sword+"` == @change"
-    q_df = a_df.query(query_str, local_dict={'change':q})
-    assert q_df.shape[0] == 1, f"Query '{q}' doesn't have one row"
-    return q_df.to_dict(orient='records')[0]
+    one_row = (a_df[column] == value)
+    assert len(one_row) == 1, f"Column '{column}' doesnt have one {value}."
+    return a_df.loc[one_row, :].to_dict(orient='records')[0]
+    
 
-def all_banks(include_non_spei:bool) -> pd.DataFrame:
-    """
-    Extrae toda la información mediante el SPEI.
-    """
-    return banks_df.loc[banks_df['spei'], :] if include_non_spei else banks_df
+def all_banks(include_non_spei:bool=False) -> models.BanksResponse:
+    """Extrae toda la información mediante el SPEI."""
+    all_df = (banks_df if not include_non_spei
+        else banks_df.loc[banks_df['spei'], :])
+    return models.BanksResponse.from_df(all_df)
 
 
 def clabe_parse(clabe_key:str) -> models.Bank:
-    """
-    Obtención de la CLABE
-    """
+    """Obtención de la CLABE"""
     verificator = clabe.compute_control_digit(clabe_key[:-1])
     if (clabe_key[-1] != verificator):
         raise ValidationError('Invalid CLABE',
@@ -68,15 +70,13 @@ def clabe_parse(clabe_key:str) -> models.Bank:
 
     is_bineo = (bank_code == gfb_code) and es_indirecto and gfb_a_bineo  
     q_code = bineo_code if is_bineo else bank_code
-    bank_row = queryrow_to_dict(banks_df,q_code,"code")
-    return models.Bank(**bank_row)
+    bank_row = _queryrow_to_dict(banks_df, "code", q_code)
+    return models.Bank.from_orm(bank_row)
 
 
 def card_number_bin(card_num:str) -> models.CardsBin:
-    """
-    Obtención de bins
-    """
-    inicio_bi=time.time()
+    """Obtención de bins"""
+    
     if len(card_num) != 16:
         raise ValidationError('Invalid card number',
             'Card Number must have 16 digits.')
@@ -103,10 +103,9 @@ def card_number_bin(card_num:str) -> models.CardsBin:
     for b_len, len_bins in length_bins.groups.items():
         bin_int = int(card_num[:b_len])
         if bin_int in len_bins:
-            # bin_row = queryrow_to_dict(bins_df, f"`bin` == {bin_int}") # D
-            bin_row = queryrow_to_dict(bins_df, bin_int,"bin")
-            fin_bi = time.time()
-            print(f"TE: {round(fin_bi-inicio_bi,2)} seg")
+            # bin_row = _queryrow_to_dict(bins_df, f"`bin` == {bin_int}") # D
+            bin_row = _queryrow_to_dict(bins_df, bin_int,"bin")
+            timer.set_mark("Query Bin")
             return models.CardsBin(**bin_row)
 
     raise NotFoundError('Card bin not found', 
@@ -114,30 +113,22 @@ def card_number_bin(card_num:str) -> models.CardsBin:
 
 
 def bin_bank(bank_key: str) -> models.Bank:
-    """
-    Se obtine la información del banco correspondiente
-    """
-    # bank_row = queryrow_to_dict(banks_df, f"`banxicoId` == '{bank_key}'") # D
-    bank_row = queryrow_to_dict(banks_df, bank_key,"banxicoId")
-    return models.Bank(**bank_row)
+    """Se obtine la información del banco correspondiente"""
+    # bank_row = _queryrow_to_dict(banks_df, f"`banxicoId` == '{bank_key}'") # D
+    bank_row = _queryrow_to_dict(banks_df, "banxicoId", bank_key)
+    return models.Bank.from_orm(bank_row)
 
 
-def bank_acquiring(acq_code: str, method='feather') -> models.BankAcquiring:
-    """
-    Obtención de datos del acquiring banks
-    """
-    
-    inicio_ac=time.time()
-    if method == 'orm': 
-        # engine=tools.get_connection() # sí se coloca consume más tiempo
+def bank_acquiring(acq_code: str) -> models.BankAcquiring:
+    """Obtención de datos del acquiring banks"""
+    if WITH_SQL: 
         sesion = sessionmaker(bind=engine) # ORM
         session = sesion()
         resultado_national_banks_acquiring = session.query(models.NationalBanksAcquiring).all()
-
         acq_attrs = {
             'tabla_id'      : 'tabla_id', 
-            'name'          : 'Institución', 
-            'codeAcquiring' : 'ID Adquirente', 
+            'Institución'   : 'name', 
+            'ID Adquirente' : 'codeAcquiring', 
             'Cámara'        : 'Cámara', 
             'Fecha de Alta' : 'Fecha de Alta'}
         data_national_banks_acquiring=[
@@ -145,20 +136,13 @@ def bank_acquiring(acq_code: str, method='feather') -> models.BankAcquiring:
             for contenido in resultado_national_banks_acquiring]
         acq_banks = pd.DataFrame(data_national_banks_acquiring)
         session.close()
-
-    elif method == 'feather': 
+        timer.set_mark("Query Acquiring")   
+    else: 
         acq_cols = {
             'Institución' : 'name', 
             'ID Adquirente' : 'codeAcquiring'}
         acq_banks = (pd.read_feather(ctlg_dir/'national-banks-acquiring.feather')
             .rename(columns=acq_cols))
-    else: 
-        raise ValueError("Use Method [ORM, FEATHER]")
-
-
-    # acq_row = queryrow_to_dict(acq_banks, f"`codeAcquiring` == '{acq_code}'") # D
-    acq_row = queryrow_to_dict(acq_banks,acq_code,"codeAcquiring")
-    fin_ac = time.time()
-
-    print(f"TE: {round(fin_ac-inicio_ac, 2)} seg")
+    
+    acq_row = _queryrow_to_dict(acq_banks, "codeAcquiring", acq_code)
     return models.BankAcquiring(**acq_row)

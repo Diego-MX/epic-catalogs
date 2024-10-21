@@ -2,10 +2,6 @@
 The purpose is to only define variables but don't run any code.
 """
 
-import os
-
-DATA_CONN = os.environ['DATA_CONN']
-
 VERSION  = "1.0.90"  # build_deploy.yml 
 EPIC_REF = "2.1"
 REQS_FILE = "reqs_base.txt"

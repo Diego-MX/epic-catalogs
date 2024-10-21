@@ -1,36 +1,36 @@
 
+# pylint: disable=too-many-locals
+from warnings import warn
 
-import time
 import pandas as pd
 from sqlalchemy import select, func, and_
 from sqlalchemy.orm import sessionmaker, aliased
 
-from src import SITE, tools
+from src import tools, SITE, DATA_CONN
 from src.app.exceptions import NotFoundError
 from . import models
 
-
+W_SQL = (DATA_CONN != "repo")
 catalogs_path = SITE/"refs/catalogs"
+timer = tools.Timer(print_mode = W_SQL*1)
 
 
-def zipcode_request(a_zipcode:str) -> dict: # NeighborhoodsResponse
+def zipcode_request(a_zipcode:str) -> models.NeighborhoodsResponse:
     """Wrapper de lo demás."""
-    response_dfs = zipcode_query(a_zipcode)
-    the_response = zipcode_response(response_dfs)
-    if (('warnings' in the_response) and
-        ('zipcode'  in the_response['warnings']) and
-        (the_response['warnings']['zipcode'][0] == 3)):
-        the_detail = the_response['warnings']['zipcode'][1]
-        raise NotFoundError('Zipcode not found', the_detail)
-    return the_response
+    nbhd_df = zipcode_query(a_zipcode)
+    return models.NeighborhoodsResponse.from_df(nbhd_df)
+    # the_response = zipcode_response(response_dfs)
+    # if (('warnings' in the_response) and
+    #     ('zipcode'  in the_response['warnings']) and
+    #     (the_response['warnings']['zipcode'][0] == 3)):
+    #     the_detail = the_response['warnings']['zipcode'][1]
+    #     raise NotFoundError('Zipcode not found', the_detail)
+    # return the_response
 
 
-def zipcode_query(a_zipcode, method='feather'):
-    """
-    Obtención de los datos de zipcode desde la db
-    """
-    inicio=time.time()
-    if method == 'orm': 
+def zipcode_query(a_zipcode) -> pd.DataFrame:
+    """Obtención de los datos de zipcode desde la db"""
+    if W_SQL: 
         engine = tools.get_connection()
         sesion = sessionmaker(bind=engine) # ORM
         session = sesion()
@@ -72,7 +72,6 @@ def zipcode_query(a_zipcode, method='feather'):
 
         pre_resultado = session.execute(consulta)
         resultado = pre_resultado.fetchall()
-        mun_edo=pd.DataFrame(resultado,columns=pre_resultado.keys())
 
         asentamiento = aliased(models.CodigosDriveTipoAsentamientos, name="asentamiento")
         ciudades = aliased(models.CodigosDriveCiudades, name="ciudades")
@@ -97,57 +96,30 @@ def zipcode_query(a_zipcode, method='feather'):
 
         pre_resultado = session.execute(consulta)
         resultado = pre_resultado.fetchall()
-        sub_cols=pd.DataFrame(resultado,columns=pre_resultado.keys())
+        sub_cols = pd.DataFrame(resultado,columns=pre_resultado.keys())
         engine.dispose()
         session.close()
-    elif method == 'feather': 
-        municipios =(pd.read_feather(catalogs_path/'codigos_drive_municipios.feather')
-            .assign(cve_mnpio=lambda df: df.c_estado.str.cat(df.c_mnpio)))
+        timer.set_mark("Query zipcode")
 
+    else:
         estados = (pd.read_csv(catalogs_path/'estados_claves.csv')
-            .assign(c_estado = lambda df: df.clave.map(str).str.pad(2, fillchar='0'))
             .rename(columns={'nombre': 'd_estado', 'ISO_3166': 'c_estado_iso'})
-            .loc[:, ['c_estado', 'd_estado', 'c_estado_iso']])
+            .assign(c_estado=lambda df: df.clave.map('{:02f}.format')))
 
-        las_colonias = (pd.read_feather(catalogs_path/'codigos_drive.feather')
-            .query(f'`d_codigo` == "{a_zipcode}"'))
-
-        mun_edo_0 = (las_colonias
-            .groupby(['d_codigo', 'c_estado', 'c_mnpio'])
-            .size().to_frame('n_cols').reset_index())
-
-        mun_edo = (mun_edo_0.loc[[mun_edo_0['n_cols'].idxmax()], :]
-                .merge(municipios, how='left', on=['c_estado', 'c_mnpio'])
-                .merge(estados, how='left', on='c_estado')
-                .loc[:, ['d_codigo', 'd_mnpio', 'd_estado', 
-                    'c_estado', 'c_estado_iso', 'cve_mnpio']]
-                    )
-        tipo_asenta = pd.read_feather(catalogs_path/'codigos_drive_tipo_asentamientos.feather')
-
+        municipios = pd.read_feather(catalogs_path/'codigos_drive_municipios.feather')
         ciudades = pd.read_feather(catalogs_path/'codigos_drive_ciudades.feather')
+        tipo_asenta = pd.read_feather(catalogs_path/'codigos_drive_tipo_asentamientos.feather')
+        colonias = pd.read_feather(catalogs_path/'codigos_drive.feather')
 
-        las_colonias = (pd.read_feather(catalogs_path/'codigos_drive.feather')
-            .query(f'`d_codigo` == "{a_zipcode}"'))
-
-        sub_cols = (las_colonias
-            .merge(tipo_asenta, on='c_tipo_asenta', how='left')
-            .merge(ciudades, on=['c_estado', 'c_cve_ciudad'], how='left')
-            .sort_values('n_asenta', ascending=False)
-            .assign(cve_ciudad = lambda df: df.c_estado.str.cat(df.c_cve_ciudad))
-            .loc[:, ['d_codigo', 'd_asenta', 'd_zona', 
-                'd_tipo_asenta', 'd_ciudad', 'cve_ciudad']])
-
-    else: 
-        raise ValueError("Query method must be one of [feather, orm]")
-
-    resp_elements={
-        'zipcode_df': mun_edo, 
-        'neighborhoods_df': sub_cols}
-
-    fin=time.time()
-    print(f"TE: {round(fin-inicio,2)} seg")
-
-    return resp_elements
+        # En caso de múltiples municipios, se toma el que tenga más asentamientos. 
+        sub_cols = (colonias.query(f'`d_codigo` == "{a_zipcode}"')
+            .merge(municipios, how='left', on=['c_estado', 'c_mnpio'])
+            .merge(estados, how='left', on='c_estado')
+            .merge(ciudades, how='left', on=['c_estado', 'c_cve_ciudad'])
+            .merge(tipo_asenta, how='left', on='c_tipo_asenta')
+            .assign(cve_ciudad = lambda df: df.c_estado.str.cat(df.c_cve_ciudad), 
+                cve_mun = lambda df: df.c_estado.str.cat(df.c_mnpio)))
+    return sub_cols 
 
 
 def zipcode_response(nbhd_elems:dict) -> dict:
@@ -155,6 +127,7 @@ def zipcode_response(nbhd_elems:dict) -> dict:
     In:  [zipcode_df, neighborhoods_df]-keyed dict.  
     Out: Explore warnings and add if necessary.
     """
+    warn("DeprecationWarning: function 'zipcode_response' is old.")
     translator = {
         'd_codigo'      : 'zipcode',    'd_asenta'      : 'name',
         'd_tipo_asenta' : 'type',       'd_zona'        : 'zone',
@@ -195,6 +168,7 @@ def zipcode_response(nbhd_elems:dict) -> dict:
 
 def zipcode_warnings(a_response:dict, warnables:list) -> dict:
     """Add 'warnings' key to Dict if warnings."""
+    warn("DeprecationWarning: function 'zipcode_warnings' is old.")
     warnings = {}
     if warnables[0]:
         warnings['borough'] = (1, 'No se encontró municipio para CP')
@@ -208,35 +182,8 @@ def zipcode_warnings(a_response:dict, warnables:list) -> dict:
     return b_response
 
 
-def one_sql_query(a_zipcode:str) -> pd.DataFrame: 
-    # estados:  ['clave', 'd_estado', 'ABR', 'Abr_1', 'ABR_2', 'renapo', 'c_estado_iso',
-    #           'drive', 'gobmx', 'marco_geo', 'min_cp', 'max_cp', 'clave_2']
-    # muns:     ['c_estado', 'c_mnpio', 'd_mnpio', 'min_cp', 'max_cp']
-    # ciudades: ['c_estado', 'c_cve_ciudad', 'd_ciudad']
-    # tipos_a:  ['c_tipo_asenta', 'd_tipo_asenta', 'n_asenta']
-    # colonias: ['d_codigo', 'd_asenta', 'd_zona', 'c_estado', 'c_mnpio', 'c_cve_ciudad',
-    #           'c_tipo_asenta']
-    estados = (pd.read_csv(catalogs_path/'estados_claves.csv')
-        .rename(columns={'nombre': 'd_estado', 'ISO_3166': 'c_estado_iso'})
-        .assign(c_estado=lambda df: df.clave.map('{:02f}.format')))
-
-    municipios = pd.read_feather(catalogs_path/'codigos_drive_municipios.feather')
-    ciudades = pd.read_feather(catalogs_path/'codigos_drive_ciudades.feather')
-    tipo_asenta = pd.read_feather(catalogs_path/'codigos_drive_tipo_asentamientos.feather')
-    colonias = pd.read_feather(catalogs_path/'codigos_drive.feather')
-
-    # En caso de múltiples municipios, se toma el que tenga más asentamientos. 
-    one_query = (colonias.query(f'`d_codigo` == "{a_zipcode}"')
-        .merge(municipios, how='left', on=['c_estado', 'c_mnpio'])
-        .merge(estados, how='left', on='c_estado')
-        .merge(ciudades, how='left', on=['c_estado', 'c_cve_ciudad'])
-        .merge(tipo_asenta, how='left', on='c_tipo_asenta')
-        .assign(cve_ciudad = lambda df: df.c_estado.str.cat(df.c_cve_ciudad), 
-            cve_mun = lambda df: df.c_estado.str.cat(df.c_mnpio)))
-    return one_query
-
-
 def process_query(a_df:pd.DataFrame): 
+    warn("DeprecationWarning: function 'process_query' is old.")
     if a_df.shape[0] == 0: 
         raise NotFoundError('Colonias Not Found', "Empty list of neighborhoods")
     
